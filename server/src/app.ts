@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import User from "./models/User.js";
+import Project from "./models/Project.js";
 
 const app = express();
 
@@ -32,24 +32,45 @@ mongoose
     console.error("Error connecting to MongoDB: ", err);
   });
 
-app.post("/users", async (req, res) => {
+// Get all projects
+// TODO: Add pagination
+app.get("/projects", async (req, res) => {
   try {
-    const user = new User(req.body);
-    const savedUser = await user.save();
-    res.status(201).json(savedUser);
+    const projects = await Project.find();
+    res.status(200).json(projects);
   } catch (err: any) {
-    res.status(400).json({
+    res.status(500).json({
       message: err.message,
     });
   }
 });
 
-app.get("/users", async (req, res) => {
+// Find a project by ID
+app.get("/projects/:id", async (req, res) => {
   try {
-    const users = await User.find();
-    res.status(200).json(users);
+    const project = await Project.findById(req.params.id);
+    if (project) {
+      res.status(200).json(project);
+    } else {
+      res.status(404).json({
+        message: "Project not found",
+      });
+    }
   } catch (err: any) {
     res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+// Create a new project for sharing
+app.post("/projects/share", async (req, res) => {
+  try {
+    const project = new Project(req.body);
+    const savedUser = await project.save();
+    res.status(201).json(savedUser);
+  } catch (err: any) {
+    res.status(400).json({
       message: err.message,
     });
   }
