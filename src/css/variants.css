@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+/* @tailwind utilities; */
+@tailwind variants;
+
+.shadow-action-icon-light {
+  &[data-variant="shadow"] {
+    background-color: var(--mantine-color-gray-1);
+    color: var(--mantine-color-gray-7);
+    @apply shadow-sm shadow-[var(--mantine-color-dark-2)] hover:bg-[var(--mantine-color-dark-1)];
+  }
+}
+
+.shadow-action-icon-dark {
+  &[data-variant="shadow"] {
+    background-color: var(--mantine-color-dark-6);
+    color: var(--mantine-color-dark-1);
+    @apply shadow-sm shadow-[var(--mantine-color-dark-9)] hover:bg-[var(--mantine-color-dark-9)];
+  }
+}

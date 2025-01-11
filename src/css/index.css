@@ -1,0 +1,57 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import "@mantine/core/styles/global.css";
+
+.actionIcon {
+  &:disabled,
+  &[data-disabled] {
+    background-color: transparent;
+  }
+}
+
+.beautifulScrollBar {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+.beautifulScrollBar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.beautifulScrollBar:hover {
+  overflow: auto; /* Show the scrollbar on hover */
+}
+
+html[data-mantine-color-scheme="light"]
+  .beautifulScrollBar::-webkit-scrollbar-thumb {
+  background: var(--mantine-color-dark-text); /* Scrollbar thumb color */
+  border-radius: 10px;
+}
+
+html[data-mantine-color-scheme="dark"]
+  .beautifulScrollBar::-webkit-scrollbar-thumb {
+  background: var(--mantine-color-dimmed); /* Scrollbar thumb color */
+  border-radius: 10px;
+}
+
+html[data-mantine-color-scheme="light"]
+  .beautifulScrollBar::-webkit-scrollbar-thumb:hover {
+  background: var(
+    --mantine-color-gray-text
+  ); /* Scrollbar thumb color on hover */
+}
+
+html[data-mantine-color-scheme="dark"]
+  .beautifulScrollBar::-webkit-scrollbar-thumb:hover {
+  background: var(
+    --mantine-color-default-border
+  ); /* Scrollbar thumb color on hover */
+}
+
+/* Make the beautifulScrollBar scrollable after reaching a certain device width */
+@media (max-width: 768px) {
+  .beautifulScrollBar {
+    overflow: auto;
+  }
+}
