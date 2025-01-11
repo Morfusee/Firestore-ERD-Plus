@@ -33,6 +33,19 @@ function TopMiddleBar() {
     selectedProject?.id
   );
 
+  const onClickShare = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Box
       className="p-3.5 absolute z-10 top-0 left-1/2 transform -translate-x-1/2"
@@ -93,6 +106,7 @@ function TopMiddleBar() {
               variant="subtle"
               size="md"
               radius="sm"
+              onClick={onClickShare}
               disabled={isButtonDisabled}
             >
               <IconShare className="p-0.5" />

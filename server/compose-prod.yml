@@ -1,0 +1,41 @@
+services: 
+  mongo:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: FERD
+      INIT_MONGO_USERNAME: ${MONGO_USERNAME}
+      INIT_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      INIT_MONGO_DATABASE: FERD
+    volumes:
+    - ./mongodb-data:/data/db
+    - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+    - server-network
+  
+  server:
+    build: .
+    restart: always
+    depends_on:
+    - mongo
+    networks:
+    - server-network
+    ports: 
+    - "127.0.0.1:3000:3000"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    networks: # This should be set to enable http://server:3000 as a URL
+    - server-network
+
+networks:
+  server-network:
+    driver: bridge
