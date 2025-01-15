@@ -35,7 +35,7 @@ function TopMiddleBar() {
 
   const onClickShare = async () => {
     try {
-      const response = await fetch("http://localhost:3000/users");
+      const response = await fetch("http://localhost:3000/projects");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
