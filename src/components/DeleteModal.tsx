@@ -1,12 +1,16 @@
 import { Modal, Flex, Button, Text } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
 import { useEffect } from "react";
+import useProjectRepo from "../data/repo/useProjectRepo";
 
 function DeleteModal({
   context,
   id,
   innerProps,
 }: ContextModalProps<{ handleDelete: () => void; title?: React.ReactNode }>) {
+
+  const { clearProject } = useProjectRepo();
+
   useEffect(() => {
     context.updateModal({
       modalId: id,
@@ -17,7 +21,7 @@ function DeleteModal({
       ),
       centered: true,
     });
-  }, [context, id]);
+  }, [id]);
 
   return (
     <>
@@ -34,6 +38,7 @@ function DeleteModal({
             onClick={() => {
               innerProps.handleDelete();
               context.closeModal(id);
+              clearProject();
             }}
           >
             Delete

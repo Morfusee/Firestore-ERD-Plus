@@ -1,4 +1,4 @@
-import { Connection, Edge, XYPosition } from "@xyflow/react";
+import { Connection, Edge, MarkerType, XYPosition } from "@xyflow/react";
 import { useEditorStore } from "../../store/useEditorStore";
 import {
   EditorNode,
@@ -142,11 +142,23 @@ const useEditorRepo = () => {
   const addEdge = (conn: Connection) => {
 
     if (!conn.sourceHandle || !conn.targetHandle) return
+
+    const edge: Edge = {
+      ...conn,
+      id: `${conn.sourceHandle}->${conn.targetHandle}`,
+      markerEnd: {
+        type: MarkerType.Arrow
+      },
+      style: {
+        strokeWidth: 2
+      }
+    }
+
     // Run onChange
     onChange();
 
     // Add edge
-    addEdgeState(conn)
+    addEdgeState(edge)
   };
 
   const changeEdge = (oldEdge: Edge, conn: Connection) => {

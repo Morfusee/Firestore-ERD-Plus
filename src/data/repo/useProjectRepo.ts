@@ -10,6 +10,10 @@ const useProjectRepo = () => {
   const setSelectedProject = useProjectStore(
     (state) => state.setSelectedProject
   );
+  const clearSelectedProject = useProjectStore(
+    (state) => state.clearSelectedProject
+  )
+  const clearStateSnap = useEditorStore((state) => state.clearStateSnapshot)
 
   const addState = useProjectStore((state) => state.addProject);
   const editState = useProjectStore((state) => state.editProject);
@@ -76,6 +80,16 @@ const useProjectRepo = () => {
 
     setSelectedProject(selected);
   };
+
+  const clearProject = () => {
+
+    // Set selected project to none
+    clearSelectedProject()
+    clearStateSnap()
+
+    // Delete cleared project from cache
+
+  }
 
   const addProject = async (name: string, icon: string) => {
     const timestamp = Date.now();
@@ -184,6 +198,7 @@ const useProjectRepo = () => {
     getProjectById,
     selectedProject,
     selectProject,
+    clearProject,
     addProject,
     editProject,
     deleteProject,
