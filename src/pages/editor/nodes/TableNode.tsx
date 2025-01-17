@@ -16,10 +16,11 @@ import {
 } from "@mantine/core";
 import TextSelect from "../../../components/TextSelect";
 import { ChangeEvent, memo, useState } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { IconCopyPlus, IconPlus, IconTrash } from "@tabler/icons-react";
 import useIsDarkMode from "../../../utils/useIsDarkMode";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
 import { useDidUpdate, useThrottledCallback } from "@mantine/hooks";
+import { useContextMenu } from 'mantine-contextmenu';
 
 export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
   const theme = useMantineTheme();
@@ -44,7 +45,7 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
     ? theme.colors.dark[7]
     : theme.colors.gray[2];
 
-  const { editNodeData, addNodeDataField, editNodeDataField } = useEditorRepo();
+  const { editNodeData, addNodeDataField, editNodeDataField, deleteNodeDataField } = useEditorRepo();
 
   return (
     <>
@@ -68,6 +69,7 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
           }}
         >
           <TableNodeField
+            type="title"
             field={{ name: data.name, type: data.type }}
             fieldOptions={tableOptions}
             onFieldNameChange={(val) => editNodeData(id, { name: val })}
@@ -89,10 +91,13 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
               {data.fields.map((field, index) => (
                 <TableNodeField
                   key={index}
+                  type="field"
                   field={field}
                   fieldOptions={fieldOptions}
                   onFieldNameChange={(val) => editNodeDataField(id, index, { name: val })}
                   onFieldTypeChange={(val) => editNodeDataField(id, index, { type: val })}
+                  onFieldDuplicate={() => {}}
+                  onFieldDelete={() => deleteNodeDataField(id, index)}
                   placeholder="field name"
                 />
               ))}
@@ -101,7 +106,7 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
               className="flex justify-center"
               variant="default"
               rightSection={<IconPlus size={18} />}
-              onClick={() => addNodeDataField(id)}
+              onClick={() => {console.log("The id added", id); addNodeDataField(id)}}
             >
               Add Field
             </Button>
@@ -138,18 +143,27 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
 });
 
 function TableNodeField({
+  type,
   field,
   fieldOptions,
   placeholder,
   onFieldNameChange,
   onFieldTypeChange,
+  onFieldDuplicate,
+  onFieldDelete,
 }: {
+  type: 'title' | 'field'
   field: TableField | { name: TableField["name"]; type: TableType };
   fieldOptions: string[];
   placeholder?: string
   onFieldNameChange: (val: string) => void
   onFieldTypeChange: (val: string) => void
+  onFieldDuplicate?: () => void
+  onFieldDelete?: () => void
 }) {
+
+  const { showContextMenu } = useContextMenu();
+
   const [fieldName, setFieldName] = useState(field.name)
   const [fieldType, setFieldType] = useState<string>(field.type)
 
@@ -180,15 +194,43 @@ function TableNodeField({
     onFieldTypeChange(val)
   }
 
+  const handleFieldDuplicate = () => {
+    if(onFieldDuplicate) {
+      onFieldDuplicate()
+    }
+  }
+
+  const handleFieldDelete = () => {
+    if(onFieldDelete) {
+      onFieldDelete()
+    }
+  }
+
   return (
     <Flex
       justify="space-between"
       gap={"xs"}
       className={
         "px-2 py-1 rounded-md transition-colors " 
+        + (type === 'field' && 'hover:bg-neutral-500 hover:bg-opacity-20')
         // + (!isOfNodeType(field.type) &&
         //   (isDarkMode ? "hover:bg-neutral-700" : "hover:bg-neutral-300"))
       }
+      onContextMenu={type === 'field' ? showContextMenu([
+        {
+          key: 'duplicate',
+          title: 'Duplicate',
+          icon: <IconCopyPlus size={16}/>,
+          onClick: () => handleFieldDuplicate()
+        },
+        {
+          key: 'delete',
+          title: 'Delete',
+          color: 'red',
+          icon: <IconTrash size={16} />,
+          onClick: () => handleFieldDelete()
+        },
+      ]) : () => {}}
     >
       <TextInput
         styles={{
@@ -201,7 +243,7 @@ function TableNodeField({
         placeholder={placeholder}
         value={fieldName}
         onChange={handleFieldNameChange}
-        className="w-full"
+        className="w-1/2"
       />
       <TextSelect value={fieldType} options={fieldOptions} onChange={handleFieldTypeChange} />
     </Flex>

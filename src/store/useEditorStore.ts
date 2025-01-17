@@ -3,37 +3,6 @@ import { IEditorState, IEditorActions } from "../types/EditorStoreTypes";
 import { devtools } from "zustand/middleware";
 import { addEdge, reconnectEdge } from "@xyflow/react";
 
-// const initialNodes: EditorNode[] = [
-//   {
-//     id: "3",
-//     position: { x: 400, y: 400 },
-//     type: "table",
-//     data: {
-//       name: "Teacher",
-//       type: "collection",
-//       fields: [
-//         {
-//           name: "firstName",
-//           type: "string",
-//         },
-//         {
-//           name: "lastName",
-//           type: "string",
-//         },
-//         {
-//           name: "email",
-//           type: "string",
-//         },
-//         {
-//           name: "section",
-//           type: "string",
-//         },
-//       ],
-//     },
-//   },
-// ];
-
-// const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
 
 export const useEditorStore = create<IEditorState & IEditorActions>()(
   devtools(
@@ -119,15 +88,6 @@ export const useEditorStore = create<IEditorState & IEditorActions>()(
           console.log("addNodeDataField", id, field, state.nodes);
           return {
             nodes: state.nodes.map((item) => {
-              if (item.type === "table" && item.data.fields.length === 0) {
-                return {
-                  ...item,
-                  data: {
-                    ...item.data,
-                    fields: [...item.data.fields, field],
-                  },
-                };
-              }
               if (item.id === id) {
                 if (item.type === "table") {
                   return {
@@ -265,6 +225,17 @@ export const useEditorStore = create<IEditorState & IEditorActions>()(
         };
       },
       loadStateSnapshot: (snapshot) => set(() => snapshot),
+      clearStateSnapshot: () => set({
+        nodes: [],
+        edges: [],
+        undoStack: [],
+        redoStack: [],
+        canUndo: false,
+        canRedo: false,
+        historyCounter: 0,
+        canSave: false,
+        hasPendingChanges: false,
+      }),
       getDataSnapshot: () => {
         const { nodes, edges } = get();
         return { nodes, edges };

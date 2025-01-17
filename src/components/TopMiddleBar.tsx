@@ -7,6 +7,7 @@ import {
   Paper,
   rem,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconCode,
@@ -19,6 +20,7 @@ import { useProjectStore } from "../store/useProjectStore";
 import useProjectIcon from "../utils/useProjectIcon";
 import ConditionalHoverCard from "./ConditionalHoverCard";
 import useIsTruncated from "../utils/useIsTruncated";
+import { ReactNode } from "react";
 
 function TopMiddleBar() {
   const { selectedProject } = useProjectStore();
@@ -78,44 +80,56 @@ function TopMiddleBar() {
 
           <Divider orientation="vertical" />
           <Flex className="gap-1" direction="row" wrap="wrap">
-            <ActionIcon
-              variant="subtle"
-              size="md"
-              radius="sm"
+            <TooltipIconButton 
+              icon={<IconTool className="p-0.5" />}
+              label="Initial Setup"
               disabled={isButtonDisabled}
-            >
-              <IconTool className="p-0.5" />
-            </ActionIcon>
-            <ActionIcon
-              variant="subtle"
-              size="md"
-              radius="sm"
+            />
+            <TooltipIconButton 
+              icon={<IconCode className="p-0.5" />}
+              label="Code Generation"
               disabled={isButtonDisabled}
-            >
-              <IconCode className="p-0.5" />
-            </ActionIcon>
-            <ActionIcon
-              variant="subtle"
-              size="md"
-              radius="sm"
+            />
+            <TooltipIconButton 
+              icon={<IconDownload className="p-0.5" />}
+              label="Download Project"
               disabled={isButtonDisabled}
-            >
-              <IconDownload className="p-0.5" />
-            </ActionIcon>
-            <ActionIcon
-              variant="subtle"
-              size="md"
-              radius="sm"
-              onClick={onClickShare}
+            />
+            <TooltipIconButton 
+              icon={<IconShare className="p-0.5" />}
+              label="Share Project"
               disabled={isButtonDisabled}
-            >
-              <IconShare className="p-0.5" />
-            </ActionIcon>
+            />
           </Flex>
         </Flex>
       </Paper>
     </Box>
   );
+}
+
+
+function TooltipIconButton({
+  icon,
+  label,
+  disabled
+} : {
+  icon: ReactNode
+  label: string
+  disabled: boolean
+}) {
+
+  return(
+    <Tooltip label={label}>
+      <ActionIcon
+        variant="subtle"
+        size="md"
+        radius="sm"
+        disabled={disabled}
+      >
+        {icon}
+      </ActionIcon>
+    </Tooltip> 
+  )
 }
 
 export default TopMiddleBar;

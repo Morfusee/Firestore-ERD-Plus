@@ -53,7 +53,7 @@ export interface IEditorActions {
   editNodeDataField: (id: string, fieldIdx: number, field: Partial<TableField>) => void;
   deleteNodeDataField: (id: string, fieldIdx: number) => void;
 
-  addEdge: (conn: Connection) => void;
+  addEdge: (conn: Edge) => void;
   changeEdge: (oldEdge: Edge, newConn: Connection) => void;
   deleteEdge: (id: string) => void;
 
@@ -76,6 +76,7 @@ export interface IEditorActions {
 
   getStateSnapshot: () => IEditorStateSnapshot;
   loadStateSnapshot: (snapshot: IEditorStateSnapshot) => void;
+  clearStateSnapshot: () => void;
   getDataSnapshot: () => IEditorDataSnapshot;
   loadDataSnapshot: (snapshot: IEditorDataSnapshot) => void;
 }
