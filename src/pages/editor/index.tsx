@@ -11,6 +11,7 @@ import {
   OnReconnect,
   ProOptions,
   ReactFlow,
+  useReactFlow,
 } from "@xyflow/react";
 import { EditorNode } from "../../types/EditorTypes";
 import TableNode from "./nodes/TableNode";
@@ -39,6 +40,7 @@ function Editor() {
   const theme = useMantineTheme();
   const isDarkMode = useIsDarkMode();
   const { canvasBackground } = usePartialUserSettingsStore();
+  const { screenToFlowPosition } = useReactFlow()
 
   const nodes = useEditorStore((state) => state.nodes);
   const edges = useEditorStore((state) => state.edges);
@@ -71,12 +73,23 @@ function Editor() {
     []
   );
 
+  const onPaneClick = useCallback(
+    (event: React.MouseEvent) => {
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      })
+      console.log(position)
+    }, []
+  )
+
   const { moveNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
 
   return (
     <Box className="w-full h-full">
       <ReactFlow
         colorMode={isDarkMode ? "dark" : "light"}
+        //panOnDrag={[2]}
         nodeTypes={nodeTypes}
         defaultNodes={nodes}
         defaultEdges={edges}
@@ -87,6 +100,7 @@ function Editor() {
         onReconnect={onReconnect}
         onReconnectStart={onReconnectStart}
         onReconnectEnd={onReconnectEnd}
+        onPaneClick={onPaneClick}
         proOptions={proOptions}
         connectionMode={ConnectionMode.Loose}
         className="-z-10"

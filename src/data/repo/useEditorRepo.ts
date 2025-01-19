@@ -44,6 +44,13 @@ const useEditorRepo = () => {
     (state) => state.setHasPendingChanges
   );
 
+
+  /**
+   * Adds a new React Flow node
+   * 
+   * @param type - The type of node to add (e.g. 'note', 'table')
+   * @param position - An optional position for the new node. If not provided, it defaults to `{ x: 0, y: 0 }`
+   */
   const addNode = (type: EditorNode["type"], position?: XYPosition) => {
     // Define initial node data
     let data: EditorNode = {
@@ -86,6 +93,14 @@ const useEditorRepo = () => {
     addNodeState(data);
   };
 
+
+  /**
+   * Moves a node to a new position.
+   *
+   * @param id - The unique identifier of the node to be moved.
+   * @param position - The new position of the node.
+   *
+   */
   const moveNode = (id: string, position: XYPosition) => {
     // Run onChange
     onChange();

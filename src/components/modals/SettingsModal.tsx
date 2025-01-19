@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
 import { useEffect } from "react";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import useIsDarkMode from "../../utils/useIsDarkMode";
 import {
   IconPhoto,
   IconMessageCircle,
@@ -23,7 +23,7 @@ import {
   IconAdjustmentsAlt,
   IconBuilding,
 } from "@tabler/icons-react";
-import { usePartialUserSettingsStore } from "../store/globalStore";
+import { usePartialUserSettingsStore } from "../../store/globalStore";
 import { BackgroundVariant } from "@xyflow/react";
 
 function SettingsModal({ context, id, innerProps }: ContextModalProps) {

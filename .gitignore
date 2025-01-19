@@ -27,3 +27,6 @@ dist-ssr
 # Docker Data
 server/mongodb-data
 server/.env
+
+# Markdown Documentation
+documentation/.obsidian
