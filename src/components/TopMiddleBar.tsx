@@ -21,6 +21,7 @@ import useProjectIcon from "../utils/useProjectIcon";
 import ConditionalHoverCard from "./ConditionalHoverCard";
 import useIsTruncated from "../utils/useIsTruncated";
 import { ReactNode } from "react";
+import { modals } from "@mantine/modals";
 
 function TopMiddleBar() {
   const { selectedProject } = useProjectStore();
@@ -89,6 +90,12 @@ function TopMiddleBar() {
               icon={<IconCode className="p-0.5" />}
               label="Code Generation"
               disabled={isButtonDisabled}
+              onClick={() =>
+                modals.openContextModal({
+                  modal: "codeGen",
+                  innerProps: {},
+                })
+              }
             />
             <TooltipIconButton 
               icon={<IconDownload className="p-0.5" />}
@@ -111,11 +118,13 @@ function TopMiddleBar() {
 function TooltipIconButton({
   icon,
   label,
-  disabled
+  disabled,
+  onClick
 } : {
   icon: ReactNode
   label: string
   disabled: boolean
+  onClick?: () => void
 }) {
 
   return(
@@ -125,6 +134,7 @@ function TooltipIconButton({
         size="md"
         radius="sm"
         disabled={disabled}
+        onClick={onClick}
       >
         {icon}
       </ActionIcon>
