@@ -4,6 +4,7 @@ import {
   getProjectById,
   createProject,
   editProject,
+  deleteProject,
 } from "../controllers/projectController";
 import { encryptDataMiddleware } from "@root/middleware/encryptDataMiddleware";
 
@@ -14,5 +15,6 @@ router.get("", getAllProjects);
 router.get("/:id", getProjectById);
 router.patch("/:id", encryptDataMiddleware, editProject);
 router.post("", encryptDataMiddleware, createProject);
+router.delete("/:id", deleteProject);
 
 export default router;
