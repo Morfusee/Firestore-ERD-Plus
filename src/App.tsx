@@ -1,5 +1,3 @@
-import "./css/index.css";
-import "@mantine/core/styles.css";
 import { MantineProvider, Notification } from "@mantine/core";
 import {
   createBrowserRouter,
@@ -16,12 +14,18 @@ import { Notifications } from "@mantine/notifications";
 import { ReactFlowProvider } from "@xyflow/react";
 import { ModalsProvider } from "@mantine/modals";
 import DeleteModal from "./components/DeleteModal";
-import SettingsModal from "./components/SettingsModal";
+import SettingsModal from "./components/modals/SettingsModal";
 import useGlobalHotkeys from "./utils/useGlobalHotkeys";
+import { ContextMenuProvider } from 'mantine-contextmenu';
+import Login from "./pages/login";
+import Register from "./pages/register";
+import CodeGenModal from "./components/modals/CodeGenModal";
+
 
 const modals = {
   delete: DeleteModal,
   settings: SettingsModal,
+  codeGen: CodeGenModal,
 };
 
 declare module "@mantine/modals" {
@@ -39,10 +43,12 @@ function App() {
   return (
     <ReactFlowProvider>
       <MantineProvider theme={theme} defaultColorScheme="light">
-        <ModalsProvider modals={modals}>
-          <Notifications />
-          <AppRouting />
-        </ModalsProvider>
+        <ContextMenuProvider>
+          <ModalsProvider modals={modals}>
+            <Notifications />
+            <AppRouting />
+          </ModalsProvider>
+        </ContextMenuProvider>
       </MantineProvider>
     </ReactFlowProvider>
   );
@@ -53,6 +59,8 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<FirestoreERD />} />
       <Route path="/:projectId" element={<FirestoreERD />} />
+      <Route path="login" element={<Login />} />
+      <Route path="register" element={<Register />} />
     </>
   ),
   {

@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
 
     "paths": {
-      "@src/*": ["src/*"] // absolute paths
+      "@root/*": ["./*"] // Alias for the root folder
     },
 
     "strictNullChecks": true, // Enable strict null checks
@@ -29,10 +29,12 @@
     "noUnusedLocals": true, // Report errors on unused locals
     "noUnusedParameters": true, // Report errors on unused parameters
     "noImplicitReturns": true, // Report error when not all code paths in function return a value
-    "noFallthroughCasesInSwitch": true // Report errors for fallthrough cases in switch statement
+    "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statement
+    "allowImportingTsExtensions": true, // Allow importing modules with a '.ts' extension
+    "noEmit": true, // Do not emit output files
   },
   "include": [
-    "src/**/*" // Include all files in the src directory
+    "**/*" // Include all files in the directory
   ],
   "exclude": [
     "node_modules", // Exclude the node_modules directory

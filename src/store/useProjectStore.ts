@@ -17,6 +17,7 @@ interface IProjectState {
 interface IProjectActions {
   setProjects: (projects: IProject[]) => void
   setSelectedProject: (project: IProject) => void
+  clearSelectedProject: () => void
   addProject: (project: IProject) => void
   editProject: (id: number, change: Partial<IProject>) => void
   deleteProject: (id: number) => void
@@ -33,6 +34,7 @@ export const useProjectStore = create<IProjectState & IProjectActions>()(
 
       setProjects: (projects) => set(() => ({ projects: projects })),
       setSelectedProject: (project) => set(() => ({ selectedProject: project })),
+      clearSelectedProject: () => set(()=> ({ selectedProject: null })),
 
       addProject: (project) => set(state => ({
         projects: [
