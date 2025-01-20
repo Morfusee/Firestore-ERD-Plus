@@ -32,6 +32,47 @@ export const getProjectById = async (req: Request, res: Response) => {
   }
 };
 
+// Edit a project
+export const editProject = async (req: Request, res: Response) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    // Check if body is empty
+    if (
+      Object.keys(req.body).length === 0 ||
+      Object.values(req.body).some((value) => value === "")
+    ) {
+      res.status(400).json({
+        message: "Request body is empty or contains empty values",
+      });
+
+      // Exit the function
+      return;
+    }
+
+    // Update the project
+    const updatedProject = await Project.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    // Send the response
+    res.status(200).json({
+      message: "Project updated successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
 // Create a new project for sharing
 export const createProject = async (req: Request, res: Response) => {
   try {
