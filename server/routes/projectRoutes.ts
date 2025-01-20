@@ -4,12 +4,13 @@ import {
   getProjectById,
   createProject,
 } from "../controllers/projectController";
+import { encryptDataMiddleware } from "@root/middleware/encryptDataMiddleware";
 
 const router = express.Router();
 
 // Define routes
-router.get("/", getAllProjects);
+router.get("", getAllProjects);
 router.get("/:id", getProjectById);
-router.post("/share", createProject);
+router.post("", encryptDataMiddleware, createProject);
 
 export default router;

@@ -24,14 +24,14 @@ app.options("*", cors()); // This will handle preflight requests for all routes
 /* For Docker */
 // const mongoURI = process.env.MONGO_DOCKER_URI;
 /* For Local */
-// const mongoURI = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@localhost:27017/FERD`;
+const mongoURI = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@localhost:27017/FERD`;
 /* For Atlas */
 // const mongoURI = process.env.MONGO_ATLAS_URI;
 // Dynamic URI for Development and Production
 const isDockerRunning = process.env.IS_DOCKERIZED;
-const mongoURI = isDockerRunning
-  ? process.env.MONGO_DOCKER_URI
-  : process.env.MONGO_ATLAS_URI;
+// const mongoURI = isDockerRunning
+//   ? process.env.MONGO_DOCKER_URI
+//   : process.env.MONGO_ATLAS_URI;
 
 // Connect to MongoDB
 mongoose
@@ -43,7 +43,6 @@ mongoose
     console.error("Error connecting to MongoDB: ", err);
   });
 
-// Use project routes
 app.use("/projects", projectRoutes);
 
 // Start the server

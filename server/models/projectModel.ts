@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 
 // Define a schema
 const projectSchema = new mongoose.Schema({
-  id: { type: String, required: true },
   name: { type: String, required: true },
   icon: { type: String, required: true },
-  diagramData: { type: Object, required: true },
-  createdAt: { type: Number, required: true },
-  updatedAt: { type: Number, required: true },
+  data: { type: String, required: true },
+  members: { type: Array, required: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // Create a model

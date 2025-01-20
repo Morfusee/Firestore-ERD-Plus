@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Project from "../models/projectModel.ts";
+import { decrypt, encrypt } from "@root/utils/encryption.ts";
 
 // Get all projects
 export const getAllProjects = async (req: Request, res: Response) => {
@@ -34,10 +35,16 @@ export const getProjectById = async (req: Request, res: Response) => {
 // Create a new project for sharing
 export const createProject = async (req: Request, res: Response) => {
   try {
+    // Encrypt the data
     const project = new Project(req.body);
+
+    // Save the project
     const savedProject = await project.save();
+
+    // Send the response
     res.status(201).json(savedProject);
   } catch (err: any) {
+    // Handle errors
     res.status(400).json({
       message: err.message,
     });
