@@ -12,6 +12,7 @@ import useProjectRepo from "../data/repo/useProjectRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { useEffect } from "react";
 import useHistoryRepo from "../data/repo/useHistoryRepo";
+import TopRightBar from "../components/TopRightBar";
 
 function FirestoreERD() {
   const theme = useMantineTheme();
@@ -46,13 +47,14 @@ function FirestoreERD() {
 
   return (
     <Paper
-      className="w-screen h-screen relative"
+      className="w-screen h-screen relative overflow-hidden"
       bg={!isDarkMode ? theme.colors.gray[2] : theme.colors.dark[8]}
     >
       {isLoaded ? (
         <>
           <TopLeftBar />
           <TopMiddleBar />
+          <TopRightBar />
           <Editor />
           <BottomMiddleBar />
         </>
