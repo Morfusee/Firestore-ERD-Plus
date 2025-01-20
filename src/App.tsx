@@ -20,12 +20,14 @@ import { ContextMenuProvider } from 'mantine-contextmenu';
 import Login from "./pages/login";
 import Register from "./pages/register";
 import CodeGenModal from "./components/modals/CodeGenModal";
+import ManageAccountModal from "./components/modals/ManageAccountModal";
 
 
 const modals = {
   delete: DeleteModal,
   settings: SettingsModal,
   codeGen: CodeGenModal,
+  manageAcc: ManageAccountModal,
 };
 
 declare module "@mantine/modals" {
