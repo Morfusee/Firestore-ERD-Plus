@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // Define the Version schema
 const versionSchema = new mongoose.Schema(
   {
-    version: { type: String, required: true, trim: true }, // Example: "1.0.0"
+    name: { type: String, required: true, trim: true }, // Example: "1.0.0"
     description: { type: String, required: false, trim: true }, // Optional metadata about the version
     project: {
       type: mongoose.Schema.Types.ObjectId,
@@ -14,7 +14,7 @@ const versionSchema = new mongoose.Schema(
     currentHistory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "History",
-    }, 
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
@@ -44,10 +44,9 @@ const historySchema = new mongoose.Schema(
         required: false,
       },
     ],
-    changeType: {
-      type: String,
-      enum: ["CREATE", "UPDATE", "DELETE", "ROLLBACK"],
-      required: true,
+    isRollback: {
+      type: Boolean,
+      default: false,
     },
   },
   {
