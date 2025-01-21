@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import projectRoutes from "./routes/projectRoutes.ts";
+import historyRoutes from "./routes/historyRoutes.ts";
+import settingsRoutes from "./routes/settingsRoutes.ts";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -44,7 +46,11 @@ mongoose
   });
 
 // Use project routes
-app.use("/projects", projectRoutes);
+app.use("/projects", projectRoutes, historyRoutes);
+
+// Use user routes
+app.use("/user", settingsRoutes);
+
 
 // Start the server
 const PORT = 3000;
