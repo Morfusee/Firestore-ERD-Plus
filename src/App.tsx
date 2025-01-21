@@ -21,12 +21,16 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import CodeGenModal from "./components/modals/CodeGenModal";
 import ManageAccountModal from "./components/modals/ManageAccountModal";
+import ShareModal from "./components/modals/ShareModal";
+import DownloadModal from "./components/modals/DownloadModal";
 
 
 const modals = {
   delete: DeleteModal,
   settings: SettingsModal,
   codeGen: CodeGenModal,
+  download: DownloadModal,
+  shareModal: ShareModal,
   manageAcc: ManageAccountModal,
 };
 
