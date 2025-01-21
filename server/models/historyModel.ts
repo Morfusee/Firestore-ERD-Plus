@@ -55,6 +55,83 @@ const historySchema = new mongoose.Schema(
   }
 );
 
+// const historySchema = new mongoose.Schema(
+//   {
+//     version: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Version",
+//       required: true,
+//       index: true,
+//     },
+//     changes: [
+//       {
+//         type: {
+//           data: {
+//             type: String,
+//             required: true,
+//           },
+//           changeType: {
+//             type: String,
+//             enum: ["CREATE", "UPDATE", "DELETE"],
+//             required: true,
+//           },
+//         },
+//         required: true,
+//       },
+//     ],
+//     members: [
+//       {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: "User",
+//         required: false,
+//       },
+//     ],
+//     isRollback: {
+//       type: Boolean,
+//       default: false,
+//     }
+//   },
+//   {
+//     timestamps: true,
+//   }
+// );
+
+// Middleware for deleteMany operations
+versionSchema.pre("deleteMany", async function (next) {
+  try {
+    // Get the filter condition being used for deleteMany
+    const filter = this.getFilter();
+
+    // Find all versions that match the filter before they're deleted
+    const versionsToDelete = await this.model.find(filter);
+
+    // Get all version IDs
+    const versionIds = versionsToDelete.map((version) => version._id);
+
+    // Delete all histories associated with these versions
+    if (versionIds.length > 0) {
+      await History.deleteMany({ version: { $in: versionIds } });
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Middleware for findByIdAndDelete operations
+versionSchema.pre("findByIdAndDelete", async function (next) {
+  try {
+    const doc = await this.model.findOne(this.getFilter());
+    if (doc) {
+      await History.deleteMany({ version: doc._id });
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Create models
 const Version = mongoose.model("Version", versionSchema);
 const History = mongoose.model("History", historySchema);
