@@ -5,6 +5,12 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch: # Allows manual triggering of the workflow
+    inputs: 
+      tag:
+        description: 'Tag for the Docker image'
+        required: false
+        default: 'latest'
 
 jobs:
   build:
