@@ -14,5 +14,5 @@ jobs:
     - name: Build and Push the Image
       run: |
         docker login --username Morfusee --password ${{ secrets.GH_PAT }} ghcr.io
-        docker build ../server/ --file Dockerfile --tag ghcr.io/morfusee/ferd-server:latest
+        docker build ./server --file Dockerfile --tag ghcr.io/morfusee/ferd-server:latest
         docker push ghcr.io/morfusee/ferd-server:latest
