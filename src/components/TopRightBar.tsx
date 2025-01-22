@@ -3,6 +3,7 @@ import { useDisclosure, useViewportSize } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { IconEdit, IconHistory, IconHistoryToggle, IconLogout } from "@tabler/icons-react";
 import { useState } from "react";
+import { useProjectStore } from "../store/useProjectStore";
 
 
 
@@ -37,6 +38,9 @@ function ActionButtons({
   openedDrawer: boolean;
 }) {
 
+  const { selectedProject } = useProjectStore();
+  const isButtonDisabled = !selectedProject;
+
   const { width } = useViewportSize();
 
   const [opened, handlers] = useDisclosure(false)
@@ -48,7 +52,13 @@ function ActionButtons({
       direction={width < 900 ? "column" : "row"}
       wrap="wrap"
     >
-      <ActionIcon variant="subtle" size="lg" radius="xl" onClick={toggleDrawer}>
+      <ActionIcon 
+        variant="subtle" 
+        size="lg" 
+        radius="xl" 
+        onClick={toggleDrawer}
+        disabled={isButtonDisabled}
+      >
         {openedDrawer ? <IconHistoryToggle /> : <IconHistory />}
       </ActionIcon>
       <Popover 
@@ -175,7 +185,7 @@ function HistoryTimeline() {
   ]
 
   return(
-    <Box py='xs' px='xs'>
+    <Box py='xs' px={6} className="w-full h-full overflow-x-auto beautifulScrollBar">
       <Timeline active={6} reverseActive bulletSize={8} lineWidth={2} align="right">
         {
           sampleTimeline.map((item) => (

@@ -101,11 +101,23 @@ function TopMiddleBar() {
               icon={<IconDownload className="p-0.5" />}
               label="Download Project"
               disabled={isButtonDisabled}
+              onClick={() =>
+                modals.openContextModal({
+                  modal: "download",
+                  innerProps: {},
+                })
+              }
             />
             <TooltipIconButton 
               icon={<IconShare className="p-0.5" />}
               label="Share Project"
               disabled={isButtonDisabled}
+              onClick={() =>
+                modals.openContextModal({
+                  modal: "shareModal",
+                  innerProps: {},
+                })
+              }
             />
           </Flex>
         </Flex>
