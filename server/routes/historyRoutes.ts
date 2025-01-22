@@ -3,7 +3,6 @@ import express from "express";
 import {
   createProjectVersion,
   createVersionHistory,
-  deleteHistoriesAfter,
   deleteProjectVersion,
   deleteVersionHistory,
   editProjectVersion,
@@ -34,6 +33,5 @@ router.delete("/:projectId/version/:versionId/history/:historyId", deleteVersion
 
 // Special operations
 router.post("/:projectId/version/:versionId/history/:historyId/rollback", rollbackVersionToHistory);
-router.delete("/:projectId/version/:versionId/history/:historyId/after", deleteHistoriesAfter);
 
 export default router;

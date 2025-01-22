@@ -113,13 +113,17 @@ versionSchema.pre("deleteMany", async function (next) {
     }
 
     next();
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    if (error instanceof Error) {
+      next(error);
+    } else {
+      next(new Error("Unknown error"));
+    }
   }
 });
 
 // Middleware for findByIdAndDelete operations
-versionSchema.pre("findByIdAndDelete", async function (next) {
+versionSchema.pre("findOneAndDelete", async function (next) {
   try {
     const doc = await this.model.findOne(this.getFilter());
     if (doc) {
@@ -127,7 +131,11 @@ versionSchema.pre("findByIdAndDelete", async function (next) {
     }
     next();
   } catch (error) {
-    next(error);
+    if (error instanceof Error) {
+      next(error);
+    } else {
+      next(new Error("Unknown error"));
+    }
   }
 });
 
