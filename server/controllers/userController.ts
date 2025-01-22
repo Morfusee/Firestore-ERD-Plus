@@ -103,3 +103,28 @@ export const getUserByEmail = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    // Find the user by ID and delete
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    // Check if user exists
+    if (!user) {
+      res.status(404).json({
+        message: "User does not exist.",
+      });
+
+      return;
+    }
+
+    // Send success response
+    res.status(200).json({
+      message: "User deleted successfully.",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
