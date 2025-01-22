@@ -88,7 +88,8 @@ export const getUserByEmail = async (req: Request, res: Response) => {
 
     // Validate the limit to ensure it's a number
     if (isNaN(limitNumber) || limitNumber <= 0) {
-      return res.status(400).json({ message: "Invalid limit value." });
+      res.status(400).json({ message: "Invalid limit value." });
+      return;
     }
 
     const users = await User.find({
