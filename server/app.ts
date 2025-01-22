@@ -2,10 +2,13 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import projectRoutes from "./routes/projectRoutes.ts";
+import memberRoutes from "./routes/memberRoutes.ts";
 import historyRoutes from "./routes/historyRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import dotenv from "dotenv";
+import errorMiddleware from "./middleware/errorMiddleware.ts";
+
 
 dotenv.config();
 
@@ -49,11 +52,14 @@ mongoose
 // Use project routes
 app.use("/projects", projectRoutes, historyRoutes);
 app.use("/projects", projectRoutes);
+app.use("/projects", memberRoutes);
 
 // Use user routes
 app.use("/user", settingsRoutes);
 
 app.use("/users", userRoutes);
+
+app.use(errorMiddleware)
 
 // Start the server
 const PORT = 3000;
