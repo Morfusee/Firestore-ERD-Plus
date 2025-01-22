@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import projectRoutes from "./routes/projectRoutes.ts";
 import historyRoutes from "./routes/historyRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
+import userRoutes from "./routes/userRoutes.ts";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -47,10 +48,12 @@ mongoose
 
 // Use project routes
 app.use("/projects", projectRoutes, historyRoutes);
+app.use("/projects", projectRoutes);
 
 // Use user routes
 app.use("/user", settingsRoutes);
 
+app.use("/users", userRoutes);
 
 // Start the server
 const PORT = 3000;
