@@ -5,6 +5,7 @@ import {
   getUserById,
   getUserByEmail,
   updateUser,
+  deleteUser,
 } from "../controllers/userController";
 
 import { validateUser } from "../middleware/userValidator";
@@ -25,5 +26,8 @@ router.post("", validateUser, createUser);
 
 // Route for updating a user by ID
 router.patch("/:id", updateUser);
+
+// Route for deleting a user by ID
+router.delete("/:id", deleteUser);
 
 export default router;
