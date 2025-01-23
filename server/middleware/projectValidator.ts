@@ -1,6 +1,6 @@
 import ValidationError from "@root/errors/ValidationError";
 import { Response, Request, NextFunction } from "express";
-import { body, param, validationResult } from "express-validator";
+import { body, check, param, validationResult } from "express-validator";
 
 export const validate = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
@@ -14,6 +14,37 @@ export const validateProjectId = param("id")
   .trim()
   .isMongoId()
   .withMessage("The project ID must be a valid MongoDB ID.");
+
+export const validateUserId = body("userId")
+  .trim()
+  .notEmpty()
+  .withMessage("The user ID is required.")
+  .isMongoId()
+  .withMessage("The user ID must be a valid MongoDB ID.");
+
+export const validateProjectFields = [
+  // Validate the project name
+  body("name").trim().notEmpty().withMessage("The project name is required."),
+  // Validate the project icon
+  body("icon").trim().notEmpty().withMessage("The project icon is required."),
+];
+
+export const validateMembersUpdateRestriction = body("members")
+  .custom((value) => {
+    // If the 'members' field is present in the request body, throw an error
+    if (value !== undefined) {
+      throw new ValidationError([
+        {
+          type: "fields",
+          value: value,
+          param: "members",
+          location: "body",
+        },
+      ]);
+    }
+    return true;
+  })
+  .withMessage("The 'members' field cannot be modified through this endpoint.");
 
 export const validateRequestBodyNotEmpty = (
   req: Request,
@@ -37,27 +68,3 @@ export const validateRequestBodyNotEmpty = (
   }
   next();
 };
-
-export const validateMembersUpdateRestriction = body("members")
-  .custom((value) => {
-    // If the 'members' field is present in the request body, throw an error
-    if (value !== undefined) {
-      throw new ValidationError([
-        {
-          type: "fields",
-          value: value,
-          param: "members",
-          location: "body",
-        },
-      ]);
-    }
-    return true;
-  })
-  .withMessage("The 'members' field cannot be modified through this endpoint.");
-
-export const validateProjectFields = [
-  // Validate the project name
-  body("name").trim().notEmpty().withMessage("The project name is required."),
-  // Validate the project icon
-  body("icon").trim().notEmpty().withMessage("The project icon is required."),
-];

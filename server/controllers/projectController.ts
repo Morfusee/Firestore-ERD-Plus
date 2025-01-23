@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Project from "../models/projectModel.ts";
 import { decrypt, encrypt } from "@root/utils/encryption.ts";
 import NotFoundError from "@root/errors/NotFoundError.ts";
+import mongoose from "mongoose";
 
 // Get all projects
 export const getAllProjects = async (req: Request, res: Response) => {
@@ -70,8 +71,19 @@ export const editProject = async (req: Request, res: Response) => {
 // Create a new project for sharing
 export const createProject = async (req: Request, res: Response) => {
   try {
-    // Encrypt the data
-    const project = new Project(req.body);
+    const { name, icon, userId } = req.body;
+
+    // Create a new project
+    const project = new Project({
+      name,
+      icon,
+      members: [
+        {
+          userId: userId,
+          role: "owner",
+        },
+      ],
+    });
 
     // Save the project
     const savedProject = await project.save();
@@ -98,7 +110,7 @@ export const deleteProject = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     res.status(500).json({
-      message: "Error deleting project: " + error.message,
+      message: error.message,
     });
   }
 };

@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
 import { History, Version } from "./historyModel";
 
+export interface IProject {
+  name: string;
+  icon: string;
+  data?: string;
+  members?: {
+    userId: mongoose.Types.ObjectId;
+    role: "owner" | "admin" | "editor" | "viewer";
+  };
+}
+
 // Define a schema
 const projectSchema = new mongoose.Schema(
   {
@@ -11,21 +21,24 @@ const projectSchema = new mongoose.Schema(
     },
     icon: { type: String, required: true, trim: true },
     data: { type: String },
-    members: [
-      {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
+    members: {
+      type: [
+        {
+          userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+          role: {
+            type: String,
+            enum: ["owner", "admin", "editor", "viewer"],
+            default: "viewer",
+            required: true,
+          },
         },
-        role: {
-          type: String,
-          enum: ["owner", "admin", "editor", "viewer"],
-          default: "viewer",
-          required: true,
-        },
-      },
-    ],
+      ],
+      required: true,
+    },
   },
   {
     timestamps: true,
