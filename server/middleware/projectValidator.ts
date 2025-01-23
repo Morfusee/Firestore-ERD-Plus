@@ -22,6 +22,12 @@ export const validateUserId = body("userId")
   .isMongoId()
   .withMessage("The user ID must be a valid MongoDB ID.");
 
+export const validateUserIdQuery = check("userId")
+  .optional()
+  .trim()
+  .isMongoId()
+  .withMessage("The user ID must be a valid MongoDB ID.");
+
 export const validateProjectFields = [
   // Validate the project name
   body("name").trim().notEmpty().withMessage("The project name is required."),

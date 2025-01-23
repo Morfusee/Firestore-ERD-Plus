@@ -4,6 +4,39 @@ import { decrypt, encrypt } from "@root/utils/encryption.ts";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import mongoose from "mongoose";
 
+/**
+ * Get projects based on query parameters.
+ * If `userId` is provided in the query, it fetches projects associated with that user.
+ * Otherwise, it fetches all projects.
+ */
+export const getProjects = async (req: Request, res: Response) => {
+  if (req.query.userId) {
+    return getProjectsByUserId(req, res);
+  }
+
+  // If no userId is provided, fetch all projects
+  return getAllProjects(req, res);
+};
+
+// Get all projects by user ID
+export const getProjectsByUserId = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.query;
+
+    const projectsByUser = await Project.find({
+      "members.userId": userId,
+    });
+
+    if (!projectsByUser) throw new NotFoundError("No projects found.");
+
+    res.status(200).json(projectsByUser);
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 // Get all projects
 export const getAllProjects = async (req: Request, res: Response) => {
   try {
@@ -11,7 +44,8 @@ export const getAllProjects = async (req: Request, res: Response) => {
     const projects = await Project.find();
 
     // If no projects are found, throw an error
-    if (!projects) throw new NotFoundError("No projects found.");
+    if (!projects || projects.length === 0)
+      throw new NotFoundError("No projects found.");
 
     // Return the projects
     res.status(200).json(projects);

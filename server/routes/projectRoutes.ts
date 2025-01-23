@@ -5,6 +5,8 @@ import {
   createProject,
   editProject,
   deleteProject,
+  getProjectsByUserId,
+  getProjects,
 } from "../controllers/projectController";
 import { encryptDataMiddleware } from "@root/middleware/encryptDataMiddleware";
 import {
@@ -14,6 +16,7 @@ import {
   validateProjectId,
   validateProjectFields,
   validateUserId,
+  validateUserIdQuery,
 } from "@root/middleware/projectValidator";
 
 const router = express.Router();
@@ -22,10 +25,19 @@ const router = express.Router();
 
 /**
  * GET /projects
- * Fetches all projects.
- * No validation or middleware is applied here.
+ * Fetches all projects associated with a specific user or all projects.
+ * Middleware:
+ * - validateUserIdQuery: Ensures the provided user ID in the query is valid.
+ * - validate: General validation middleware.
  */
-router.get("", getAllProjects);
+router.get("", [validateUserIdQuery, validate], getProjects);
+
+// /**
+//  * GET /projects
+//  * Fetches all projects.
+//  * No validation or middleware is applied here.
+//  */
+// router.get("", getAllProjects);
 
 /**
  * GET /projects/:id
