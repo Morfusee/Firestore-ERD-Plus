@@ -4,6 +4,7 @@ import { decrypt, encrypt } from "@root/utils/encryption.ts";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import mongoose from "mongoose";
 import ConflictError from "@root/errors/ConflictError.ts";
+import User from "@root/models/userModel.ts";
 
 /**
  * Get projects based on query parameters.
@@ -122,6 +123,16 @@ export const createProject = async (req: Request, res: Response) => {
 
     // Save the project
     const savedProject = await project.save();
+
+    // Check if the project was saved
+    if (!savedProject) throw new ConflictError("Project could not be saved.");
+
+    // Insert the project ID into the user's ownedProjects array
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        ownedProjects: savedProject._id,
+      },
+    });
 
     // Send the response
     res.status(201).json(savedProject);
