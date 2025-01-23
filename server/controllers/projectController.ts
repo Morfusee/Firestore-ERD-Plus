@@ -42,25 +42,11 @@ export const getProjectById = async (req: Request, res: Response) => {
 // Edit a project
 export const editProject = async (req: Request, res: Response) => {
   try {
+    // Find the project by ID
     const project = await Project.findById(req.params.id);
-    if (!project) {
-      res.status(404).json({
-        message: "Project not found",
-      });
-    }
 
-    // Check if body is empty
-    if (
-      Object.keys(req.body).length === 0 ||
-      Object.values(req.body).some((value) => value === "")
-    ) {
-      res.status(400).json({
-        message: "Request body is empty or contains empty values",
-      });
-
-      // Exit the function
-      return;
-    }
+    // Check if the project exists
+    if (!project) throw new NotFoundError("Project not found.");
 
     // Update the project
     const updatedProject = await Project.findByIdAndUpdate(
@@ -72,6 +58,7 @@ export const editProject = async (req: Request, res: Response) => {
     // Send the response
     res.status(200).json({
       message: "Project updated successfully",
+      project: updatedProject,
     });
   } catch (err: any) {
     res.status(500).json({
