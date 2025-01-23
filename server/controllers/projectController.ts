@@ -1,11 +1,18 @@
 import { Request, Response } from "express";
 import Project from "../models/projectModel.ts";
 import { decrypt, encrypt } from "@root/utils/encryption.ts";
+import NotFoundError from "@root/errors/NotFoundError.ts";
 
 // Get all projects
 export const getAllProjects = async (req: Request, res: Response) => {
   try {
+    // Find all projects
     const projects = await Project.find();
+
+    // If no projects are found, throw an error
+    if (!projects) throw new NotFoundError("No projects found.");
+
+    // Return the projects
     res.status(200).json(projects);
   } catch (err: any) {
     res.status(500).json({
@@ -17,14 +24,14 @@ export const getAllProjects = async (req: Request, res: Response) => {
 // Get a project by ID
 export const getProjectById = async (req: Request, res: Response) => {
   try {
+    // Find the project by ID
     const project = await Project.findById(req.params.id);
-    if (project) {
-      res.status(200).json(project);
-    } else {
-      res.status(404).json({
-        message: "Project not found",
-      });
-    }
+
+    // Check if the project exists
+    if (!project) throw new NotFoundError("Project not found.");
+
+    // Return the project
+    res.status(200).json(project);
   } catch (err: any) {
     res.status(500).json({
       message: err.message,
