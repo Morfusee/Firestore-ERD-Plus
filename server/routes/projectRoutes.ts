@@ -7,6 +7,7 @@ import {
   deleteProject,
   getProjectsByUserId,
   getProjects,
+  saveProject,
 } from "../controllers/projectController";
 import { encryptDataMiddleware } from "@root/middleware/encryptDataMiddleware";
 import {
@@ -17,6 +18,9 @@ import {
   validateProjectFields,
   validateUserId,
   validateUserIdQuery,
+  validateDataUpdateRestriction,
+  validateProjectData,
+  validateOnlyDataField,
 } from "@root/middleware/projectValidator";
 
 const router = express.Router();
@@ -54,6 +58,7 @@ router.get("/:id", [validateProjectId, validate], getProjectById);
  * Middleware:
  * - validateProjectId: Ensures the provided project ID is valid.
  * - validateRequestBodyNotEmpty: Ensures the request body is not empty.
+ * - validateDataUpdateRestriction: Ensures restrictions on updating project data are enforced.
  * - validateMembersUpdateRestriction: Ensures restrictions on updating project members are enforced.
  * - validate: General validation middleware.
  */
@@ -62,10 +67,27 @@ router.patch(
   [
     validateProjectId,
     validateRequestBodyNotEmpty,
+    validateDataUpdateRestriction,
     validateMembersUpdateRestriction,
     validate,
   ],
   editProject
+);
+
+/**
+ * PATCH /projects/:id/data
+ * Updates the data field of a project by its ID.
+ * Middleware:
+ * - validateProjectId: Ensures the provided project ID is valid.
+ * - validateProjectData: Ensures the provided project data is valid.
+ * - validateOnlyDataField: Ensures only the data field is being updated.
+ * - validate: General validation middleware.
+ *
+ */
+router.patch(
+  "/:id/data",
+  [validateProjectId, validateProjectData, validateOnlyDataField, validate],
+  saveProject
 );
 
 /**

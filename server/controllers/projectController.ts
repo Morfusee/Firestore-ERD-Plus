@@ -3,6 +3,7 @@ import Project from "../models/projectModel.ts";
 import { decrypt, encrypt } from "@root/utils/encryption.ts";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import mongoose from "mongoose";
+import ConflictError from "@root/errors/ConflictError.ts";
 
 /**
  * Get projects based on query parameters.
@@ -128,6 +129,31 @@ export const createProject = async (req: Request, res: Response) => {
     // Handle errors
     res.status(400).json({
       message: err.message,
+    });
+  }
+};
+
+// Save data to a project
+export const saveProject = async (req: Request, res: Response) => {
+  try {
+    // Find the project by ID
+    const project = await Project.findById(req.params.id);
+
+    // Check if the project exists
+    if (!project) throw new ConflictError("Project does not exist.");
+
+    project.data = req.body.data;
+
+    // Save the project
+    const savedProject = await project.save();
+
+    res.status(200).json({
+      message: "Project data saved successfully.",
+      project: savedProject,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 };

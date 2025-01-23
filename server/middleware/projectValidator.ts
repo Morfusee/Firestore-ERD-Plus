@@ -35,6 +35,45 @@ export const validateProjectFields = [
   body("icon").trim().notEmpty().withMessage("The project icon is required."),
 ];
 
+export const validateProjectData = body("data")
+  .trim()
+  .notEmpty()
+  .withMessage("The project data is required.");
+
+export const validateDataUpdateRestriction = body("data")
+  .custom((value) => {
+    if (value !== undefined) {
+      throw new ValidationError([
+        {
+          type: "fields",
+          value: value,
+          param: "data",
+          location: "body",
+        },
+      ]);
+    }
+    return true;
+  })
+  .withMessage("The 'data' field cannot be modified through this endpoint.");
+
+export const validateOnlyDataField = body("data")
+  .custom((_, { req }) => {
+    const bodyKeys = Object.keys(req.body);
+
+    if (bodyKeys.length !== 1 || !bodyKeys.includes("data")) {
+      throw new ValidationError([
+        {
+          type: "fields",
+          value: req.body,
+          param: bodyKeys.join(", "),
+          location: "body",
+        },
+      ]);
+    }
+    return true;
+  })
+  .withMessage("Only the 'data' field can be updated through this endpoint.");
+
 export const validateMembersUpdateRestriction = body("members")
   .custom((value) => {
     // If the 'members' field is present in the request body, throw an error
