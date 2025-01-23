@@ -80,7 +80,7 @@ export const addMember = async (
     )
     // Add project to user
     await user.updateOne(
-      { $push: { sharedProjects: { projectId: project.id }}}
+      { $push: { sharedProjects: project.id }}
     )
 
     // Return success
