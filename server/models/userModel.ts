@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema(
         ref: "Project",
       },
     ],
+    sharedProjects: [
+      {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Project",
+      },
+    ]
   },
   {
     timestamps: true,
