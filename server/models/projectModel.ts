@@ -10,22 +10,22 @@ const projectSchema = new mongoose.Schema(
       trim: true,
     },
     icon: { type: String, required: true, trim: true },
-    data: { type: String, required: true },
+    data: { type: String },
     members: [
       {
         userId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-          required: true
+          ref: "User",
+          required: true,
         },
         role: {
           type: String,
-          enum: ['owner', 'admin', 'editor', 'viewer'],
-          default: 'viewer',
+          enum: ["owner", "admin", "editor", "viewer"],
+          default: "viewer",
           required: true,
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
     timestamps: true,

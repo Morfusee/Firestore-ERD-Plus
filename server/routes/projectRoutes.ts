@@ -12,6 +12,7 @@ import {
   validateRequestBodyNotEmpty,
   validateMembersUpdateRestriction,
   validateProjectId,
+  validateProjectFields,
 } from "@root/middleware/projectValidator";
 
 const router = express.Router();
@@ -24,7 +25,11 @@ router.patch(
   [validateRequestBodyNotEmpty, validateMembersUpdateRestriction, validate],
   editProject
 );
-router.post("", createProject);
+router.post(
+  "",
+  [...validateProjectFields, validateMembersUpdateRestriction, validate],
+  createProject
+);
 router.delete("/:id", deleteProject);
 
 export default router;

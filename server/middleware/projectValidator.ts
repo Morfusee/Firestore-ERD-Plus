@@ -20,6 +20,7 @@ export const validateRequestBodyNotEmpty = (
   _: Response,
   next: NextFunction
 ) => {
+  // Check if the request body is empty or if any of the fields are empty
   if (
     Object.keys(req.body).length === 0 ||
     Object.values(req.body).some((value) => value === "")
@@ -39,6 +40,7 @@ export const validateRequestBodyNotEmpty = (
 
 export const validateMembersUpdateRestriction = body("members")
   .custom((value) => {
+    // If the 'members' field is present in the request body, throw an error
     if (value !== undefined) {
       throw new ValidationError([
         {
@@ -52,3 +54,10 @@ export const validateMembersUpdateRestriction = body("members")
     return true;
   })
   .withMessage("The 'members' field cannot be modified through this endpoint.");
+
+export const validateProjectFields = [
+  // Validate the project name
+  body("name").trim().notEmpty().withMessage("The project name is required."),
+  // Validate the project icon
+  body("icon").trim().notEmpty().withMessage("The project icon is required."),
+];
