@@ -1,7 +1,7 @@
 import { Modal, Flex, Button, Text } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
 import { useEffect } from "react";
-import useProjectRepo from "../data/repo/useProjectRepo";
+import useProjectRepo from "../../data/repo/useProjectRepo";
 
 function DeleteModal({
   context,

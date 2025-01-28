@@ -81,6 +81,7 @@ import useEditorRepo from "../data/repo/useEditorRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { modals } from "@mantine/modals";
 import AsyncEmojiPicker from "./AsyncEmojiPicker";
+import DrawerModal from "./modals/DrawerModal";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -222,231 +223,27 @@ function Drawer({ opened }: { opened: boolean }) {
 }
 
 function DrawerHeader() {
-  const [opened, { open, close }] = useDisclosure(false);
-
   return (
     <Flex direction={"row"} justify={"space-between"} align={"center"}>
       <Text fw={700} size="md" lh={"h4"}>
         Projects
       </Text>
-      <ActionIcon variant="subtle" size="xs" radius="xl" onClick={open}>
+      <ActionIcon
+        variant="subtle"
+        size="xs"
+        radius="xl"
+        onClick={() =>
+          modals.openContextModal({
+            modal: "drawer",
+            innerProps: {
+              mode: "create",
+            },
+          })
+        }
+      >
         <IconPlus />
       </ActionIcon>
-      <DrawerModal mode="create" opened={opened} close={close} />
     </Flex>
-  );
-}
-
-function DrawerModal({
-  mode,
-  project,
-  opened,
-  close,
-}: {
-  mode: "create" | "edit";
-  project?: IProject;
-  opened: boolean;
-  close: () => void;
-}) {
-  const { addProject, editProject } = useProjectRepo();
-  const { getHexByEmoji } = useEmojiRepo();
-  const [emojiList, setEmojiList] = useState<EmojiGroup>({
-    smileysEmotion: [],
-    peopleBody: [],
-    animalsNature: [],
-    foodDrink: [],
-    travelPlaces: [],
-    activities: [],
-    objects: [],
-    symbols: [],
-    component: [],
-  });
-
-  const {
-    activities,
-    animalsNature,
-    component,
-    foodDrink,
-    objects,
-    peopleBody,
-    smileysEmotion,
-    symbols,
-    travelPlaces,
-  } = useEmojiStore();
-
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: () => {
-      combobox.resetSelectedOption();
-      setEmojiList({
-        smileysEmotion,
-        peopleBody,
-        animalsNature,
-        foodDrink,
-        travelPlaces,
-        activities,
-        objects,
-        symbols,
-        component,
-      });
-    },
-  });
-
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
-      name: "",
-      icon: "",
-    },
-    validate: {
-      name: (value) => {
-        if (!value.trim()) {
-          return "Name is required";
-        }
-      },
-      icon: (value) => {
-        if (!value.trim()) {
-          return "Icon is required";
-        }
-      },
-    },
-  });
-
-  const { projectIcon, isProjectSelected } = useProjectIcon(
-    project?.icon || "",
-    project || null,
-    project?.id
-  );
-
-  const [comboboxValue, setComboboxValue] = useState<string>("");
-
-  // There's no other way to set initial values for the edit mode
-  useEffect(() => {
-    if (mode === "edit" && opened) {
-      form.setFieldValue("name", project?.name!);
-      form.setFieldValue("icon", project?.icon!);
-    }
-
-    return () => {
-      form.reset();
-    };
-  }, [opened]);
-
-  const comboboxOnOptionSubmit = (value: string) => {
-    getHexByEmoji(value).then((hex) => {
-      if (!hex) return;
-
-      form.setFieldValue("icon", hex);
-      setComboboxValue(value);
-      combobox.closeDropdown();
-    });
-  };
-
-  const modalOnClose = () => {
-    close();
-    setComboboxValue("");
-    setEmojiList({
-      smileysEmotion: [],
-      peopleBody: [],
-      animalsNature: [],
-      foodDrink: [],
-      travelPlaces: [],
-      activities: [],
-      objects: [],
-      symbols: [],
-      component: [],
-    });
-  };
-
-  const addFormSubmit = (values: DrawerModalFormValues) => {
-    addProject(values.name, values.icon);
-    form.reset();
-    modalOnClose();
-    notifications.show({
-      icon: (
-        <ThemeIcon variant="filled" radius={"xl"}>
-          <IconCheck size={"1.25rem"} />
-        </ThemeIcon>
-      ),
-      withBorder: true,
-      autoClose: 3000,
-      title: "Project Added",
-      message: "Project has been added successfully.",
-    });
-  };
-
-  const editFormSubmit = (values: DrawerModalFormValues) => {
-    editProject(project?.id!, values.name, values.icon);
-    form.reset();
-    modalOnClose();
-    notifications.show({
-      icon: (
-        <ThemeIcon variant="filled" radius={"xl"}>
-          <IconCheck size={"1.25rem"} />
-        </ThemeIcon>
-      ),
-      withBorder: true,
-      autoClose: 3000,
-      title: "Project Updated",
-      message: "Project has been updated successfully.",
-    });
-  };
-
-  const modeToggler = useMemo(() => {
-    switch (mode) {
-      case "create":
-        return {
-          title: "Create Project",
-          submit: addFormSubmit,
-        };
-      case "edit":
-        return {
-          title: "Edit Project",
-          submit: editFormSubmit,
-        };
-    }
-  }, []);
-
-  return (
-    <Modal
-      opened={opened}
-      onClose={modalOnClose}
-      title={
-        <Text fw={700} size="md" lh={"h4"}>
-          {modeToggler.title}
-        </Text>
-      }
-      centered
-    >
-      <form onSubmit={form.onSubmit((values) => modeToggler.submit(values))}>
-        <Flex gap={"xs"} direction={"column"}>
-          <TextInput
-            label="Name"
-            classNames={{
-              label: "mb-1",
-            }}
-            required
-            placeholder="(e.g. LMS System)"
-            key={form.key("name")}
-            {...form.getInputProps("name")}
-            defaultValue={project?.name}
-          />
-          <AsyncEmojiPicker
-            combobox={combobox}
-            comboboxValue={comboboxValue || projectIcon || ""}
-            comboboxOnOptionSubmit={comboboxOnOptionSubmit}
-          />
-          <Flex direction={"row"} gap={"xs"} justify={"flex-end"} pt={"md"}>
-            <Button variant="subtle" onClick={close}>
-              Cancel
-            </Button>
-            <Button variant="filled" type="submit">
-              Confirm
-            </Button>
-          </Flex>
-        </Flex>
-      </form>
-    </Modal>
   );
 }
 
@@ -550,15 +347,6 @@ function DrawerItemMenu({
     { open: openDrawerItemMenu, close: closeDrawerItemMenu },
   ] = useDisclosure(false);
 
-  const [
-    isDrawerModalOpen,
-    { open: openDrawerModal, close: closeDrawerModal },
-  ] = useDisclosure(false);
-
-  const handleEdit = () => {
-    openDrawerModal();
-  };
-
   const handleDuplicate = () => {
     duplicateProject(project?.id!);
   };
@@ -584,7 +372,15 @@ function DrawerItemMenu({
       <Menu.Dropdown>
         <Menu.Item
           leftSection={<IconEdit size={"1rem"} />}
-          onClick={handleEdit}
+          onClick={() =>
+            modals.openContextModal({
+              modal: "drawer",
+              innerProps: {
+                mode: "edit",
+                project: project,
+              },
+            })
+          }
         >
           Edit
         </Menu.Item>
@@ -609,15 +405,6 @@ function DrawerItemMenu({
           Delete
         </Menu.Item>
       </Menu.Dropdown>
-
-      <>
-        <DrawerModal
-          close={closeDrawerModal}
-          mode="edit"
-          opened={isDrawerModalOpen}
-          project={project}
-        />
-      </>
     </Menu>
   );
 }
