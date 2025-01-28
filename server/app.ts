@@ -6,9 +6,9 @@ import memberRoutes from "./routes/memberRoutes.ts";
 import historyRoutes from "./routes/historyRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
+import emojiRoutes from "./routes/emojiRoutes.ts";
 import dotenv from "dotenv";
 import errorMiddleware from "./middleware/errorMiddleware.ts";
-
 
 dotenv.config();
 
@@ -56,10 +56,12 @@ app.use("/projects", memberRoutes);
 
 // Use user routes
 app.use("/user", settingsRoutes);
-
 app.use("/users", userRoutes);
 
-app.use(errorMiddleware)
+// GitHub Emoji API
+app.use("/emojis", emojiRoutes);
+
+app.use(errorMiddleware);
 
 // Start the server
 const PORT = 3000;
