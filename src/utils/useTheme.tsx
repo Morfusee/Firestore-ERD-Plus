@@ -4,6 +4,7 @@ import {
   ActionIcon,
   Button,
   createTheme,
+  Loader,
   MantineTheme,
   Paper,
   SegmentedControl,
@@ -136,6 +137,13 @@ function themeCurator(isDarkMode: boolean, mantineTheme: MantineTheme) {
           color: isDarkMode
             ? mantineTheme.colors.dark[4]
             : mantineTheme.colors.dark[8],
+        },
+      }),
+      Loader: Loader.extend({
+        defaultProps: {
+          color: isDarkMode
+            ? mantineTheme.colors.dark[2]
+            : mantineTheme.colors.gray[9],
         },
       }),
     },

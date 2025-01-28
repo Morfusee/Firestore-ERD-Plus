@@ -28,3 +28,11 @@ export type EmojiGroup = {
   symbols: EmojiData[];
   component: EmojiData[];
 };
+
+export type EmojiCategory = {
+  faces: EmojiData[];
+  nature: EmojiData[];
+  activities: EmojiData[];
+  places: EmojiData[];
+  objects: EmojiData[];
+};

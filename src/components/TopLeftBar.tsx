@@ -80,6 +80,7 @@ import {
 import useEditorRepo from "../data/repo/useEditorRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { modals } from "@mantine/modals";
+import AsyncEmojiPicker from "./AsyncEmojiPicker";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -430,11 +431,10 @@ function DrawerModal({
             {...form.getInputProps("name")}
             defaultValue={project?.name}
           />
-          <EmojiPicker
+          <AsyncEmojiPicker
             combobox={combobox}
             comboboxValue={comboboxValue || projectIcon || ""}
             comboboxOnOptionSubmit={comboboxOnOptionSubmit}
-            optionList={emojiList}
           />
           <Flex direction={"row"} gap={"xs"} justify={"flex-end"} pt={"md"}>
             <Button variant="subtle" onClick={close}>
