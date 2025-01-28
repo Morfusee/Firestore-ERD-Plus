@@ -36,3 +36,15 @@ export type EmojiCategory = {
   places: EmojiData[];
   objects: EmojiData[];
 };
+
+export type EmojiAsyncGroup = {
+  "smileys-emotion": EmojiData[];
+  "people-body": EmojiData[];
+  "component": EmojiData[];
+  "animals-nature": EmojiData[];
+  "food-drink": EmojiData[];
+  "travel-places": EmojiData[];
+  "objects": EmojiData[];
+  "symbols": EmojiData[];
+  "activities": EmojiData[];
+}

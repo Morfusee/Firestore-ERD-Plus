@@ -1,20 +1,12 @@
 import {
-  getActivitiesEmojis,
   getAllEmojis,
-  getFacesEmojis,
-  getNatureEmojis,
-  getObjectsEmojis,
-  getPlacesEmojis,
+  getEmojis,
+  getEmojisByGroup,
 } from "@root/controllers/emojiControllers";
 import express from "express";
 
 const router = express.Router();
 
-router.get("/", getAllEmojis);
-router.get("/faces", getFacesEmojis);
-router.get("/activities", getActivitiesEmojis);
-router.get("/nature", getNatureEmojis);
-router.get("/objects", getObjectsEmojis);
-router.get("/places", getPlacesEmojis);
+router.get("/", getEmojis);
 
 export default router;

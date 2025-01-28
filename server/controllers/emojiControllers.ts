@@ -1,6 +1,19 @@
+import ConflictError from "@root/errors/ConflictError";
 import NotFoundError from "@root/errors/NotFoundError";
 import { IEmoji } from "@root/types/emojiTypes";
 import { NextFunction, Request, Response } from "express";
+
+export const getEmojis = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.query.group) {
+    return getEmojisByGroup(req, res, next);
+  }
+
+  return getAllEmojis(req, res, next);
+};
 
 export const getAllEmojis = async (
   req: Request,
@@ -8,9 +21,7 @@ export const getAllEmojis = async (
   next: NextFunction
 ) => {
   try {
-    const emojis = (await fetch(
-      "https://morfusee.github.io/emoji-list-api/emojis.json"
-    )
+    const emojis = (await fetch("https://www.emoji.family/api/emojis")
       .then((res) => res.json())
       .catch((err) => {
         throw new NotFoundError("There was an error fetching emojis.");
@@ -24,113 +35,24 @@ export const getAllEmojis = async (
   }
 };
 
-export const getFacesEmojis = async (
+export const getEmojisByGroup = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const faceEmojis = await fetch(
-      "https://morfusee.github.io/emoji-list-api/categories/faces.json"
+    const group = req.query.group as string;
+    const emojisByGroup = (await fetch(
+      "https://www.emoji.family/api/emojis?group=" + group
     )
       .then((res) => res.json())
       .catch((err) => {
-        throw new NotFoundError("There was an error fetching face emojis.");
-      });
+        throw new NotFoundError("There was an error fetching emojis.");
+      })) as IEmoji[];
 
-    if (!faceEmojis) throw new NotFoundError("No emojis found.");
+    if (!emojisByGroup) throw new NotFoundError("No emojis found.");
 
-    res.status(200).json(faceEmojis);
-  } catch (error: any) {
-    next(error);
-  }
-};
-
-export const getActivitiesEmojis = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const activitiesEmojis = await fetch(
-      "https://morfusee.github.io/emoji-list-api/categories/activities.json"
-    )
-      .then((res) => res.json())
-      .catch((err) => {
-        throw new NotFoundError(
-          "There was an error fetching activities emojis."
-        );
-      });
-
-    if (!activitiesEmojis) throw new NotFoundError("No emojis found.");
-
-    res.status(200).json(activitiesEmojis);
-  } catch (error: any) {
-    next(error);
-  }
-};
-
-export const getNatureEmojis = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const natureEmojis = await fetch(
-      "https://morfusee.github.io/emoji-list-api/categories/nature.json"
-    )
-      .then((res) => res.json())
-      .catch((err) => {
-        throw new NotFoundError("There was an error fetching nature emojis.");
-      });
-
-    if (!natureEmojis) throw new NotFoundError("No emojis found.");
-
-    res.status(200).json(natureEmojis);
-  } catch (error: any) {
-    next(error);
-  }
-};
-
-export const getObjectsEmojis = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const objectsEmojis = await fetch(
-      "https://morfusee.github.io/emoji-list-api/categories/objects.json"
-    )
-      .then((res) => res.json())
-      .catch((err) => {
-        throw new NotFoundError("There was an error fetching objects emojis.");
-      });
-
-    if (!objectsEmojis) throw new NotFoundError("No emojis found.");
-
-    res.status(200).json(objectsEmojis);
-  } catch (error: any) {
-    next(error);
-  }
-};
-
-export const getPlacesEmojis = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const objectsEmojis = await fetch(
-      "https://morfusee.github.io/emoji-list-api/categories/places.json"
-    )
-      .then((res) => res.json())
-      .catch((err) => {
-        throw new NotFoundError("There was an error fetching places emojis.");
-      });
-
-    if (!objectsEmojis) throw new NotFoundError("No emojis found.");
-
-    res.status(200).json(objectsEmojis);
+    res.status(200).json(emojisByGroup);
   } catch (error: any) {
     next(error);
   }

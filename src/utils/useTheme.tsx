@@ -7,6 +7,7 @@ import {
   Loader,
   MantineTheme,
   Paper,
+  ScrollArea,
   SegmentedControl,
   TabsList,
   TabsTab,
@@ -144,6 +145,15 @@ function themeCurator(isDarkMode: boolean, mantineTheme: MantineTheme) {
           color: isDarkMode
             ? mantineTheme.colors.dark[2]
             : mantineTheme.colors.gray[9],
+        },
+      }),
+      ScrollArea: ScrollArea.extend({
+        styles: {
+          thumb: {
+            backgroundColor: isDarkMode
+              ? mantineTheme.colors.dark[2]
+              : mantineTheme.colors.dark[5],
+          },
         },
       }),
     },

@@ -13,6 +13,7 @@ import {
   createTheme,
   TabsTab,
   useMantineTheme,
+  ScrollArea,
 } from "@mantine/core";
 import {
   IconProps,
@@ -22,8 +23,13 @@ import {
   IconBubbleTea2,
   IconWorld,
   IconHeart,
+  IconUser,
+  IconPlane,
+  IconBulb,
+  IconBallTennis,
+  IconComponents,
 } from "@tabler/icons-react";
-import { EmojiCategory, EmojiData, EmojiGroup } from "../types/EmojiData";
+import { EmojiAsyncGroup, EmojiData, EmojiGroup } from "../types/EmojiData";
 import useIsDarkMode from "../utils/useIsDarkMode";
 import { useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
@@ -90,9 +96,8 @@ function EmojiPickerDropdown() {
 }
 
 interface ITabData {
-  category: keyof EmojiCategory;
+  group: keyof EmojiAsyncGroup;
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
-  group: (keyof EmojiGroup)[];
 }
 
 function EmojiPickerTabs() {
@@ -120,29 +125,36 @@ function EmojiPickerTabs() {
   const tabData: ITabData[] = useMemo(
     () => [
       {
-        category: "faces",
+        group: "smileys-emotion",
         icon: IconMoodSmile,
-        group: ["smileysEmotion", "peopleBody", "component"],
       },
       {
-        category: "nature",
+        group: "people-body",
+        icon: IconUser,
+      },
+      {
+        group: "animals-nature",
         icon: IconDog,
-        group: ["animalsNature"],
       },
       {
-        category: "activities",
+        group: "food-drink",
         icon: IconBubbleTea2,
-        group: ["foodDrink", "activities"],
       },
       {
-        category: "places",
-        icon: IconWorld,
-        group: ["travelPlaces"],
+        group: "travel-places",
+        icon: IconPlane,
       },
       {
-        category: "objects",
+        group: "objects",
+        icon: IconBulb,
+      },
+      {
+        group: "symbols",
         icon: IconHeart,
-        group: ["objects", "symbols"],
+      },
+      {
+        group: "activities",
+        icon: IconBallTennis,
       },
     ],
     []
@@ -151,18 +163,25 @@ function EmojiPickerTabs() {
   return (
     <Tabs
       keepMounted={false}
-      defaultValue="faces"
+      defaultValue="smileys-emotion"
       className="w-full"
       variant="default"
       color={isDarkMode ? "white" : "dark"}
     >
       <MantineThemeProvider theme={theme}>
-        <Tabs.List>
+        <Tabs.List
+          style={{
+            display: "flex",
+            flexWrap: "nowrap",
+            justifyContent: "space-evenly",
+          }}
+        >
           {tabData.map((tab) => (
             <Tabs.Tab
-              key={tab.category}
-              value={tab.category}
-              leftSection={<tab.icon size={"1rem"} />}
+              maw={rem(44)}
+              key={tab.group}
+              value={tab.group}
+              leftSection={<tab.icon size={"1.2rem"} />}
             />
           ))}
         </Tabs.List>
@@ -170,23 +189,19 @@ function EmojiPickerTabs() {
 
       {tabData.map((tab) => (
         <Tabs.Panel
-          value={tab.category}
-          key={tab.category}
+          value={tab.group}
+          key={tab.group}
           className="flex gap-1 py-1 flex-wrap overflow-y-auto min-h-48 max-h-48 beautifulScrollBar"
         >
-          <EmojiPickerTabContent category={tab.category} />
+          <EmojiPickerTabContent group={tab.group} />
         </Tabs.Panel>
       ))}
     </Tabs>
   );
 }
 
-function EmojiPickerTabContent({
-  category,
-}: {
-  category: keyof EmojiCategory;
-}) {
-  const { emojiData, loading, error } = useEmojiData(category);
+function EmojiPickerTabContent({ group }: { group: keyof EmojiAsyncGroup }) {
+  const { emojiData, loading, error } = useEmojiData(group);
 
   if (loading) {
     return (

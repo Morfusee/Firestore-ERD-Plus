@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { EmojiCategory, EmojiData } from "../types/EmojiData";
+import { EmojiAsyncGroup, EmojiData } from "../types/EmojiData";
 import { usePrevious } from "@mantine/hooks";
 
-const useEmojiData = (category: keyof EmojiCategory) => {
+const useEmojiData = (group: keyof EmojiAsyncGroup) => {
   // Define the state variables
   const [emojiData, setEmojiData] = useState<EmojiData[]>([]);
 
@@ -10,19 +10,19 @@ const useEmojiData = (category: keyof EmojiCategory) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch the emoji data when the category changes
+  // Fetch the emoji data when the group changes
   useEffect(() => {
-    fetchEmojiCategory(category);
-  }, [category]);
+    fetchEmojiGroup(group);
+  }, [group]);
 
-  const fetchEmojiCategory = async (category: keyof EmojiCategory) => {
+  const fetchEmojiGroup = async (group: keyof EmojiAsyncGroup) => {
     try {
       // Always set loading to true before fetching data
       setLoading(true);
 
       // Fetch data from the server
       const response = await fetch(
-        import.meta.env.VITE_SERVER_URL + `/emojis/${category}`
+        import.meta.env.VITE_SERVER_URL + `/emojis?group=${group}`
       );
 
       // Throw an error if the response is not ok
@@ -48,7 +48,7 @@ const useEmojiData = (category: keyof EmojiCategory) => {
     }
   };
 
-  return { emojiData, loading, error, fetchEmojiCategory };
+  return { emojiData, loading, error, fetchEmojiGroup };
 };
 
 export default useEmojiData;
