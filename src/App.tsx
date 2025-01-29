@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import { Notifications } from "@mantine/notifications";
 import { ReactFlowProvider } from "@xyflow/react";
 import { ModalsProvider } from "@mantine/modals";
-import DeleteModal from "./components/DeleteModal";
+import DeleteModal from "./components/modals/DeleteModal";
 import SettingsModal from "./components/modals/SettingsModal";
 import useGlobalHotkeys from "./utils/useGlobalHotkeys";
 import { ContextMenuProvider } from 'mantine-contextmenu';
@@ -23,9 +23,11 @@ import CodeGenModal from "./components/modals/CodeGenModal";
 import ManageAccountModal from "./components/modals/ManageAccountModal";
 import ShareModal from "./components/modals/ShareModal";
 import DownloadModal from "./components/modals/DownloadModal";
+import DrawerModal from "./components/modals/DrawerModal";
 
 
 const modals = {
+  drawer: DrawerModal,
   delete: DeleteModal,
   settings: SettingsModal,
   codeGen: CodeGenModal,
