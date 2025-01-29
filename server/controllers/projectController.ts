@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Project from "../models/projectModel.ts";
 import { decrypt, encrypt } from "@root/utils/encryption.ts";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import mongoose from "mongoose";
 import ConflictError from "@root/errors/ConflictError.ts";
 import User from "@root/models/userModel.ts";
+import { SuccessResponse } from "@root/success/SuccessResponse.ts";
 
 /**
  * Get projects based on query parameters.
@@ -170,18 +171,22 @@ export const saveProject = async (req: Request, res: Response) => {
 };
 
 // Delete a project
-export const deleteProject = async (req: Request, res: Response) => {
+export const deleteProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const project = await Project.findByIdAndDelete(req.params.id);
 
     if (!project) throw new NotFoundError("Project not found.");
 
-    res.status(200).json({
-      message: "Project deleted successfully.",
-    });
+    next(
+      new SuccessResponse(200, "Project deleted successfully.", {
+        deletedProjectId: project._id,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };

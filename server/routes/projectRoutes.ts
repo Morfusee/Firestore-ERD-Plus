@@ -36,13 +36,6 @@ const router = express.Router();
  */
 router.get("", [validateUserIdQuery, validate], getProjects);
 
-// /**
-//  * GET /projects
-//  * Fetches all projects.
-//  * No validation or middleware is applied here.
-//  */
-// router.get("", getAllProjects);
-
 /**
  * GET /projects/:id
  * Fetches a specific project by its ID.
