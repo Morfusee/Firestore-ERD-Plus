@@ -7,13 +7,14 @@ import { IEditorDataSnapshot } from "../../types/EditorStoreTypes";
 const useProjectRepo = () => {
   const projects = useProjectStore((state) => state.projects);
   const selectedProject = useProjectStore((state) => state.selectedProject);
+  const setProjects = useProjectStore((state) => state.setProjects);
   const setSelectedProject = useProjectStore(
     (state) => state.setSelectedProject
   );
   const clearSelectedProject = useProjectStore(
     (state) => state.clearSelectedProject
-  )
-  const clearStateSnap = useEditorStore((state) => state.clearStateSnapshot)
+  );
+  const clearStateSnap = useEditorStore((state) => state.clearStateSnapshot);
 
   const addState = useProjectStore((state) => state.addProject);
   const editState = useProjectStore((state) => state.editProject);
@@ -34,11 +35,15 @@ const useProjectRepo = () => {
     return projects;
   };
 
-  const getProjectById = (id: number) => {
+  const setProjectList = (projects: IProject[]) => {
+    setProjects(projects);
+  }
+
+  const getProjectById = (id: string) => {
     return projects.find((project) => project.id === id);
   };
 
-  const saveProjectCache = (id: number) => {
+  const saveProjectCache = (id: string) => {
     const stateSnap = getStateSnap();
     saveCache({
       id: id,
@@ -47,6 +52,7 @@ const useProjectRepo = () => {
   };
 
   const loadProject = (project: IProject) => {
+    if (!project.diagramData) return;
     const data = JSON.parse(project.diagramData) as IEditorDataSnapshot;
     console.log(data);
 
@@ -61,35 +67,39 @@ const useProjectRepo = () => {
     setCanRedo(false);
   };
 
-  const selectProject = (id: number | undefined) => {
+  const selectProject = (id: string | undefined) => {
+    // If no projects have been saved, return
+    if (!projects) return;
     const selected = projects.find((project) => project.id === id);
+
+    // If no project is selected, return
     if (!selected) return;
 
+    // If the selected project is the same as the current project, return
     if (selectedProject && selectedProject.id === id) return;
 
+    // Save the current project to cache
     if (selectedProject && selectedProject.id !== undefined) {
       saveProjectCache(selectedProject.id);
     }
 
-    const cache = getCache().find(item => item.id === id)
+    const cache = getCache().find((item) => item.id === id);
     if (cache) {
-      loadCache(cache.stateData)
+      loadCache(cache.stateData);
     } else {
-      loadProject(selected)
+      loadProject(selected);
     }
 
     setSelectedProject(selected);
   };
 
   const clearProject = () => {
-
     // Set selected project to none
-    clearSelectedProject()
-    clearStateSnap()
+    clearSelectedProject();
+    clearStateSnap();
 
     // Delete cleared project from cache
-
-  }
+  };
 
   const addProject = async (name: string, icon: string) => {
     const timestamp = Date.now();
@@ -100,6 +110,7 @@ const useProjectRepo = () => {
         nodes: [],
         edges: [],
       }),
+      members: [],
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -114,7 +125,7 @@ const useProjectRepo = () => {
     });
   };
 
-  const editProject = async (id: number, name: string, icon: string) => {
+  const editProject = async (id: string, name: string, icon: string) => {
     const edit = projects.find((project) => project.id === id);
 
     if (!edit) {
@@ -146,7 +157,7 @@ const useProjectRepo = () => {
     editState(id, data);
   };
 
-  const deleteProject = async (id: number) => {
+  const deleteProject = async (id: string) => {
     // TODO: Deselect current project if deleted
     const project = projects.find((project) => project.id === id);
 
@@ -164,7 +175,7 @@ const useProjectRepo = () => {
     deleteState(id);
   };
 
-  const duplicateProject = async (id: number) => {
+  const duplicateProject = async (id: string) => {
     const project = getProjectById(id);
 
     if (!project) {
@@ -195,6 +206,7 @@ const useProjectRepo = () => {
   return {
     projects,
     getProjectsList,
+    setProjectList,
     getProjectById,
     selectedProject,
     selectProject,

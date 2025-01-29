@@ -9,6 +9,8 @@ import userRoutes from "./routes/userRoutes.ts";
 import emojiRoutes from "./routes/emojiRoutes.ts";
 import dotenv from "dotenv";
 import errorMiddleware from "./middleware/errorMiddleware.ts";
+import successMiddleware from "./middleware/successMiddleware.ts";
+import { responseStatusMiddleware } from "./middleware/responseStatusMiddleware.ts";
 
 dotenv.config();
 
@@ -18,8 +20,7 @@ const app = express();
 app.use(
   cors({
     origin: "http://localhost:5173", // Allow frontend origin locally
-    methods: "GET,POST,OPTIONS", // Allow methods
-    allowedHeaders: "Content-Type,Authorization", // Alow headers
+    methods: "GET,POST,DELETE,PATCH,OPTIONS", // Allow methods
     credentials: true, // Allow cookies and credentials
   })
 );
@@ -61,7 +62,7 @@ app.use("/users", userRoutes);
 // GitHub Emoji API
 app.use("/emojis", emojiRoutes);
 
-app.use(errorMiddleware);
+app.use(responseStatusMiddleware);
 
 // Start the server
 const PORT = 3000;

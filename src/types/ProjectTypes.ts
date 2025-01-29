@@ -1,9 +1,14 @@
-
 export interface IProject {
-  id?: number
-  name: string
-  icon: string
-  diagramData: string
-  createdAt: number
-  updatedAt: number
+  id?: string;
+  name: string;
+  icon: string;
+  diagramData?: string;
+  members: IProjectMembers[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface IProjectMembers {
+  userId: string;
+  role: string;
 }
