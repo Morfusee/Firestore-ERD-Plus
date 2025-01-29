@@ -38,7 +38,8 @@ function DeleteModal({
             onClick={() => {
               innerProps.handleDelete();
               context.closeModal(id);
-              clearProject();
+              // Implemented another approach for deletion of projects
+              // clearProject();
             }}
           >
             Delete

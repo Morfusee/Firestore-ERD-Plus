@@ -82,6 +82,14 @@ import { useEditorStore } from "../store/useEditorStore";
 import { modals } from "@mantine/modals";
 import AsyncEmojiPicker from "./AsyncEmojiPicker";
 import DrawerModal from "./modals/DrawerModal";
+import {
+  createProject,
+  deleteProject,
+  editProject,
+  reformatProject,
+} from "../data/api/projectsApi";
+import { StatusIcon } from "./icons/StatusIcon";
+import { determineTitle, isSuccessStatus } from "../utils/successHelpers";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -190,7 +198,7 @@ function Drawer({ opened }: { opened: boolean }) {
   // Get projects
   const { getProjectsList } = useProjectRepo();
   const projects = getProjectsList();
-  
+
   return (
     <Transition
       mounted={opened}
@@ -227,6 +235,49 @@ function Drawer({ opened }: { opened: boolean }) {
 }
 
 function DrawerHeader() {
+  const { addProject: addProjectToStore, selectProject } = useProjectRepo();
+  const navigate = useNavigate();
+
+  const handleCreateProject = async (values: DrawerModalFormValues) => {
+    const response = await createProject(
+      values.name,
+      values.icon,
+      "67905ca5411c5dcf426c89c6"
+    );
+
+    // Get status of response
+    const status = isSuccessStatus(response.status);
+
+    // Only attempt to add the project if the success status is true
+    if (status) {
+      const createdProject = reformatProject(response.data.createdProject);
+
+      // Add project to store
+      await addProjectToStore(createdProject);
+
+      // Select the project on creation in STATE
+      selectProject(createdProject.id);
+
+      // Navigate/Enter the project on creation
+      navigate(`/${createdProject.id}`);
+    }
+
+    // Show notification
+    notifications.show({
+      icon: <StatusIcon status={status ? "success" : "error"} />,
+      withBorder: true,
+      autoClose: 5000,
+      title: determineTitle(
+        "Project Created",
+        "Failed to Create Project",
+        status
+      ),
+      message: response.message,
+    });
+
+    return response;
+  };
+
   return (
     <Flex direction={"row"} justify={"space-between"} align={"center"}>
       <Text fw={700} size="md" lh={"h4"}>
@@ -241,6 +292,7 @@ function DrawerHeader() {
             modal: "drawer",
             innerProps: {
               mode: "create",
+              handleOptimisticUpdate: handleCreateProject,
             },
           })
         }
@@ -345,18 +397,89 @@ function DrawerItemMenu({
   project: IProject;
   children: (open: () => void, opened: boolean) => React.ReactNode;
 }) {
-  const { addProject, duplicateProject, deleteProject } = useProjectRepo();
+  // Router
+  const navigate = useNavigate();
+  const params = useParams();
+
+  // State
+  const {
+    addProject: addProjectToStore,
+    selectProject,
+    duplicateProject,
+    deleteProject: deleteProjectStore,
+    editProject: editProjectStore,
+    clearProject,
+  } = useProjectRepo();
   const [
     isDrawerItemMenuOpen,
     { open: openDrawerItemMenu, close: closeDrawerItemMenu },
   ] = useDisclosure(false);
 
+  const handleEditProject = async (
+    values: DrawerModalFormValues,
+    projectId: IProject["id"]
+  ) => {
+    const response = await editProject(values.name, values.icon, projectId!);
+    // Get status of response
+    const status = isSuccessStatus(response.status);
+
+    // Only attempt to locally edit the project if the success status is true
+    if (status) {
+      const editedProject = reformatProject(response.data.updatedProject);
+
+      // Add edited project to store
+      await editProjectStore(
+        editedProject.id,
+        editedProject.name,
+        editedProject.icon,
+        editedProject.updatedAt
+      );
+
+      // If the user is currently editing the selected project,
+      // just reselect the project to update the values.
+      if (params.projectId == editedProject.id) selectProject(params.projectId);
+    }
+
+    // Show notification
+    notifications.show({
+      icon: <StatusIcon status={status ? "success" : "error"} />,
+      withBorder: true,
+      autoClose: 5000,
+      title: determineTitle("Project Edited", "Failed to Edit Project", status),
+      message: response.message,
+    });
+
+    return response;
+  };
+
   const handleDuplicate = () => {
     duplicateProject(project?.id!);
   };
 
-  const handleDelete = () => {
-    deleteProject(project?.id!);
+  const handleDelete = async () => {
+    // If id doesn't exist, return
+    if (!project.id) return;
+
+    // Delete project from DB
+    const response = await deleteProject(project.id);
+
+    // Delete project from store
+    await deleteProjectStore(response.data.deletedProjectId);
+
+    const status = isSuccessStatus(response.status);
+
+    if (status && params.projectId == response.data.deletedProjectId) {
+      navigate("/");
+      clearProject();
+    }
+
+    // Show notification after deleting
+    notifications.show({
+      icon: <StatusIcon status={status ? "success" : "error"} />,
+      withBorder: true,
+      autoClose: 5000,
+      message: response.message,
+    });
   };
 
   return (
@@ -382,6 +505,7 @@ function DrawerItemMenu({
               innerProps: {
                 mode: "edit",
                 project: project,
+                handleOptimisticUpdate: handleEditProject,
               },
             })
           }

@@ -12,17 +12,25 @@ import { SuccessResponse } from "@root/success/SuccessResponse.ts";
  * If `userId` is provided in the query, it fetches projects associated with that user.
  * Otherwise, it fetches all projects.
  */
-export const getProjects = async (req: Request, res: Response) => {
+export const getProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (req.query.userId) {
-    return getProjectsByUserId(req, res);
+    return getProjectsByUserId(req, res, next);
   }
 
   // If no userId is provided, fetch all projects
-  return getAllProjects(req, res);
+  return getAllProjects(req, res, next);
 };
 
 // Get all projects by user ID
-export const getProjectsByUserId = async (req: Request, res: Response) => {
+export const getProjectsByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { userId } = req.query;
 
@@ -32,16 +40,23 @@ export const getProjectsByUserId = async (req: Request, res: Response) => {
 
     if (!projectsByUser) throw new NotFoundError("No projects found.");
 
-    res.status(200).json(projectsByUser);
+    // Send templated response
+    next(
+      new SuccessResponse(200, "Projects successfully fetched.", {
+        projects: projectsByUser,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // Get all projects
-export const getAllProjects = async (req: Request, res: Response) => {
+export const getAllProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // Find all projects
     const projects = await Project.find();
@@ -51,16 +66,22 @@ export const getAllProjects = async (req: Request, res: Response) => {
       throw new NotFoundError("No projects found.");
 
     // Return the projects
-    res.status(200).json(projects);
+    next(
+      new SuccessResponse(200, "Successfully fetched all projects.", {
+        projects,
+      })
+    );
   } catch (err: any) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // Get a project by ID
-export const getProjectById = async (req: Request, res: Response) => {
+export const getProjectById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // Find the project by ID
     const project = await Project.findById(req.params.id);
@@ -69,16 +90,23 @@ export const getProjectById = async (req: Request, res: Response) => {
     if (!project) throw new NotFoundError("Project not found.");
 
     // Return the project
-    res.status(200).json(project);
+    // res.status(200).json(project);
+    next(
+      new SuccessResponse(200, "Successfully fetched the project.", {
+        project,
+      })
+    );
   } catch (err: any) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // Edit a project
-export const editProject = async (req: Request, res: Response) => {
+export const editProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // Find the project by ID
     const project = await Project.findById(req.params.id);
@@ -93,20 +121,22 @@ export const editProject = async (req: Request, res: Response) => {
       { new: true }
     );
 
-    // Send the response
-    res.status(200).json({
-      message: "Project updated successfully",
-      project: updatedProject,
-    });
+    next(
+      new SuccessResponse(200, "Project updated successfully.", {
+        updatedProject,
+      })
+    );
   } catch (err: any) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // Create a new project for sharing
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { name, icon, userId } = req.body;
 
@@ -135,13 +165,14 @@ export const createProject = async (req: Request, res: Response) => {
       },
     });
 
-    // Send the response
-    res.status(201).json(savedProject);
+    // Send the response back using format
+    next(
+      new SuccessResponse(201, "Project saved successfully.", {
+        createdProject: savedProject,
+      })
+    );
   } catch (err: any) {
-    // Handle errors
-    res.status(400).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
@@ -181,6 +212,7 @@ export const deleteProject = async (
 
     if (!project) throw new NotFoundError("Project not found.");
 
+    // Send the response back using format
     next(
       new SuccessResponse(200, "Project deleted successfully.", {
         deletedProjectId: project._id,

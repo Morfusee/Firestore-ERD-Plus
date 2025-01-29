@@ -3,6 +3,7 @@ import successMiddleware from "./successMiddleware";
 import errorMiddleware from "./errorMiddleware";
 import { SuccessResponse } from "@root/success/SuccessResponse";
 import HTTPError from "@root/errors/HTTPError";
+import { isSuccessStatus } from "@root/utils/isSuccessStatus";
 
 export const responseStatusMiddleware = <T>(
   data: SuccessResponse<T> | HTTPError,
@@ -10,7 +11,7 @@ export const responseStatusMiddleware = <T>(
   res: Response,
   next: NextFunction
 ) => {
-  if (data.status === 200) {
+  if (isSuccessStatus(data.status)) {
     successMiddleware(data, req, res, next);
     return;
   }
