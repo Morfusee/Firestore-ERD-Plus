@@ -1,16 +1,6 @@
 import mongoose from "mongoose";
 import { History, Version } from "./historyModel";
 
-export interface IProject {
-  name: string;
-  icon: string;
-  data?: string;
-  members?: {
-    userId: mongoose.Types.ObjectId;
-    role: "owner" | "admin" | "editor" | "viewer";
-  };
-}
-
 // Define a schema
 const projectSchema = new mongoose.Schema(
   {

@@ -187,7 +187,10 @@ function ActionButtons({
 }
 
 function Drawer({ opened }: { opened: boolean }) {
-  const { projects } = useProjectStore((state) => state);
+  // Get projects
+  const { getProjectsList } = useProjectRepo();
+  const projects = getProjectsList();
+  
   return (
     <Transition
       mounted={opened}
@@ -211,9 +214,10 @@ function Drawer({ opened }: { opened: boolean }) {
               direction={"column"}
               className="overflow-y-auto h-full beautifulScrollBar gap-0.5"
             >
-              {projects.map((project) => (
-                <DrawerItems project={project} key={project.id} />
-              ))}
+              {projects &&
+                projects.map((project) => (
+                  <DrawerItems project={project} key={project.id} />
+                ))}
             </Flex>
           </Flex>
         </Paper>
@@ -249,7 +253,7 @@ function DrawerHeader() {
 
 function DrawerItems({ project }: { project: IProject }) {
   const navigate = useNavigate();
-  const { selectedProject, selectProject } = useProjectRepo();
+  const { selectedProject } = useProjectRepo();
   const { id: projectId, name: projectName, icon: projectIconHex } = project;
   const isDarkMode = useIsDarkMode();
   const { isTruncated, textRef } =

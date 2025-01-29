@@ -4,7 +4,7 @@ import { IEditorStateSnapshot } from "../types/EditorStoreTypes";
 import { devtools } from 'zustand/middleware'
 
 interface IProjectCache {
-  id: number
+  id: string
   stateData: IEditorStateSnapshot
 }
 
@@ -19,8 +19,8 @@ interface IProjectActions {
   setSelectedProject: (project: IProject) => void
   clearSelectedProject: () => void
   addProject: (project: IProject) => void
-  editProject: (id: number, change: Partial<IProject>) => void
-  deleteProject: (id: number) => void
+  editProject: (id: string, change: Partial<IProject>) => void
+  deleteProject: (id: string) => void
   saveCache: (cache: IProjectCache) => void
   getCache: () => IProjectCache[]
 }

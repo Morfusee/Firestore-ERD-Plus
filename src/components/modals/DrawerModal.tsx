@@ -20,6 +20,7 @@ import { DrawerModalFormValues } from "../../types/TopLeftBarTypes";
 import useProjectIcon from "../../utils/useProjectIcon";
 import AsyncEmojiPicker from "../AsyncEmojiPicker";
 import { ContextModalProps } from "@mantine/modals";
+import { createProject } from "../../data/api/projectsApi";
 
 function DrawerModal({
   context,
@@ -28,7 +29,7 @@ function DrawerModal({
 }: ContextModalProps<{ mode: "create" | "edit"; project?: IProject }>) {
   // Set up the props
   const { mode, project } = innerProps;
-  const { addProject, editProject } = useProjectRepo();
+  const { editProject } = useProjectRepo();
   const { getHexByEmoji } = useEmojiRepo();
   const { projectIcon, isProjectSelected } = useProjectIcon(
     project?.icon || "",
@@ -105,7 +106,7 @@ function DrawerModal({
   };
 
   const addFormSubmit = (values: DrawerModalFormValues) => {
-    addProject(values.name, values.icon);
+    createProject(values.name, values.icon);
     form.reset();
     modalOnClose();
     notifications.show({
