@@ -20,16 +20,29 @@ import { DrawerModalFormValues } from "../../types/TopLeftBarTypes";
 import useProjectIcon from "../../utils/useProjectIcon";
 import AsyncEmojiPicker from "../AsyncEmojiPicker";
 import { ContextModalProps } from "@mantine/modals";
-import { createProject } from "../../data/api/projectsApi";
+import { createProject, reformatProject } from "../../data/api/projectsApi";
+import { StatusIcon } from "../icons/StatusIcon";
+import { isSuccessStatus, determineTitle } from "../../utils/successHelpers";
 
 function DrawerModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ mode: "create" | "edit"; project?: IProject }>) {
+}: ContextModalProps<{
+  mode: "create" | "edit";
+  project?: IProject;
+  handleOptimisticUpdate: (
+    values: DrawerModalFormValues,
+    projectId?: IProject["id"]
+  ) => any;
+}>) {
   // Set up the props
-  const { mode, project } = innerProps;
-  const { editProject } = useProjectRepo();
+  const { mode, project, handleOptimisticUpdate } = innerProps;
+  const {
+    editProject,
+    addProject: addProjectToStore,
+    selectProject,
+  } = useProjectRepo();
   const { getHexByEmoji } = useEmojiRepo();
   const { projectIcon, isProjectSelected } = useProjectIcon(
     project?.icon || "",
@@ -105,57 +118,17 @@ function DrawerModal({
     setComboboxValue("");
   };
 
-  const addFormSubmit = (values: DrawerModalFormValues) => {
-    createProject(values.name, values.icon);
+  const handleSubmit = async (values: DrawerModalFormValues) => {
+    // Add the project to DB and State
+    const response = await handleOptimisticUpdate(values, project?.id);
+
+    // Reset form and close modal
     form.reset();
     modalOnClose();
-    notifications.show({
-      icon: (
-        <ThemeIcon variant="filled" radius={"xl"}>
-          <IconCheck size={"1.25rem"} />
-        </ThemeIcon>
-      ),
-      withBorder: true,
-      autoClose: 3000,
-      title: "Project Added",
-      message: "Project has been added successfully.",
-    });
   };
-
-  const editFormSubmit = (values: DrawerModalFormValues) => {
-    editProject(project?.id!, values.name, values.icon);
-    form.reset();
-    modalOnClose();
-    notifications.show({
-      icon: (
-        <ThemeIcon variant="filled" radius={"xl"}>
-          <IconCheck size={"1.25rem"} />
-        </ThemeIcon>
-      ),
-      withBorder: true,
-      autoClose: 3000,
-      title: "Project Updated",
-      message: "Project has been updated successfully.",
-    });
-  };
-
-  const modeToggler = useMemo(() => {
-    switch (mode) {
-      case "create":
-        return {
-          title: "Create Project",
-          submit: addFormSubmit,
-        };
-      case "edit":
-        return {
-          title: "Edit Project",
-          submit: editFormSubmit,
-        };
-    }
-  }, []);
 
   return (
-    <form onSubmit={form.onSubmit((values) => modeToggler.submit(values))}>
+    <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
       <Flex gap={"xs"} direction={"column"}>
         <TextInput
           label="Name"

@@ -4,7 +4,7 @@ import { db } from "../db/db";
 import { useEmojiStore } from "../../store/globalStore";
 import useEmojiRepo from "./useEmojiRepo";
 import useProjectRepo from "./useProjectRepo";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getProjects } from "../api/projectsApi";
 import { useIsFirstRender } from "@mantine/hooks";
 
@@ -21,9 +21,6 @@ export const useDataInitializer = () => {
 
   // State
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-
-  // Hook for checking if it's the first render
-  const isFirstRender = useIsFirstRender();
 
   useEffect(() => {
     Promise.all([loadProjects(), loadEmojis()]).then(() => {
