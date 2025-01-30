@@ -16,7 +16,7 @@ services:
     - server-network
   
   server:
-    build: .
+    image: ghcr.io/morfusee/ferd-server:latest
     restart: always
     depends_on:
     - mongo
@@ -27,15 +27,27 @@ services:
     environment:
       MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
       IS_DOCKERIZED: true
+    labels:
+    - "com.centurylinklabs.watchtower.enable=true"
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
-    networks: # This should be set to enable http://server:3000 as a URL
-    - server-network
+  watchtower:
+    image: containrrr/watchtower
+    command:
+    - "--label-enable"
+    - "--interval"
+    - "30"
+    - "--rolling-restart"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+  #   networks: # This should be set to enable http://server:3000 as a URL
+  #   - server-network
 
 networks:
   server-network:

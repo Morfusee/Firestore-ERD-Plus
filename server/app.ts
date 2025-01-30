@@ -40,7 +40,6 @@ const mongoURI = isDockerRunning
   ? process.env.MONGO_DOCKER_URI
   : process.env.MONGO_ATLAS_URI;
 
-console.log("updated");
 // Connect to MongoDB
 mongoose
   .connect(mongoURI!)
