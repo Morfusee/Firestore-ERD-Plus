@@ -466,10 +466,15 @@ function DrawerItemMenu({
     // Delete project from store
     await deleteProjectStore(response.data.deletedProjectId);
 
+    // Check if returned response is a success
     const status = isSuccessStatus(response.status);
 
+    // Check if the current project is the one that's deleted
     if (status && params.projectId == response.data.deletedProjectId) {
+      // Navigate to "/" if the deleted project is the current project the user is on.
       navigate("/");
+
+      // Reset the selectedProject field
       clearProject();
     }
 
