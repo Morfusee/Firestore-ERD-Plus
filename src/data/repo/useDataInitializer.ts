@@ -4,18 +4,22 @@ import { db } from "../db/db";
 import { useEmojiStore } from "../../store/globalStore";
 import useEmojiRepo from "./useEmojiRepo";
 import useProjectRepo from "./useProjectRepo";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { getProjects } from "../api/projectsApi";
+import { useIsFirstRender } from "@mantine/hooks";
 
 export const useDataInitializer = () => {
-  const { setProjects } = useProjectStore();
+  const { setProjectList, selectProject } = useProjectRepo();
+
+  // Router
   const params = useParams();
   const id = params.projectId;
-  const { selectProject } = useProjectRepo();
 
   // Emojis
   const { emojis, setEmojis: setEmojisStore } = useEmojiStore();
   const { setEmojis: setEmojisDB } = useEmojiRepo();
 
+  // State
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -26,14 +30,19 @@ export const useDataInitializer = () => {
 
   useEffect(() => {
     if (id) {
-      selectProject(Number(id));
+      selectProject(id);
     }
   }, [id, isLoaded]);
 
   const loadProjects = async () => {
     console.log("Loading projects from local storage");
+
+    // Dexie fetching of projects
+    // NOTE: Not needed anymore
     const projectList = await db.projects.toArray();
-    setProjects(projectList);
+
+    // Backend fetching of projects
+    setProjectList(await getProjects("67905ca5411c5dcf426c89c6"));
   };
 
   const fetchEmojis = async () => {

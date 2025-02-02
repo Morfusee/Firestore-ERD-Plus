@@ -1,59 +1,118 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Project from "../models/projectModel.ts";
 import { decrypt, encrypt } from "@root/utils/encryption.ts";
+import NotFoundError from "@root/errors/NotFoundError.ts";
+import mongoose from "mongoose";
+import ConflictError from "@root/errors/ConflictError.ts";
+import User from "@root/models/userModel.ts";
+import { SuccessResponse } from "@root/success/SuccessResponse.ts";
+
+/**
+ * Get projects based on query parameters.
+ * If `userId` is provided in the query, it fetches projects associated with that user.
+ * Otherwise, it fetches all projects.
+ */
+export const getProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.query.userId) {
+    return getProjectsByUserId(req, res, next);
+  }
+
+  // If no userId is provided, fetch all projects
+  return getAllProjects(req, res, next);
+};
+
+// Get all projects by user ID
+export const getProjectsByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.query;
+
+    const projectsByUser = await Project.find({
+      "members.userId": userId,
+    });
+
+    if (!projectsByUser) throw new NotFoundError("No projects found.");
+
+    // Send templated response
+    next(
+      new SuccessResponse(200, "Projects successfully fetched.", {
+        projects: projectsByUser,
+      })
+    );
+  } catch (error: any) {
+    next(error);
+  }
+};
 
 // Get all projects
-export const getAllProjects = async (req: Request, res: Response) => {
+export const getAllProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // Find all projects
     const projects = await Project.find();
-    res.status(200).json(projects);
+
+    // If no projects are found, throw an error
+    if (!projects || projects.length === 0)
+      throw new NotFoundError("No projects found.");
+
+    // Return the projects
+    next(
+      new SuccessResponse(200, "Successfully fetched all projects.", {
+        projects,
+      })
+    );
   } catch (err: any) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // Get a project by ID
-export const getProjectById = async (req: Request, res: Response) => {
+export const getProjectById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // Find the project by ID
     const project = await Project.findById(req.params.id);
-    if (project) {
-      res.status(200).json(project);
-    } else {
-      res.status(404).json({
-        message: "Project not found",
-      });
-    }
+
+    // Check if the project exists
+    if (!project) throw new NotFoundError("Project not found.");
+
+    // Return the project
+    // res.status(200).json(project);
+    next(
+      new SuccessResponse(200, "Successfully fetched the project.", {
+        project,
+      })
+    );
   } catch (err: any) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // Edit a project
-export const editProject = async (req: Request, res: Response) => {
+export const editProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // Find the project by ID
     const project = await Project.findById(req.params.id);
-    if (!project) {
-      res.status(404).json({
-        message: "Project not found",
-      });
-    }
 
-    // Check if body is empty
-    if (
-      Object.keys(req.body).length === 0 ||
-      Object.values(req.body).some((value) => value === "")
-    ) {
-      res.status(400).json({
-        message: "Request body is empty or contains empty values",
-      });
-
-      // Exit the function
-      return;
-    }
+    // Check if the project exists
+    if (!project) throw new NotFoundError("Project not found.");
 
     // Update the project
     const updatedProject = await Project.findByIdAndUpdate(
@@ -62,55 +121,104 @@ export const editProject = async (req: Request, res: Response) => {
       { new: true }
     );
 
-    // Send the response
-    res.status(200).json({
-      message: "Project updated successfully",
-    });
+    next(
+      new SuccessResponse(200, "Project updated successfully.", {
+        updatedProject,
+      })
+    );
   } catch (err: any) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // Create a new project for sharing
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    // Encrypt the data
-    const project = new Project(req.body);
+    const { name, icon, userId } = req.body;
+
+    // Create a new project
+    const project = new Project({
+      name,
+      icon,
+      members: [
+        {
+          userId: userId,
+          role: "owner",
+        },
+      ],
+    });
 
     // Save the project
     const savedProject = await project.save();
 
-    // Send the response
-    res.status(201).json(savedProject);
+    // Check if the project was saved
+    if (!savedProject) throw new ConflictError("Project could not be saved.");
+
+    // Insert the project ID into the user's ownedProjects array
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        ownedProjects: savedProject._id,
+      },
+    });
+
+    // Send the response back using format
+    next(
+      new SuccessResponse(201, "Project saved successfully.", {
+        createdProject: savedProject,
+      })
+    );
   } catch (err: any) {
-    // Handle errors
-    res.status(400).json({
-      message: err.message,
+    next(err);
+  }
+};
+
+// Save data to a project
+export const saveProject = async (req: Request, res: Response) => {
+  try {
+    // Find the project by ID
+    const project = await Project.findById(req.params.id);
+
+    // Check if the project exists
+    if (!project) throw new ConflictError("Project does not exist.");
+
+    project.data = req.body.data;
+
+    // Save the project
+    const savedProject = await project.save();
+
+    res.status(200).json({
+      message: "Project data saved successfully.",
+      project: savedProject,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 };
 
 // Delete a project
-export const deleteProject = async (req: Request, res: Response) => {
+export const deleteProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const project = await Project.findByIdAndDelete(req.params.id);
 
-    if (!project) {
-      res.status(404).json({
-        message: "Project does not exist.",
-      });
+    if (!project) throw new NotFoundError("Project not found.");
 
-      return;
-    }
-
-    res.status(200).json({
-      message: "Project deleted successfully.",
-    });
+    // Send the response back using format
+    next(
+      new SuccessResponse(200, "Project deleted successfully.", {
+        deletedProjectId: project._id,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      message: "Error deleting project: " + error.message,
-    });
+    next(error);
   }
 };

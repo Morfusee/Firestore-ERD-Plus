@@ -80,6 +80,16 @@ import {
 import useEditorRepo from "../data/repo/useEditorRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { modals } from "@mantine/modals";
+import AsyncEmojiPicker from "./AsyncEmojiPicker";
+import DrawerModal from "./modals/DrawerModal";
+import {
+  createProject,
+  deleteProject,
+  editProject,
+  reformatProject,
+} from "../data/api/projectsApi";
+import { StatusIcon } from "./icons/StatusIcon";
+import { determineTitle, isSuccessStatus } from "../utils/successHelpers";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -185,7 +195,10 @@ function ActionButtons({
 }
 
 function Drawer({ opened }: { opened: boolean }) {
-  const { projects } = useProjectStore((state) => state);
+  // Get projects
+  const { getProjectsList } = useProjectRepo();
+  const projects = getProjectsList();
+
   return (
     <Transition
       mounted={opened}
@@ -209,9 +222,10 @@ function Drawer({ opened }: { opened: boolean }) {
               direction={"column"}
               className="overflow-y-auto h-full beautifulScrollBar gap-0.5"
             >
-              {projects.map((project) => (
-                <DrawerItems project={project} key={project.id} />
-              ))}
+              {projects &&
+                projects.map((project) => (
+                  <DrawerItems project={project} key={project.id} />
+                ))}
             </Flex>
           </Flex>
         </Paper>
@@ -221,238 +235,77 @@ function Drawer({ opened }: { opened: boolean }) {
 }
 
 function DrawerHeader() {
-  const [opened, { open, close }] = useDisclosure(false);
+  const { addProject: addProjectToStore, selectProject } = useProjectRepo();
+  const navigate = useNavigate();
+
+  const handleCreateProject = async (values: DrawerModalFormValues) => {
+    const response = await createProject(
+      values.name,
+      values.icon,
+      "67905ca5411c5dcf426c89c6"
+    );
+
+    // Get status of response
+    const status = isSuccessStatus(response.status);
+
+    // Only attempt to add the project if the success status is true
+    if (status) {
+      const createdProject = reformatProject(response.data.createdProject);
+
+      // Add project to store
+      await addProjectToStore(createdProject);
+
+      // Select the project on creation in STATE
+      selectProject(createdProject.id);
+
+      // Navigate/Enter the project on creation
+      navigate(`/${createdProject.id}`);
+    }
+
+    // Show notification
+    notifications.show({
+      icon: <StatusIcon status={status ? "success" : "error"} />,
+      withBorder: true,
+      autoClose: 5000,
+      title: determineTitle(
+        "Project Created",
+        "Failed to Create Project",
+        status
+      ),
+      message: response.message,
+    });
+
+    return response;
+  };
 
   return (
     <Flex direction={"row"} justify={"space-between"} align={"center"}>
       <Text fw={700} size="md" lh={"h4"}>
         Projects
       </Text>
-      <ActionIcon variant="subtle" size="xs" radius="xl" onClick={open}>
+      <ActionIcon
+        variant="subtle"
+        size="xs"
+        radius="xl"
+        onClick={() =>
+          modals.openContextModal({
+            modal: "drawer",
+            innerProps: {
+              mode: "create",
+              handleOptimisticUpdate: handleCreateProject,
+            },
+          })
+        }
+      >
         <IconPlus />
       </ActionIcon>
-      <DrawerModal mode="create" opened={opened} close={close} />
     </Flex>
-  );
-}
-
-function DrawerModal({
-  mode,
-  project,
-  opened,
-  close,
-}: {
-  mode: "create" | "edit";
-  project?: IProject;
-  opened: boolean;
-  close: () => void;
-}) {
-  const { addProject, editProject } = useProjectRepo();
-  const { getHexByEmoji } = useEmojiRepo();
-  const [emojiList, setEmojiList] = useState<EmojiGroup>({
-    smileysEmotion: [],
-    peopleBody: [],
-    animalsNature: [],
-    foodDrink: [],
-    travelPlaces: [],
-    activities: [],
-    objects: [],
-    symbols: [],
-    component: [],
-  });
-
-  const {
-    activities,
-    animalsNature,
-    component,
-    foodDrink,
-    objects,
-    peopleBody,
-    smileysEmotion,
-    symbols,
-    travelPlaces,
-  } = useEmojiStore();
-
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: () => {
-      combobox.resetSelectedOption();
-      setEmojiList({
-        smileysEmotion,
-        peopleBody,
-        animalsNature,
-        foodDrink,
-        travelPlaces,
-        activities,
-        objects,
-        symbols,
-        component,
-      });
-    },
-  });
-
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
-      name: "",
-      icon: "",
-    },
-    validate: {
-      name: (value) => {
-        if (!value.trim()) {
-          return "Name is required";
-        }
-      },
-      icon: (value) => {
-        if (!value.trim()) {
-          return "Icon is required";
-        }
-      },
-    },
-  });
-
-  const { projectIcon, isProjectSelected } = useProjectIcon(
-    project?.icon || "",
-    project || null,
-    project?.id
-  );
-
-  const [comboboxValue, setComboboxValue] = useState<string>("");
-
-  // There's no other way to set initial values for the edit mode
-  useEffect(() => {
-    if (mode === "edit" && opened) {
-      form.setFieldValue("name", project?.name!);
-      form.setFieldValue("icon", project?.icon!);
-    }
-
-    return () => {
-      form.reset();
-    };
-  }, [opened]);
-
-  const comboboxOnOptionSubmit = (value: string) => {
-    getHexByEmoji(value).then((hex) => {
-      if (!hex) return;
-
-      form.setFieldValue("icon", hex);
-      setComboboxValue(value);
-      combobox.closeDropdown();
-    });
-  };
-
-  const modalOnClose = () => {
-    close();
-    setComboboxValue("");
-    setEmojiList({
-      smileysEmotion: [],
-      peopleBody: [],
-      animalsNature: [],
-      foodDrink: [],
-      travelPlaces: [],
-      activities: [],
-      objects: [],
-      symbols: [],
-      component: [],
-    });
-  };
-
-  const addFormSubmit = (values: DrawerModalFormValues) => {
-    addProject(values.name, values.icon);
-    form.reset();
-    modalOnClose();
-    notifications.show({
-      icon: (
-        <ThemeIcon variant="filled" radius={"xl"}>
-          <IconCheck size={"1.25rem"} />
-        </ThemeIcon>
-      ),
-      withBorder: true,
-      autoClose: 3000,
-      title: "Project Added",
-      message: "Project has been added successfully.",
-    });
-  };
-
-  const editFormSubmit = (values: DrawerModalFormValues) => {
-    editProject(project?.id!, values.name, values.icon);
-    form.reset();
-    modalOnClose();
-    notifications.show({
-      icon: (
-        <ThemeIcon variant="filled" radius={"xl"}>
-          <IconCheck size={"1.25rem"} />
-        </ThemeIcon>
-      ),
-      withBorder: true,
-      autoClose: 3000,
-      title: "Project Updated",
-      message: "Project has been updated successfully.",
-    });
-  };
-
-  const modeToggler = useMemo(() => {
-    switch (mode) {
-      case "create":
-        return {
-          title: "Create Project",
-          submit: addFormSubmit,
-        };
-      case "edit":
-        return {
-          title: "Edit Project",
-          submit: editFormSubmit,
-        };
-    }
-  }, []);
-
-  return (
-    <Modal
-      opened={opened}
-      onClose={modalOnClose}
-      title={
-        <Text fw={700} size="md" lh={"h4"}>
-          {modeToggler.title}
-        </Text>
-      }
-      centered
-    >
-      <form onSubmit={form.onSubmit((values) => modeToggler.submit(values))}>
-        <Flex gap={"xs"} direction={"column"}>
-          <TextInput
-            label="Name"
-            classNames={{
-              label: "mb-1",
-            }}
-            required
-            placeholder="(e.g. LMS System)"
-            key={form.key("name")}
-            {...form.getInputProps("name")}
-            defaultValue={project?.name}
-          />
-          <EmojiPicker
-            combobox={combobox}
-            comboboxValue={comboboxValue || projectIcon || ""}
-            comboboxOnOptionSubmit={comboboxOnOptionSubmit}
-            optionList={emojiList}
-          />
-          <Flex direction={"row"} gap={"xs"} justify={"flex-end"} pt={"md"}>
-            <Button variant="subtle" onClick={close}>
-              Cancel
-            </Button>
-            <Button variant="filled" type="submit">
-              Confirm
-            </Button>
-          </Flex>
-        </Flex>
-      </form>
-    </Modal>
   );
 }
 
 function DrawerItems({ project }: { project: IProject }) {
   const navigate = useNavigate();
-  const { selectedProject, selectProject } = useProjectRepo();
+  const { selectedProject } = useProjectRepo();
   const { id: projectId, name: projectName, icon: projectIconHex } = project;
   const isDarkMode = useIsDarkMode();
   const { isTruncated, textRef } =
@@ -544,27 +397,94 @@ function DrawerItemMenu({
   project: IProject;
   children: (open: () => void, opened: boolean) => React.ReactNode;
 }) {
-  const { addProject, duplicateProject, deleteProject } = useProjectRepo();
+  // Router
+  const navigate = useNavigate();
+  const params = useParams();
+
+  // State
+  const {
+    addProject: addProjectToStore,
+    selectProject,
+    duplicateProject,
+    deleteProject: deleteProjectStore,
+    editProject: editProjectStore,
+    clearProject,
+  } = useProjectRepo();
   const [
     isDrawerItemMenuOpen,
     { open: openDrawerItemMenu, close: closeDrawerItemMenu },
   ] = useDisclosure(false);
 
-  const [
-    isDrawerModalOpen,
-    { open: openDrawerModal, close: closeDrawerModal },
-  ] = useDisclosure(false);
+  const handleEditProject = async (
+    values: DrawerModalFormValues,
+    projectId: IProject["id"]
+  ) => {
+    const response = await editProject(values.name, values.icon, projectId!);
+    // Get status of response
+    const status = isSuccessStatus(response.status);
 
-  const handleEdit = () => {
-    openDrawerModal();
+    // Only attempt to locally edit the project if the success status is true
+    if (status) {
+      const editedProject = reformatProject(response.data.updatedProject);
+
+      // Add edited project to store
+      await editProjectStore(
+        editedProject.id,
+        editedProject.name,
+        editedProject.icon,
+        editedProject.updatedAt
+      );
+
+      // If the user is currently editing the selected project,
+      // just reselect the project to update the values.
+      if (params.projectId == editedProject.id) selectProject(params.projectId);
+    }
+
+    // Show notification
+    notifications.show({
+      icon: <StatusIcon status={status ? "success" : "error"} />,
+      withBorder: true,
+      autoClose: 5000,
+      title: determineTitle("Project Edited", "Failed to Edit Project", status),
+      message: response.message,
+    });
+
+    return response;
   };
 
   const handleDuplicate = () => {
     duplicateProject(project?.id!);
   };
 
-  const handleDelete = () => {
-    deleteProject(project?.id!);
+  const handleDelete = async () => {
+    // If id doesn't exist, return
+    if (!project.id) return;
+
+    // Delete project from DB
+    const response = await deleteProject(project.id);
+
+    // Delete project from store
+    await deleteProjectStore(response.data.deletedProjectId);
+
+    // Check if returned response is a success
+    const status = isSuccessStatus(response.status);
+
+    // Check if the current project is the one that's deleted
+    if (status && params.projectId == response.data.deletedProjectId) {
+      // Navigate to "/" if the deleted project is the current project the user is on.
+      navigate("/");
+
+      // Reset the selectedProject field
+      clearProject();
+    }
+
+    // Show notification after deleting
+    notifications.show({
+      icon: <StatusIcon status={status ? "success" : "error"} />,
+      withBorder: true,
+      autoClose: 5000,
+      message: response.message,
+    });
   };
 
   return (
@@ -584,7 +504,16 @@ function DrawerItemMenu({
       <Menu.Dropdown>
         <Menu.Item
           leftSection={<IconEdit size={"1rem"} />}
-          onClick={handleEdit}
+          onClick={() =>
+            modals.openContextModal({
+              modal: "drawer",
+              innerProps: {
+                mode: "edit",
+                project: project,
+                handleOptimisticUpdate: handleEditProject,
+              },
+            })
+          }
         >
           Edit
         </Menu.Item>
@@ -609,15 +538,6 @@ function DrawerItemMenu({
           Delete
         </Menu.Item>
       </Menu.Dropdown>
-
-      <>
-        <DrawerModal
-          close={closeDrawerModal}
-          mode="edit"
-          opened={isDrawerModalOpen}
-          project={project}
-        />
-      </>
     </Menu>
   );
 }

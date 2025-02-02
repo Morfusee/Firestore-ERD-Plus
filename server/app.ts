@@ -2,9 +2,15 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import projectRoutes from "./routes/projectRoutes.ts";
+import memberRoutes from "./routes/memberRoutes.ts";
 import historyRoutes from "./routes/historyRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
+import userRoutes from "./routes/userRoutes.ts";
+import emojiRoutes from "./routes/emojiRoutes.ts";
 import dotenv from "dotenv";
+import errorMiddleware from "./middleware/errorMiddleware.ts";
+import successMiddleware from "./middleware/successMiddleware.ts";
+import { responseStatusMiddleware } from "./middleware/responseStatusMiddleware.ts";
 
 dotenv.config();
 
@@ -14,8 +20,7 @@ const app = express();
 app.use(
   cors({
     origin: "http://localhost:5173", // Allow frontend origin locally
-    methods: "GET,POST,OPTIONS", // Allow methods
-    allowedHeaders: "Content-Type,Authorization", // Alow headers
+    methods: "GET,POST,DELETE,PATCH,OPTIONS", // Allow methods
     credentials: true, // Allow cookies and credentials
   })
 );
@@ -47,10 +52,17 @@ mongoose
 
 // Use project routes
 app.use("/projects", projectRoutes, historyRoutes);
+app.use("/projects", projectRoutes);
+app.use("/projects", memberRoutes);
 
 // Use user routes
 app.use("/user", settingsRoutes);
+app.use("/users", userRoutes);
 
+// GitHub Emoji API
+app.use("/emojis", emojiRoutes);
+
+app.use(responseStatusMiddleware);
 
 // Start the server
 const PORT = 3000;
