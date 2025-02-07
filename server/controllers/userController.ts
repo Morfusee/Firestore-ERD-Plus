@@ -1,30 +1,84 @@
+import { SuccessResponse } from "@root/success/SuccessResponse.js";
 import User from "../models/userModel.js";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import NotFoundError from "@root/errors/NotFoundError.js";
+import ValidationError from "@root/errors/ValidationError.js";
 
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const users = await User.find();
-    res.status(200).json(users);
+
+    next(
+      new SuccessResponse(200, "Users fetched successfully", {
+        users,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await User.findById(req.params.id);
 
     if (user) {
-      res.status(200).json(user);
+      next(
+        new SuccessResponse(200, "User fetched successfully", {
+          user,
+        })
+      );
     } else {
-      res.status(404).json({ message: "User not found" });
+      next(new NotFoundError("User not found."));
     }
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
+// Get all projects by user ID
+export const getOwnedProjectsByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+
+    const ownedProjectsByUser = await User.findOne({
+      _id: id,
+    })
+      .populate("ownedProjects") // Populate all the found ids with data
+      .then((user) => user?.ownedProjects); // Get the ownedProjects field only
+
+    if (!ownedProjectsByUser) {
+      throw new NotFoundError("No projects found.");
+    }
+
+    // Send templated response
+    next(
+      new SuccessResponse(200, "Projects successfully fetched.", {
+        projects: ownedProjectsByUser,
+      })
+    );
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export const createUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { username, email, displayName } = req.body;
 
@@ -36,21 +90,25 @@ export const createUser = async (req: Request, res: Response) => {
 
     await newUser.save();
 
-    res.status(201).json(newUser);
+    next(
+      new SuccessResponse(201, "User created successfully", {
+        createdUser: newUser,
+      })
+    );
   } catch (err: any) {
-    res.status(400).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      res.status(404).json({
-        message: "User not found",
-      });
+      next(new NotFoundError("User not found."));
       return;
     }
 
@@ -58,9 +116,9 @@ export const updateUser = async (req: Request, res: Response) => {
       Object.keys(req.body).length === 0 ||
       Object.values(req.body).some((value) => value === "")
     ) {
-      res.status(400).json({
-        message: "Request body is empty or contains empty value.",
-      });
+      next(
+        new ValidationError("Request body is empty or contains empty value.")
+      );
 
       return;
     }
@@ -69,18 +127,21 @@ export const updateUser = async (req: Request, res: Response) => {
       new: true,
     });
 
-    res.status(200).json({
-      message: "User updated successfully",
-      updatedUser,
-    });
+    next(
+      new SuccessResponse(200, "User updated successfully", {
+        updatedUser,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-export const getUserByEmail = async (req: Request, res: Response) => {
+export const getUserByEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { email, limit } = req.query;
 
@@ -88,7 +149,7 @@ export const getUserByEmail = async (req: Request, res: Response) => {
 
     // Validate the limit to ensure it's a number
     if (isNaN(limitNumber) || limitNumber <= 0) {
-      res.status(400).json({ message: "Invalid limit value." });
+      next(new ValidationError("Invalid limit value."));
       return;
     }
 
@@ -96,35 +157,38 @@ export const getUserByEmail = async (req: Request, res: Response) => {
       email: { $regex: email, $options: "i" },
     }).limit(limitNumber);
 
-    res.status(200).json(users);
+    next(
+      new SuccessResponse(200, "Users fetched successfully", {
+        users,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // Find the user by ID and delete
     const user = await User.findByIdAndDelete(req.params.id);
 
     // Check if user exists
     if (!user) {
-      res.status(404).json({
-        message: "User does not exist.",
-      });
-
+      next(new NotFoundError("User not found."));
       return;
     }
 
     // Send success response
-    res.status(200).json({
-      message: "User deleted successfully.",
-    });
+    next(
+      new SuccessResponse(200, "User deleted successfully.", {
+        deleteUser: user,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
