@@ -44,6 +44,36 @@ export const getUserById = async (
   }
 };
 
+// Get all projects by user ID
+export const getOwnedProjectsByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+
+    const ownedProjectsByUser = await User.findOne({
+      _id: id,
+    })
+      .populate("ownedProjects") // Populate all the found ids with data
+      .then((user) => user?.ownedProjects); // Get the ownedProjects field only
+
+    if (!ownedProjectsByUser) {
+      throw new NotFoundError("No projects found.");
+    }
+
+    // Send templated response
+    next(
+      new SuccessResponse(200, "Projects successfully fetched.", {
+        projects: ownedProjectsByUser,
+      })
+    );
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export const createUser = async (
   req: Request,
   res: Response,
