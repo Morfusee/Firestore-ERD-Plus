@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { History, Version } from "./historyModel";
 import User from "./userModel";
+import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
 
 // Define a schema
 const projectSchema = new mongoose.Schema(
@@ -68,6 +69,8 @@ projectSchema.pre("findOneAndDelete", async function (next) {
     }
   }
 });
+
+projectSchema.plugin(mongooseTransformPlugin);
 
 // Create a model
 const Project = mongoose.model("Project", projectSchema);

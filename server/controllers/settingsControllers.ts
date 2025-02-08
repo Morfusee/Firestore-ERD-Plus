@@ -7,7 +7,7 @@ import Settings from "../models/settingsModel.ts";
 export const getSettingsByUserId = async (req: Request, res: Response) => {
   try {
     // Find settings by user ID
-    const settings = await Settings.findById(req.params.id);
+    const settings = await Settings.findOne({ user: req.params.userId });
     if (settings) {
       // Return settings if found
       res.status(200).json(settings);
@@ -27,16 +27,16 @@ export const getSettingsByUserId = async (req: Request, res: Response) => {
 
 // Create user settings
 export const createSettings = async (req: Request, res: Response) => {
-    try{
-        const userId = req.params.id;
-        const newSettings = await Settings.create({...req.body, user: userId});
-        res.status(201).json(newSettings);
-    } catch (err: any) {
-        res.status(500).json({
-            message: err.message,
-        });
-    }
-}
+  try {
+    const userId = req.params.id;
+    const newSettings = await Settings.create({ ...req.body, user: userId });
+    res.status(201).json(newSettings);
+  } catch (err: any) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
 
 /**
  * Update user settings by user ID.
@@ -47,7 +47,7 @@ export const updateSettings = async (req: Request, res: Response) => {
 
     // Update settings for the specified user ID
     const updatedSettings = await Settings.findOneAndUpdate(
-      { userId: userId },
+      { user: userId },
       req.body,
       { new: true }
     );
