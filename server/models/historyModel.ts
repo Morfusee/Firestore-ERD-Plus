@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
 
 // Define the Version schema
 const versionSchema = new mongoose.Schema(
@@ -138,6 +139,9 @@ versionSchema.pre("findOneAndDelete", async function (next) {
     }
   }
 });
+
+versionSchema.plugin(mongooseTransformPlugin);
+historySchema.plugin(mongooseTransformPlugin);
 
 // Create models
 const Version = mongoose.model("Version", versionSchema);
