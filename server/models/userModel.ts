@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
 import Project from "./projectModel";
+import Settings from "./settingsModel";
+import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
 
 // Define type
 export interface IUser {
+  _id: mongoose.Types.ObjectId;
   username: string;
   email: string;
   displayName?: string;
@@ -36,23 +39,23 @@ const userSchema = new mongoose.Schema(
     // Change this if necessary, this is just for my testing
     ownedProjects: [
       {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Project",
       },
     ],
     sharedProjects: [
       {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Project",
       },
-    ]
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-// Cascade delete projects when a user is deleted
+// Cascade delete projects and settings when a user is deleted
 userSchema.pre("findOneAndDelete", async function (next) {
   try {
     // Get the document that's about to be deleted
@@ -60,11 +63,15 @@ userSchema.pre("findOneAndDelete", async function (next) {
     const doc: IUser | null = await this.model.findOne(this.getFilter());
 
     if (doc) {
-      // Delete all projects owned by this user by 
-      // looping through the ownedProjects array
-      for (const projectId of doc.ownedProjects) {
-        await Project.findByIdAndDelete(projectId);
-      }
+      // Delete all projects owned by this user by
+      await Promise.all(
+        doc.ownedProjects.map((projectId) =>
+          Project.findByIdAndDelete(projectId)
+        )
+      );
+
+      // Delete settings associated by this user
+      await Settings.findOneAndDelete({ user: doc._id });
     }
 
     next();
@@ -76,6 +83,18 @@ userSchema.pre("findOneAndDelete", async function (next) {
     }
   }
 });
+
+// auto create settings when a user is created
+userSchema.post("save", async function (doc, next) {
+  try {
+    await Settings.create({ user: doc._id });
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+userSchema.plugin(mongooseTransformPlugin);
 
 //Create model
 const User = mongoose.model("User", userSchema);
