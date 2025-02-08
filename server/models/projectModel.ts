@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { History, Version } from "./historyModel";
+import User from "./userModel";
+import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
 
 // Define a schema
 const projectSchema = new mongoose.Schema(
@@ -41,6 +43,13 @@ projectSchema.pre("findOneAndDelete", async function (next) {
     // Get the document that's about to be deleted
     const doc = await this.model.findOne(this.getFilter());
     if (doc) {
+      // Remove project ID from all users' ownedProjects
+      await User.updateOne(
+        // Find the user that has this project ID in their ownedProjects
+        { ownedProjects: doc._id },
+        { $pull: { ownedProjects: doc._id } }
+      );
+
       // Find all versions associated with this project
       const versions = await Version.find({ project: doc._id });
       const versionIds = versions.map((version) => version._id);
@@ -60,6 +69,8 @@ projectSchema.pre("findOneAndDelete", async function (next) {
     }
   }
 });
+
+projectSchema.plugin(mongooseTransformPlugin);
 
 // Create a model
 const Project = mongoose.model("Project", projectSchema);

@@ -6,6 +6,7 @@ import {
   getUserByEmail,
   updateUser,
   deleteUser,
+  getOwnedProjectsByUserId,
 } from "../controllers/userController";
 
 import { validateUser } from "../middleware/userValidator";
@@ -20,6 +21,9 @@ router.get("/search", getUserByEmail);
 
 // Route for a specific user by ID
 router.get("/:id", getUserById);
+
+// Route for getting all projects by user ID
+router.get("/:id/projects", getOwnedProjectsByUserId);
 
 // Route for creating a new user
 router.post("", validateUser, createUser);
