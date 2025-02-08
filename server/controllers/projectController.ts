@@ -5,7 +5,9 @@ import NotFoundError from "@root/errors/NotFoundError.ts";
 import mongoose from "mongoose";
 import ConflictError from "@root/errors/ConflictError.ts";
 import User from "@root/models/userModel.ts";
-import { SuccessResponse } from "@root/success/SuccessResponse.ts";
+import SuccessResponse from "@root/success/SuccessResponse.ts";
+import CreatedResponse from "@root/success/CreatedResponse.ts";
+import Changelog from "@root/models/changelogModel.ts";
 
 /**
  * Get projects based on query parameters.
@@ -42,7 +44,7 @@ export const getProjectsByUserId = async (
 
     // Send templated response
     next(
-      new SuccessResponse(200, "Projects successfully fetched.", {
+      new SuccessResponse("Projects successfully fetched.", {
         projects: projectsByUser,
       })
     );
@@ -67,7 +69,7 @@ export const getAllProjects = async (
 
     // Return the projects
     next(
-      new SuccessResponse(200, "Successfully fetched all projects.", {
+      new SuccessResponse("Successfully fetched all projects.", {
         projects,
       })
     );
@@ -89,10 +91,8 @@ export const getProjectById = async (
     // Check if the project exists
     if (!project) throw new NotFoundError("Project not found.");
 
-    // Return the project
-    // res.status(200).json(project);
     next(
-      new SuccessResponse(200, "Successfully fetched the project.", {
+      new SuccessResponse("Successfully fetched the project.", {
         project,
       })
     );
@@ -122,7 +122,7 @@ export const editProject = async (
     );
 
     next(
-      new SuccessResponse(200, "Project updated successfully.", {
+      new SuccessResponse("Project updated successfully.", {
         updatedProject,
       })
     );
@@ -167,7 +167,7 @@ export const createProject = async (
 
     // Send the response back using format
     next(
-      new SuccessResponse(201, "Project saved successfully.", {
+      new CreatedResponse("Project saved successfully.", {
         createdProject: savedProject,
       })
     );
@@ -177,10 +177,15 @@ export const createProject = async (
 };
 
 // Save data to a project
-export const saveProject = async (req: Request, res: Response) => {
+export const saveProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // Find the project by ID
     const project = await Project.findById(req.params.id);
+    const { data, members = [] } = req.body;
 
     // Check if the project exists
     if (!project) throw new ConflictError("Project does not exist.");
@@ -190,14 +195,24 @@ export const saveProject = async (req: Request, res: Response) => {
     // Save the project
     const savedProject = await project.save();
 
-    res.status(200).json({
-      message: "Project data saved successfully.",
-      project: savedProject,
+    // Create a new Changelog entry
+    const changelog = new Changelog({
+      project: project._id,
+      data,
+      currentVersion: true,
+      members,
     });
+
+    await changelog.save();
+
+    next(
+      new SuccessResponse("Project data saved successfully.", {
+        project: savedProject,
+        changelog,
+      })
+    );
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error)
   }
 };
 
@@ -214,7 +229,7 @@ export const deleteProject = async (
 
     // Send the response back using format
     next(
-      new SuccessResponse(200, "Project deleted successfully.", {
+      new SuccessResponse("Project deleted successfully.", {
         deletedProjectId: project._id,
       })
     );

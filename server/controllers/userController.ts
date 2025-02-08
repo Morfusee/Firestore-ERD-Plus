@@ -1,8 +1,9 @@
-import { SuccessResponse } from "@root/success/SuccessResponse.js";
-import User from "../models/userModel.js";
+import SuccessResponse from "@root/success/SuccessResponse.ts";
+import User from "../models/userModel.ts";
 import { NextFunction, Request, Response } from "express";
-import NotFoundError from "@root/errors/NotFoundError.js";
-import ValidationError from "@root/errors/ValidationError.js";
+import NotFoundError from "@root/errors/NotFoundError.ts";
+import ValidationError from "@root/errors/ValidationError.ts";
+import CreatedResponse from "@root/success/CreatedResponse.ts";
 
 export const getAllUsers = async (
   req: Request,
@@ -13,7 +14,7 @@ export const getAllUsers = async (
     const users = await User.find();
 
     next(
-      new SuccessResponse(200, "Users fetched successfully", {
+      new SuccessResponse("Users fetched successfully.", {
         users,
       })
     );
@@ -32,12 +33,12 @@ export const getUserById = async (
 
     if (user) {
       next(
-        new SuccessResponse(200, "User fetched successfully", {
+        new SuccessResponse("User fetched successfully.", {
           user,
         })
       );
     } else {
-      next(new NotFoundError("User not found."));
+      throw new NotFoundError("User not found.");
     }
   } catch (error: any) {
     next(error);
@@ -53,6 +54,9 @@ export const getOwnedProjectsByUserId = async (
   try {
     const id = req.params.id;
 
+    const user = await User.findById(id)
+    if (!user) throw new NotFoundError("User not found.");
+
     const ownedProjectsByUser = await User.findOne({
       _id: id,
     })
@@ -65,7 +69,7 @@ export const getOwnedProjectsByUserId = async (
 
     // Send templated response
     next(
-      new SuccessResponse(200, "Projects successfully fetched.", {
+      new SuccessResponse("Projects successfully fetched.", {
         projects: ownedProjectsByUser,
       })
     );
@@ -91,7 +95,7 @@ export const createUser = async (
     await newUser.save();
 
     next(
-      new SuccessResponse(201, "User created successfully", {
+      new CreatedResponse("User created successfully.", {
         createdUser: newUser,
       })
     );
@@ -108,19 +112,16 @@ export const updateUser = async (
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      next(new NotFoundError("User not found."));
-      return;
+      throw new NotFoundError("User not found.");
     }
 
     if (
       Object.keys(req.body).length === 0 ||
       Object.values(req.body).some((value) => value === "")
     ) {
-      next(
-        new ValidationError("Request body is empty or contains empty value.")
-      );
 
-      return;
+      throw new ValidationError("Request body is empty or contains empty value.")
+
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
@@ -128,7 +129,7 @@ export const updateUser = async (
     });
 
     next(
-      new SuccessResponse(200, "User updated successfully", {
+      new SuccessResponse("User updated successfully.", {
         updatedUser,
       })
     );
@@ -145,20 +146,15 @@ export const getUserByEmail = async (
   try {
     const { email, limit } = req.query;
 
-    const limitNumber = limit ? parseInt(limit as string, 10) : 10; // Default to 10 if no limit is provided
+    const limitNumber = Number(limit) || 10; // Default to 10 if no limit is provided
 
-    // Validate the limit to ensure it's a number
-    if (isNaN(limitNumber) || limitNumber <= 0) {
-      next(new ValidationError("Invalid limit value."));
-      return;
-    }
 
     const users = await User.find({
       email: { $regex: email, $options: "i" },
     }).limit(limitNumber);
 
     next(
-      new SuccessResponse(200, "Users fetched successfully", {
+      new SuccessResponse("Users fetched successfully.", {
         users,
       })
     );
@@ -178,13 +174,12 @@ export const deleteUser = async (
 
     // Check if user exists
     if (!user) {
-      next(new NotFoundError("User not found."));
-      return;
+      throw new NotFoundError("User not found.");
     }
 
     // Send success response
     next(
-      new SuccessResponse(200, "User deleted successfully.", {
+      new SuccessResponse("User deleted successfully.", {
         deleteUser: user,
       })
     );

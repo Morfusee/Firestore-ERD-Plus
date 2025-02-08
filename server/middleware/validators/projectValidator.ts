@@ -60,7 +60,7 @@ export const validateOnlyDataField = body("data")
   .custom((_, { req }) => {
     const bodyKeys = Object.keys(req.body);
 
-    if (bodyKeys.length !== 1 || !bodyKeys.includes("data")) {
+    if (bodyKeys.length < 1 || bodyKeys.length > 2 || !bodyKeys.includes("data")) {
       throw new ValidationError([
         {
           type: "fields",

@@ -18,20 +18,20 @@ const router = express.Router();
 
 // Define routes
 // Version routes
-router.get("/:projectId/version", getAllProjectVersions);
-router.post("/:projectId/version", encryptDataMiddleware, createProjectVersion);
-router.get("/:projectId/version/:versionId", getVersionById);
-router.patch("/:projectId/version/:versionId", encryptDataMiddleware, editProjectVersion);
-router.delete("/:projectId/version/:versionId", deleteProjectVersion);
+router.get("/:projectId/versions", getAllProjectVersions);
+router.post("/:projectId/versions", encryptDataMiddleware, createProjectVersion);
+router.get("/:projectId/versions/:versionId", getVersionById);
+router.patch("/:projectId/versions/:versionId", encryptDataMiddleware, editProjectVersion);
+router.delete("/:projectId/versions/:versionId", deleteProjectVersion);
 
 // Version history routes
-router.get("/:projectId/version/:versionId/history", getVersionHistory);
-router.post("/:projectId/version/:versionId/history", encryptDataMiddleware, createVersionHistory);
-router.get("/:projectId/version/:versionId/history/:historyId", getHistoryById);
-router.patch("/:projectId/version/:versionId/history/:historyId", encryptDataMiddleware, editVersionHistory);
-router.delete("/:projectId/version/:versionId/history/:historyId", deleteVersionHistory);
+router.get("/:projectId/versions/:versionId/history", getVersionHistory);
+router.post("/:projectId/versions/:versionId/history", encryptDataMiddleware, createVersionHistory);
+router.get("/:projectId/versions/:versionId/history/:historyId", getHistoryById);
+router.patch("/:projectId/versions/:versionId/history/:historyId", encryptDataMiddleware, editVersionHistory);
+router.delete("/:projectId/versions/:versionId/history/:historyId", deleteVersionHistory);
 
 // Special operations
-router.post("/:projectId/version/:versionId/history/:historyId/rollback", rollbackVersionToHistory);
+router.post("/:projectId/versions/:versionId/history/:historyId/rollback", rollbackVersionToHistory);
 
 export default router;

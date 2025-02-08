@@ -9,7 +9,7 @@ import { useProjectStore } from "../store/useProjectStore";
 
 function TopRightBar() {
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);

@@ -1,5 +1,5 @@
 import { addMember, editMemberRole, getMembersByProjectId, removeMember } from "@root/controllers/memberControllers";
-import { validate, validateProjectId, validateRoleOptional, validateRoleRequired, validateUserId } from "@root/middleware/memberValidator";
+import { validate, validateProjectId, validateRoleOptional, validateRoleRequired, validateUserId } from "@root/middleware/validators/memberValidator";
 import { Router } from "express";
 
 
