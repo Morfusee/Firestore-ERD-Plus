@@ -1,13 +1,11 @@
+import ValidationError from "@root/errors/ValidationError";
 import { Request, Response, NextFunction } from "express";
-import { body, validationResult } from "express-validator";
+import { body, query, validationResult } from "express-validator";
 
-const validate = (req: Request, res: Response, next: NextFunction) => {
+const validate = (req: Request, _res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(400).json({
-      errors: errors.array(),
-    });
-    return;
+    throw new ValidationError(errors.array())
   }
   next();
 };
@@ -35,4 +33,13 @@ export const validateUser = [
     .withMessage("Display name must be between 8 and 20 characters"),
 
   validate,
-];
+]
+
+export const validateEmailQuery = [
+  query("limit")
+    .optional()
+    .isInt({ gt: 0})
+    .withMessage("Limit must be a positive integer"),
+
+  validate,
+]

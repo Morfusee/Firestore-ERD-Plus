@@ -20,7 +20,6 @@ import { DrawerModalFormValues } from "../../types/TopLeftBarTypes";
 import useProjectIcon from "../../utils/useProjectIcon";
 import AsyncEmojiPicker from "../AsyncEmojiPicker";
 import { ContextModalProps } from "@mantine/modals";
-import { createProject, reformatProject } from "../../data/api/projectsApi";
 import { StatusIcon } from "../icons/StatusIcon";
 import { isSuccessStatus, determineTitle } from "../../utils/successHelpers";
 
@@ -38,11 +37,6 @@ function DrawerModal({
 }>) {
   // Set up the props
   const { mode, project, handleOptimisticUpdate } = innerProps;
-  const {
-    editProject,
-    addProject: addProjectToStore,
-    selectProject,
-  } = useProjectRepo();
   const { getHexByEmoji } = useEmojiRepo();
   const { projectIcon, isProjectSelected } = useProjectIcon(
     project?.icon || "",

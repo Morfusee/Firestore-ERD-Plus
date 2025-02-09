@@ -13,12 +13,13 @@ export default function errorMiddleware(
     const error = err.error
     const message = err.message
     const errors = err.details
-    res.status(status).send({ status, error, message, details: errors})
+    res.status(status).send({ success: false, status, message, error, details: errors})
   } else {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      status: 500
+      status: 500,
+      error: err
     })
   }
 

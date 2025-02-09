@@ -4,6 +4,7 @@ import Project from "@root/models/projectModel"
 import User from "@root/models/userModel"
 import { MemberBody, MemberParams, MemberRoleBody, ProjectParams } from "@root/types/memberTypes"
 import { NextFunction, Request, Response } from "express"
+import SuccessResponse from "@root/success/SuccessResponse.ts";
 
 
 
@@ -23,21 +24,37 @@ export const getMembersByProjectId = async (
     if (!project) throw new NotFoundError('Project not found')
  
     // Query for Member document
-    const member = await Project.findById(projectId)
+    const members = await Project.findById(projectId)
       .select('members')
       .populate({
         path: 'members.userId',
         select: 'username email displayName'
       })
+      .lean()
       .exec()
-    if (!member) throw new NotFoundError('Member list not found')
+    if (!members) throw new NotFoundError('Member list not found')
     
-    // Return list of members
-    res.status(200).json(member)
+    const cleanedMembers = members.members.map(({ userId, role }: any) => {
+      if (typeof userId === "object" && userId !== null) {
+        return {
+          id: userId._id,
+          username: userId.username,
+          email: userId.email,
+          displayName: userId.displayName,
+          role,
+        };
+      }
+      return { id: userId, role };
+    });
+    
 
+    next(
+      new SuccessResponse("Members fetched successfully.", {
+        members: cleanedMembers,
+      })
+    )
     // Todo: Pagination
   } catch (error) {
-    console.log(error)
     next(error)
   }
 }
@@ -74,17 +91,23 @@ export const addMember = async (
     // Check if the role of the one adding is an owner or admin
     // TODO when auth is implemented
 
+    const memberData = { userId: user.id, role: role || 'viewer' }
+
     // Add member to project
     await project.updateOne(
-      { $push: { members: { userId: user.id, role: role || 'viewer' } } }
+      { $push: { members: memberData } }
     )
     // Add project to user
     await user.updateOne(
       { $push: { sharedProjects: project.id }}
     )
 
-    // Return success
-    res.status(200).json({ message: "Member has been added successfully" })
+    next(
+      new SuccessResponse("Member has been added successfully.", {
+        addedMember: memberData,
+      })
+    )
+
   } catch (error) {
     next(error)
   }
@@ -134,8 +157,11 @@ export const editMemberRole = async (
       { arrayFilters: [{ 'member.userId': user.id }] }
     )
 
-    // Return ok
-    res.status(200).json({ message: "Member role has been updated successfully" })
+    next(
+      new SuccessResponse("Member role has been updated successfully.", {
+        updatedMember: { userId: user.id, role: role },
+      })
+    )
 
   } catch (error) {
     next(error)
@@ -185,11 +211,14 @@ export const removeMember = async (
     )
     // Remove project from the user
     await user.updateOne(
-      { $pull: { sharedProjects: { projectId: project.id }}}
+      { $pull: { sharedProjects: project.id }}
     )
 
-    // Return ok
-    res.status(200).json({ message: "Member has been removed successfully" })
+    next(
+      new SuccessResponse("Member has been removed successfully.", {
+        deletedMemberId: user.id,
+      })
+    )
 
   } catch (error) {
     next(error)

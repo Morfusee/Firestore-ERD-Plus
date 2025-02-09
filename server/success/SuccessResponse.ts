@@ -1,11 +1,9 @@
-export class SuccessResponse<T> {
-  status: number;
-  message: string;
-  data?: T;
+import HTTPSuccess from "./HTTPSuccess";
 
-  constructor(status: number = 200, message: string, data?: T) {
-    this.status = status;
-    this.message = message;
-    this.data = data;
+
+export default class SucessResponse<T> extends HTTPSuccess<T> {
+  constructor( message: string, data: T ) {
+    super(200, message,  data)
   }
 }
+

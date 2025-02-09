@@ -1,8 +1,8 @@
-import { SuccessResponse } from "@root/success/SuccessResponse";
+import HTTPSuccess from "@root/success/HTTPSuccess";
 import { Request, Response, NextFunction } from "express";
 
 export default function successMiddleware<T>(
-  success: SuccessResponse<T>,
+  success: HTTPSuccess<T>,
   _req: Request,
   res: Response,
   _next: NextFunction
@@ -12,6 +12,7 @@ export default function successMiddleware<T>(
     const message = success.message;
     const data = success.data;
     res.status(status).send({
+      success: true,
       status,
       message,
       data,

@@ -9,7 +9,7 @@ import {
   getOwnedProjectsByUserId,
 } from "../controllers/userController";
 
-import { validateUser } from "../middleware/userValidator";
+import { validateEmailQuery, validateUser } from "../middleware/validators/userValidator";
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const router = express.Router();
 router.get("", getAllUsers);
 
 // Route for getting users by email
-router.get("/search", getUserByEmail);
+router.get("/search", validateEmailQuery, getUserByEmail);
 
 // Route for a specific user by ID
 router.get("/:id", getUserById);

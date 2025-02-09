@@ -83,13 +83,14 @@ import { modals } from "@mantine/modals";
 import AsyncEmojiPicker from "./AsyncEmojiPicker";
 import DrawerModal from "./modals/DrawerModal";
 import {
-  createProject,
-  deleteProject,
-  editProject,
-  reformatProject,
+  createProjectApi,
+  deleteProjectApi,
+  editProjectApi,
 } from "../data/api/projectsApi";
 import { StatusIcon } from "./icons/StatusIcon";
 import { determineTitle, isSuccessStatus } from "../utils/successHelpers";
+import useUserRepo from "../data/repo/useUserRepo";
+import useChangelogRepo from "../data/repo/useChangelogRepo";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -127,7 +128,17 @@ function ActionButtons({
   const { height, width } = useViewportSize();
 
   const { onSave, onUndo, canUndo, canRedo, onRedo } = useHistoryRepo();
+  const { saveChangelog } = useChangelogRepo();
   const { hasPendingChanges } = useEditorStore();
+
+  const handleSave = async () => {
+    const res = await onSave()
+
+    if (res?.success) {
+      const changelog = res.data.changelog
+      await saveChangelog(changelog)
+    }
+  }
 
   return (
     <Flex
@@ -165,7 +176,7 @@ function ActionButtons({
         variant="subtle"
         size="lg"
         radius="xl"
-        onClick={() => onSave()}
+        onClick={() => handleSave()}
       >
         {hasPendingChanges ? <Loader size={"sm"} /> : <IconDeviceFloppy />}
       </ActionIcon>
@@ -235,42 +246,39 @@ function Drawer({ opened }: { opened: boolean }) {
 }
 
 function DrawerHeader() {
-  const { addProject: addProjectToStore, selectProject } = useProjectRepo();
+  const { addProject, selectProject } = useProjectRepo();
+  const { loadChangelogs } = useChangelogRepo();
+  const { user } = useUserRepo();
   const navigate = useNavigate();
 
   const handleCreateProject = async (values: DrawerModalFormValues) => {
-    const response = await createProject(
-      values.name,
-      values.icon,
-      "67905ca5411c5dcf426c89c6"
-    );
+
+    if (!user) return;
 
     // Get status of response
-    const status = isSuccessStatus(response.status);
+    const response = await addProject(values.name, values.icon, user.id)
 
     // Only attempt to add the project if the success status is true
-    if (status) {
-      const createdProject = reformatProject(response.data.createdProject);
-
-      // Add project to store
-      await addProjectToStore(createdProject);
+    if (response.success) {
 
       // Select the project on creation in STATE
-      selectProject(createdProject.id);
+      selectProject(response.data.createdProject.id);
+
+      loadChangelogs(response.data.createdProject.id)
 
       // Navigate/Enter the project on creation
-      navigate(`/${createdProject.id}`);
+      navigate(`/${response.data.createdProject.id}`);
     }
 
     // Show notification
     notifications.show({
-      icon: <StatusIcon status={status ? "success" : "error"} />,
+      icon: <StatusIcon status={response.success ? "success" : "error"} />,
       withBorder: true,
       autoClose: 5000,
       title: determineTitle(
         "Project Created",
         "Failed to Create Project",
-        status
+        response.success
       ),
       message: response.message,
     });
@@ -331,6 +339,9 @@ function DrawerItems({ project }: { project: IProject }) {
     projectId
   );
 
+  const { selectProject } = useProjectRepo()
+  const { loadChangelogs } = useChangelogRepo();
+
   return (
     <DrawerItemMenu project={project}>
       {(open, opened) => (
@@ -355,7 +366,8 @@ function DrawerItems({ project }: { project: IProject }) {
           }}
           onClick={() => {
             navigate(`/${project.id}`, { replace: true });
-            // selectProject(project.id);
+            selectProject(project.id);
+            loadChangelogs(project.id)
           }}
           rightSection={
             <ActionIcon
@@ -403,11 +415,10 @@ function DrawerItemMenu({
 
   // State
   const {
-    addProject: addProjectToStore,
     selectProject,
     duplicateProject,
-    deleteProject: deleteProjectStore,
-    editProject: editProjectStore,
+    deleteProject,
+    editProject,
     clearProject,
   } = useProjectRepo();
   const [
@@ -419,37 +430,33 @@ function DrawerItemMenu({
     values: DrawerModalFormValues,
     projectId: IProject["id"]
   ) => {
-    const response = await editProject(values.name, values.icon, projectId!);
-    // Get status of response
-    const status = isSuccessStatus(response.status);
+
+    if (!projectId) return
+
+    const res = await editProject(
+      projectId,
+      values.name,
+      values.icon,
+    );
 
     // Only attempt to locally edit the project if the success status is true
-    if (status) {
-      const editedProject = reformatProject(response.data.updatedProject);
-
-      // Add edited project to store
-      await editProjectStore(
-        editedProject.id,
-        editedProject.name,
-        editedProject.icon,
-        editedProject.updatedAt
-      );
+    if (res?.success) {
 
       // If the user is currently editing the selected project,
       // just reselect the project to update the values.
-      if (params.projectId == editedProject.id) selectProject(params.projectId);
+      if (params.projectId == res.data.updatedProject.id) selectProject(params.projectId);
     }
 
     // Show notification
     notifications.show({
-      icon: <StatusIcon status={status ? "success" : "error"} />,
+      icon: <StatusIcon status={res?.success ? "success" : "error"} />,
       withBorder: true,
       autoClose: 5000,
-      title: determineTitle("Project Edited", "Failed to Edit Project", status),
-      message: response.message,
+      title: determineTitle("Project Edited", "Failed to Edit Project", res?.success || false),
+      message: res?.message,
     });
 
-    return response;
+    return res;
   };
 
   const handleDuplicate = () => {
@@ -461,16 +468,12 @@ function DrawerItemMenu({
     if (!project.id) return;
 
     // Delete project from DB
-    const response = await deleteProject(project.id);
 
     // Delete project from store
-    await deleteProjectStore(response.data.deletedProjectId);
-
-    // Check if returned response is a success
-    const status = isSuccessStatus(response.status);
+    const res = await deleteProject(project.id);
 
     // Check if the current project is the one that's deleted
-    if (status && params.projectId == response.data.deletedProjectId) {
+    if (res.success && params.projectId == res.data.deletedProjectId) {
       // Navigate to "/" if the deleted project is the current project the user is on.
       navigate("/");
 
@@ -480,10 +483,10 @@ function DrawerItemMenu({
 
     // Show notification after deleting
     notifications.show({
-      icon: <StatusIcon status={status ? "success" : "error"} />,
+      icon: <StatusIcon status={res.success ? "success" : "error"} />,
       withBorder: true,
       autoClose: 5000,
-      message: response.message,
+      message: res.message,
     });
   };
 

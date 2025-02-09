@@ -3,8 +3,10 @@ import { db } from "../db/db";
 import { IProject } from "../../types/ProjectTypes";
 import { useEditorStore } from "../../store/useEditorStore";
 import { IEditorDataSnapshot } from "../../types/EditorStoreTypes";
+import { createProjectApi, editProjectApi, deleteProjectApi, getProjectByIdApi } from "../api/projectsApi";
 
-const useProjectRepo = () => {
+
+const useProjectRepo  = () => {
   const projects = useProjectStore((state) => state.projects);
   const selectedProject = useProjectStore((state) => state.selectedProject);
   const setProjects = useProjectStore((state) => state.setProjects);
@@ -25,6 +27,7 @@ const useProjectRepo = () => {
   const saveCache = useProjectStore((state) => state.saveCache);
   const getCache = useProjectStore((state) => state.getCache);
   const loadStateData = useEditorStore((state) => state.loadDataSnapshot);
+  const loadDiagramData = useEditorStore((state) => state.loadDataSnapshot);
   const loadCache = useEditorStore((state) => state.loadDataSnapshot);
 
   const clearRedo = useEditorStore((state) => state.clearRedo);
@@ -53,12 +56,30 @@ const useProjectRepo = () => {
   };
 
   const loadProject = (project: IProject) => {
-    if (!project.diagramData) return;
-    const data = JSON.parse(project.diagramData) as IEditorDataSnapshot;
-    console.log(data);
+    if (!project.data) {
+      loadStateData({
+        nodes: [],
+        edges: []
+      })
+      return
+    }
+    const data = JSON.parse(project.data) as IEditorDataSnapshot;
 
     // Load the data to the state
     loadStateData(data);
+  };
+
+  const loadProjectData = (diagramData: IEditorDataSnapshot) => {
+    if (!diagramData) {
+      loadDiagramData({
+        nodes: [],
+        edges: []
+      })
+      return
+    }
+
+    // Load the data to the state
+    loadStateData(diagramData);
   };
 
   const resetProjectCanvas = () => {
@@ -68,26 +89,25 @@ const useProjectRepo = () => {
     setCanRedo(false);
   };
 
-  const selectProject = (id: string | undefined) => {
-    // Non-stale state
-    const projects = getProjects();
+  const selectProject = async (projectId: string | undefined) => {
 
-    // If no projects have been saved, return
-    if (!projects) return;
-    const selected = projects.find((project) => project.id === id);
+    if (!projectId) return
 
-    // If no project is selected, return
-    if (!selected) return;
-
-    // Save the current project to cache
+    // Save the previous current project to cache
     if (selectedProject && selectedProject.id !== undefined) {
       saveProjectCache(selectedProject.id);
     }
+    
+    // Fetch the new selected project
+    const res = await getProjectByIdApi(projectId)
+    const selected = res.data.project
 
-    const cache = getCache().find((item) => item.id === id);
+    const cache = getCache().find((item) => item.id === projectId);
     if (cache) {
+      console.log("Loading cache money")
       loadCache(cache.stateData);
     } else {
+      console.log("Loading projector")
       loadProject(selected);
     }
 
@@ -102,93 +122,62 @@ const useProjectRepo = () => {
     // Delete cleared project from cache
   };
 
-  const addProject = async (project: IProject) => {
-    // const timestamp = Date.now();
-    // const data: IProject = {
-    //   name: name,
-    //   icon: icon,
-    //   diagramData: JSON.stringify({
-    //     nodes: [],
-    //     edges: [],
-    //   }),
-    //   members: [],
-    //   createdAt: timestamp,
-    //   updatedAt: timestamp,
-    // };
-
-    // // Save to db
-    // const id = await db.projects.add(data);
-
-    // // Save to state
-    // addState({
-    //   ...data,
-    //   id: id,
-    // });
+  const addProject = async (
+    name: IProject["name"],
+    icon: IProject["icon"],
+    userId: string
+  ) => {
+    const response = await createProjectApi(
+      name,
+      icon,
+      userId
+    );
 
     // Add to state
-    addState(project);
+    if (response.success) {
+      addState(response.data.createdProject);
+    }
+
+    return response
   };
 
   const editProject = async (
     id: string,
     name: string,
     icon: string,
-    updatedAt: IProject["updatedAt"]
   ) => {
-    const projects = getProjects();
-
-    const edit = projects.find((project) => project.id === id);
 
     if (name == "" && icon == "") {
       console.warn("Incomplete data.");
       return;
     }
-    // if (!edit) {
-    //   console.warn(
-    //     `Error editing the project - project with the id ${id} cannot be found`
-    //   );
-    //   return;
-    // }
-    // if (name == "") {
-    //   console.warn(`Error editing the project - name should not be blank`);
-    //   return;
-    // }
-    // if (icon == "") {
-    //   console.warn(`Error editing the project - invalid icon`);
-    //   return;
-    // }
 
-    // const timestamp = Date.now();
-
-    // // Save to db
-    // await db.projects.update(id, data);
-
-    const updatedData = {
-      name: name,
-      icon: icon,
-      updatedAt: updatedAt,
-    };
+    const response = await editProjectApi(name, icon, id);
 
     // Save to state
-    editState(id, updatedData);
+    if (response.success) {
+      const updatedData = {
+        name: response.data.updatedProject.name,
+        icon: response.data.updatedProject.icon,
+        updatedAt: response.data.updatedProject.updatedAt,
+      };
+
+      editState(id, updatedData);
+    }
+
+    return response
   };
 
-  const deleteProject = async (id: string) => {
-    // // TODO: Deselect current project if deleted
-    // const project = projects.find((project) => project.id === id);
+  const deleteProject = async (projectId: string) => {
 
-    // if (!project) {
-    //   console.warn(
-    //     `Error deleting the project - project with the id ${id} cannot be found`
-    //   );
-    //   return;
-    // }
-
-    // // Delete from db
-    // await db.projects.delete(id);
+    const response = await deleteProjectApi(projectId);
 
     // Delete from state
-    deleteState(id);
+    if(response.success) {
+      deleteState(projectId);
+    }
+
+    return response
   };
 
   const duplicateProject = async (id: string) => {
@@ -231,6 +220,7 @@ const useProjectRepo = () => {
     editProject,
     deleteProject,
     duplicateProject,
+    loadProjectData,
   };
 };
 
