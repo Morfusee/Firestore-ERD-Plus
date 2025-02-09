@@ -34,7 +34,19 @@ export const getMembersByProjectId = async (
       .exec()
     if (!members) throw new NotFoundError('Member list not found')
     
-    const cleanedMembers = members.members.map(({ _id, ...rest }) => rest)
+    const cleanedMembers = members.members.map(({ userId, role }: any) => {
+      if (typeof userId === "object" && userId !== null) {
+        return {
+          id: userId._id,
+          username: userId.username,
+          email: userId.email,
+          displayName: userId.displayName,
+          role,
+        };
+      }
+      return { id: userId, role };
+    });
+    
 
     next(
       new SuccessResponse("Members fetched successfully.", {

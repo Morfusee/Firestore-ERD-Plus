@@ -5,11 +5,15 @@ import { useEmojiStore } from "../../store/globalStore";
 import useEmojiRepo from "./useEmojiRepo";
 import useProjectRepo from "./useProjectRepo";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProjects } from "../api/projectsApi";
+import { getProjectsApi } from "../api/projectsApi";
 import { useIsFirstRender } from "@mantine/hooks";
+import useUserRepo from "./useUserRepo";
+import useChangelogRepo from "./useChangelogRepo";
 
 export const useDataInitializer = () => {
+  const { loginUser } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
+  const { loadChangelogs } = useChangelogRepo();
 
   // Router
   const params = useParams();
@@ -23,7 +27,7 @@ export const useDataInitializer = () => {
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    Promise.all([loadProjects(), loadEmojis()]).then(() => {
+    Promise.all([loadProjects(), loadEmojis(), loadLoggedInUser()]).then(() => {
       setIsLoaded(true);
     });
   }, []);
@@ -31,18 +35,27 @@ export const useDataInitializer = () => {
   useEffect(() => {
     if (id) {
       selectProject(id);
+      loadChangelogs(id)
     }
   }, [id, isLoaded]);
+
+  const testUserId = "67a89f3a14e42f94a3b68a2d"
+
+  const loadLoggedInUser = async () => {
+    loginUser(testUserId)
+  }
 
   const loadProjects = async () => {
     console.log("Loading projects from local storage");
 
     // Dexie fetching of projects
     // NOTE: Not needed anymore
-    const projectList = await db.projects.toArray();
+    // const projectList = await db.projects.toArray();
+
+    const getProjectList = await getProjectsApi(testUserId) 
 
     // Backend fetching of projects
-    setProjectList(await getProjects("67905ca5411c5dcf426c89c6"));
+    setProjectList(getProjectList.data.projects);
   };
 
   const fetchEmojis = async () => {

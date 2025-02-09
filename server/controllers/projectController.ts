@@ -38,7 +38,7 @@ export const getProjectsByUserId = async (
 
     const projectsByUser = await Project.find({
       "members.userId": userId,
-    });
+    }).select('-data -members');
 
     if (!projectsByUser) throw new NotFoundError("No projects found.");
 
@@ -61,7 +61,7 @@ export const getAllProjects = async (
 ) => {
   try {
     // Find all projects
-    const projects = await Project.find();
+    const projects = await Project.find().select('-data -members');
 
     // If no projects are found, throw an error
     if (!projects || projects.length === 0)
@@ -86,7 +86,7 @@ export const getProjectById = async (
 ) => {
   try {
     // Find the project by ID
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findById(req.params.id).select('-members');
 
     // Check if the project exists
     if (!project) throw new NotFoundError("Project not found.");
@@ -119,7 +119,7 @@ export const editProject = async (
       req.params.id,
       req.body,
       { new: true }
-    );
+    ).select('-data -members');
 
     next(
       new SuccessResponse("Project updated successfully.", {
@@ -184,7 +184,7 @@ export const saveProject = async (
 ) => {
   try {
     // Find the project by ID
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findById(req.params.id).select('-members');
     const { data, members = [] } = req.body;
 
     // Check if the project exists
@@ -196,19 +196,34 @@ export const saveProject = async (
     const savedProject = await project.save();
 
     // Create a new Changelog entry
-    const changelog = new Changelog({
+    const newChangelog = new Changelog({
       project: project._id,
       data,
       currentVersion: true,
       members,
     });
 
-    await changelog.save();
+    await newChangelog.save();
+
+    const changelog = await newChangelog
+      .populate({
+        path: 'members',
+        select: '_id displayName'
+      })
+
+    const transformedChangelog = {
+      ...changelog.toObject(),
+      id: changelog.id,
+      members: changelog.members.map((member: any) => ({
+        id: member._id,
+        displayName: member.displayName,
+      })),
+    };
 
     next(
       new SuccessResponse("Project data saved successfully.", {
         project: savedProject,
-        changelog,
+        changelog: transformedChangelog,
       })
     );
   } catch (error: any) {

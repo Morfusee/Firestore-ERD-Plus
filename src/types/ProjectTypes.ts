@@ -2,7 +2,7 @@ export interface IProject {
   id?: string;
   name: string;
   icon: string;
-  diagramData?: string;
+  data?: string;
   members: IProjectMembers[];
   createdAt: number;
   updatedAt: number;

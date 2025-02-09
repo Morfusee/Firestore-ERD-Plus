@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
+import mongooseNestedTransformPlugin from "@root/utils/mongooseNestedTransformPlugin";
 
 // Define the Version schema
 const changelogSchema = new mongoose.Schema(
@@ -33,7 +33,7 @@ const changelogSchema = new mongoose.Schema(
 );
 
 
-changelogSchema.plugin(mongooseTransformPlugin);
+changelogSchema.plugin(mongooseNestedTransformPlugin);
 
 const Changelog = mongoose.model('Changelog', changelogSchema);
 export default Changelog;

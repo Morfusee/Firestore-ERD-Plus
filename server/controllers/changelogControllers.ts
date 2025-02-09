@@ -3,7 +3,7 @@ import NotFoundError from "@root/errors/NotFoundError"
 import { NextFunction, Request, Response } from "express"
 import SuccessResponse from "@root/success/SuccessResponse.ts";
 
-// Get All Changelogs (Excluding the `data` Field)
+// Get All Changelogs
 export const getChangelogsByProjectId = async (
   req: Request, 
   res: Response,
@@ -13,8 +13,12 @@ export const getChangelogsByProjectId = async (
     const { projectId } = req.params;
 
     const changelogs = await Changelog.find({ project: projectId })
-      .select('-data') // Exclude the `data` field
-      .sort({ createdAt: -1 }); // Optional: Sort by creation date (newest first)
+      .select('-data')
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'members',
+        select: '_id displayName'
+      })
 
     next(
       new SuccessResponse("Changelogs fetched successfully.", {
@@ -26,7 +30,7 @@ export const getChangelogsByProjectId = async (
   }
 };
 
-// Get Single Changelog (Includes the `data` Field)
+// Get Single Changelog
 export const getChangelogById = async (
   req: Request, 
   res: Response,
@@ -35,7 +39,11 @@ export const getChangelogById = async (
   try {
     const { changelogId } = req.params;
 
-    const changelog = await Changelog.findById(changelogId);
+    const changelog = await Changelog.findById(changelogId)
+      .populate({
+        path: 'members',
+        select: '_id displayName'
+      });
 
     if (!changelog) throw new NotFoundError("Changelog not found.")
 

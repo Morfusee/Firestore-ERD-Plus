@@ -66,7 +66,7 @@ export const useProjectStore = create<IProjectState & IProjectActions>()(
       saveCache: (stateData) =>
         set((state) => {
           const isCached = state.projectStateCache.some(
-            (projectCache) => projectCache.id == stateData.id
+            (projectCache) => projectCache.id === stateData.id
           );
           if (isCached) {
             return {

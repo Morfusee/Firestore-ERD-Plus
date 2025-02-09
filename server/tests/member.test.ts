@@ -57,7 +57,8 @@ describe("Members Tests", () => {
     expect(res.body.status).toBe(200)
     expect(res.body.message).toBe("Members fetched successfully.")
     expect(res.body.data.members).toHaveLength(1)
-    expect(res.body.data.members[0].userId.username).toBe("owner_user")
+    expect(res.body.data.members[0].username).toBe("owner_user")
+    expect(res.body.data.members[0].role).toBe("owner")
   })
 
   it("should return 404 if project not found", async () => {

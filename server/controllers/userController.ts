@@ -60,7 +60,10 @@ export const getOwnedProjectsByUserId = async (
     const ownedProjectsByUser = await User.findOne({
       _id: id,
     })
-      .populate("ownedProjects") // Populate all the found ids with data
+      .populate({
+        path: "ownedProjects",
+        select: "-data -members"
+      }) // Populate all the found ids with data
       .then((user) => user?.ownedProjects); // Get the ownedProjects field only
 
     if (!ownedProjectsByUser) {
