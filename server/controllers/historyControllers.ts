@@ -1,41 +1,52 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { History, Version } from "../models/historyModel.ts";
 import Project from "../models/projectModel.ts";
+import NotFoundError from "@root/errors/NotFoundError.ts";
+import SucessResponse from "@root/success/SuccessResponse.ts";
+import ValidationError from "@root/errors/ValidationError.ts";
+import ConflictError from "@root/errors/ConflictError.ts";
+import CreatedResponse from "@root/success/CreatedResponse.ts";
 
 // Get all project versions
-export const getAllProjectVersions = async (req: Request, res: Response) => {
+export const getAllProjectVersions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { projectId } = req.params;
 
     // Validate project existence
     const project = await Project.findById(projectId);
-    if (!project) {
-      res.status(404).json({ message: "Project not found" });
-      return;
-    }
+    if (!project) throw new NotFoundError("Project not found.")
 
     // Fetch versions for the project
     const versions = await Version.find({ project: projectId }).populate(
       "project"
     );
-    res.status(200).json(versions);
+
+    next(
+      new SucessResponse("Versions fetched successfully.", {
+        versions,
+      })
+    )
+
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
 //Create project version
-export const createProjectVersion = async (req: Request, res: Response) => {
+export const createProjectVersion = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { projectId } = req.params;
     const { name, description } = req.body;
 
-    if (!name) {
-      res.status(400).json({
-        message: "Version name is required. Example: 1.0 or Dev Branch",
-      });
-      return;
-    }
+    if (!name) throw new ValidationError("Version name is required. Example: 1.0 or Dev Branch.")
 
     // Check if version already exists for this project
     const existingVersion = await Version.findOne({
@@ -43,11 +54,7 @@ export const createProjectVersion = async (req: Request, res: Response) => {
       version: name,
     });
 
-    if (existingVersion) {
-      res.status(409).json({
-        message: "Version with this name already exists for this project.",
-      });
-    }
+    if (existingVersion) throw new ConflictError("Version with this name already exists for this project.")
 
     const newVersion = await Version.create({
       project: projectId,
@@ -55,17 +62,22 @@ export const createProjectVersion = async (req: Request, res: Response) => {
       description,
     });
 
-    res.status(201).json(newVersion);
+    next(
+      new CreatedResponse("Versions created successfully.", {
+        createdVersion: newVersion,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({
-      message: "Failed to create version",
-      error: err.message,
-    });
+    next(err)
   }
 };
 
 // Get a project version by ID
-export const getVersionById = async (req: Request, res: Response) => {
+export const getVersionById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { projectId, versionId } = req.params;
 
@@ -74,14 +86,15 @@ export const getVersionById = async (req: Request, res: Response) => {
       _id: versionId,
       project: projectId,
     }).populate("project");
-    if (!version) {
-      res.status(404).json({ message: "Version not found" });
-      return;
-    }
+    if (!version) throw new NotFoundError("Version not found.")
 
-    res.status(200).json(version);
+    next(
+      new SucessResponse("Versions created successfully.", {
+        version,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
@@ -91,15 +104,16 @@ interface EditProjectVersionBody {
   description?: string;
 }
 
-export const editProjectVersion = async (req: Request, res: Response) => {
+export const editProjectVersion = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { versionId } = req.params;
     const { name, description } = req.body;
 
-    if (!versionId) {
-      res.status(400).json({ message: "Version ID is required." });
-      return;
-    }
+    if (!versionId) throw new ValidationError("Version ID is required.")
 
     const updates: Partial<EditProjectVersionBody> = {};
     if (name !== undefined) updates.name = name;
@@ -110,68 +124,79 @@ export const editProjectVersion = async (req: Request, res: Response) => {
       runValidators: true,
     });
 
-    if (!updatedVersion) {
-      res.status(404).json({ message: "Version not found." });
-      return;
-    }
+    if (!updatedVersion) throw new NotFoundError("Version not found.")
 
-    res.status(200).json(updatedVersion);
+    next(
+      new SucessResponse("Versions updated successfully.", {
+        updatedVersion,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({
-      message: err instanceof Error ? err.message : "An error occurred.",
-    });
+    next(err)
   }
 };
 
 // Delete a project version
-export const deleteProjectVersion = async (req: Request, res: Response) => {
+export const deleteProjectVersion = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { versionId } = req.params;
 
     const deletedVersion = await Version.findByIdAndDelete(versionId);
-    if (!deletedVersion) {
-      res.status(404).json({ message: "Version not found." });
-      return;
-    }
+    if (!deletedVersion) throw new NotFoundError("Version not found.")
 
-    res.status(200).json({ message: "Version deleted successfully." });
+    next(
+      new SucessResponse("Versions deleted successfully.", {
+        deletedVersionId: deletedVersion,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
 // Get a version's history
-export const getVersionHistory = async (req: Request, res: Response) => {
+export const getVersionHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { versionId } = req.params;
 
     // Validate version existence
     const version = await Version.findById(versionId);
-    if (!version) {
-      res.status(404).json({ message: "Version not found" });
-      return;
-    }
+    if (!version) throw new NotFoundError("Version not found.")
 
     // Fetch history entries for the version
     const histories = await History.find({ version: versionId }).populate(
       "version"
     );
-    res.status(200).json(histories);
+
+    next(
+      new SucessResponse("History entries fetched successfully.", {
+        histories,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
 // Create a history entry
-export const createVersionHistory = async (req: Request, res: Response) => {
+export const createVersionHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { versionId } = req.params;
     const { data, members } = req.body;
 
-    if (!data) {
-      res.status(400).json({ message: "Data is required." });
-      return;
-    }
+    if (!data) throw new ValidationError("Data is required.")
 
     const newHistory = await History.create({
       version: versionId,
@@ -190,19 +215,24 @@ export const createVersionHistory = async (req: Request, res: Response) => {
       }
     );
 
-    if (!updatedVersion) {
-      res.status(404).json({ message: "Version not found." });
-      return;
-    }
+    if (!updatedVersion) throw new NotFoundError("Version not found.")
 
-    res.status(201).json(newHistory);
+    next(
+      new CreatedResponse("History entry created successfully.", {
+        createdHistory: newHistory,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
 // Get a history entry
-export const getHistoryById = async (req: Request, res: Response) => {
+export const getHistoryById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { versionId, historyId } = req.params;
 
@@ -211,14 +241,15 @@ export const getHistoryById = async (req: Request, res: Response) => {
       _id: historyId,
       version: versionId,
     }).populate("version");
-    if (!history) {
-      res.status(404).json({ message: "History entry not found" });
-      return;
-    }
+    if (!history) throw new NotFoundError("History entry not found.")
 
-    res.status(200).json(history);
+    next(
+      new SucessResponse("History entry fetched successfully.", {
+        history,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
@@ -228,15 +259,16 @@ interface EditVersionHistoryBody {
   members?: string[];
 }
 
-export const editVersionHistory = async (req: Request, res: Response) => {
+export const editVersionHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { historyId } = req.params;
     const { data, members } = req.body;
 
-    if (!historyId) {
-      res.status(400).json({ message: "History ID is required." });
-      return;
-    }
+    if (!historyId) throw new ValidationError("History ID is required.")
 
     const updates: Partial<EditVersionHistoryBody> = {};
     if (data !== undefined) updates.data = data;
@@ -246,44 +278,44 @@ export const editVersionHistory = async (req: Request, res: Response) => {
       new: true,
     });
 
-    if (!updatedHistory) {
-      res.status(404).json({ message: "History entry not found." });
-      return;
-    }
+    if (!updatedHistory) throw new NotFoundError("History entry not found.")
 
-    res.status(200).json(updatedHistory);
+    next(
+      new SucessResponse("History entry updated successfully.", {
+        updatedHistory,
+      })
+    )
   } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
 // Delete a history entry
-export const deleteVersionHistory = async (req: Request, res: Response) => {
+export const deleteVersionHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { historyId } = req.params;
 
-    if (!historyId) {
-      res.status(400).json({ message: "History ID is required." });
-      return;
-    }
+    if (!historyId) throw new ValidationError("History ID is required.")
 
     const historyToDelete = await History.findById(historyId);
 
-    if (!historyToDelete) {
-      res.status(404).json({ message: "History entry not found." });
-      return;
-    }
+    if (!historyToDelete) throw new NotFoundError("History entry not found.")
 
     const deleteMessage = await deleteHistoriesAfter(historyId);
 
     await History.findByIdAndDelete(historyId);
 
-    res
-      .status(200)
-      .json({ message: "History entry deleted successfully.", deleteMessage });
+    next(
+      new SucessResponse("History entry deleted successfully.", {
+        deletedHistory: deleteMessage,
+      })
+    )
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    next(err)
   }
 };
 
@@ -299,12 +331,16 @@ const deleteHistoriesAfter = async (historyId: string): Promise<string> => {
 
     return `${deletedHistories.deletedCount} histories deleted.`;
   } else {
-    throw new Error("Reference history entry not found.");
+    throw new NotFoundError("Reference history entry not found.");
   }
 };
 
 // Rollback a version
-export const rollbackVersionToHistory = async (req: Request, res: Response) => {
+export const rollbackVersionToHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { versionId, historyId } = req.params;
 
   try {
@@ -325,24 +361,20 @@ export const rollbackVersionToHistory = async (req: Request, res: Response) => {
         { new: true }
       );
 
-      if (!updatedVersion) {
-        res.status(404).json({ message: "Version not found." });
-        return;
-      }
-
-      res.status(200).json({
-        message: "Version rolled back successfully.",
-        version: updatedVersion,
-        rollbackEntry,
-      });
+      if (!updatedVersion) throw new NotFoundError("Version not found.")
+      
+      next(
+        new SucessResponse("Version rolled back successfully.", {
+          version: updatedVersion,
+          rollbackEntry: rollbackEntry,
+        })
+      )
     } else {
-      res.status(404).json({ message: "History entry not found." });
+      throw new NotFoundError("History entry not found")
     }
 
     // Update the version's current history reference
   } catch (error: any) {
-    res.status(500).json({
-      message: "Error during rollback: " + error.message,
-    });
+    next(error)
   }
 };

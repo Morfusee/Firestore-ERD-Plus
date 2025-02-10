@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { History, Version } from "./historyModel";
 import User from "./userModel";
 import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
+import Changelog from "./changelogModel";
 
 // Define a schema
 const projectSchema = new mongoose.Schema(
@@ -59,6 +60,9 @@ projectSchema.pre("findOneAndDelete", async function (next) {
 
       // Delete all versions
       await Version.deleteMany({ project: doc._id });
+
+      // Delete all changelogs
+      await Changelog.deleteMany({ project: doc._id });
     }
     next();
   } catch (error) {
@@ -69,6 +73,7 @@ projectSchema.pre("findOneAndDelete", async function (next) {
     }
   }
 });
+
 
 projectSchema.plugin(mongooseTransformPlugin);
 

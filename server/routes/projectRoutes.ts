@@ -21,7 +21,7 @@ import {
   validateDataUpdateRestriction,
   validateProjectData,
   validateOnlyDataField,
-} from "@root/middleware/projectValidator";
+} from "@root/middleware/validators/projectValidator";
 
 const router = express.Router();
 

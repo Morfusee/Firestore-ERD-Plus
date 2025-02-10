@@ -7,9 +7,8 @@ import historyRoutes from "./routes/historyRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import emojiRoutes from "./routes/emojiRoutes.ts";
+import changelogRoutes from "./routes/changelogRoutes.ts";
 import dotenv from "dotenv";
-import errorMiddleware from "./middleware/errorMiddleware.ts";
-import successMiddleware from "./middleware/successMiddleware.ts";
 import { responseStatusMiddleware } from "./middleware/responseStatusMiddleware.ts";
 
 dotenv.config();
@@ -35,35 +34,33 @@ app.options("*", cors()); // This will handle preflight requests for all routes
 /* For Atlas */
 // const mongoURI = process.env.MONGO_ATLAS_URI;
 // Dynamic URI for Development and Production
-const isDockerRunning = process.env.IS_DOCKERIZED;
-const mongoURI = isDockerRunning
-  ? process.env.MONGO_DOCKER_URI
-  : process.env.MONGO_ATLAS_URI;
+if (process.env.NODE_ENV !== "test") {
+  const isDockerRunning = process.env.IS_DOCKERIZED;
+  const mongoURI = isDockerRunning
+    ? process.env.MONGO_DOCKER_URI
+    : process.env.MONGO_ATLAS_URI;
 
-// Connect to MongoDB
-mongoose
-  .connect(mongoURI!)
-  .then(() => {
-    console.log("Connected to MongoDB", isDockerRunning ? "Docker" : "Atlas");
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB: ", err);
-  });
+  // Connect to MongoDB
+  mongoose
+    .connect(mongoURI!)
+    .then(() => {
+      console.log("Connected to MongoDB", isDockerRunning ? "Docker" : "Atlas");
+    })
+    .catch((err) => {
+      console.error("Error connecting to MongoDB: ", err);
+    });
+}
 
 // Use project routes
-app.use("/projects", projectRoutes, historyRoutes);
-app.use("/projects", projectRoutes);
-app.use("/projects", memberRoutes);
+app.use("/projects", projectRoutes, historyRoutes, memberRoutes, changelogRoutes);
 
 // Use user routes
-app.use("/user", settingsRoutes);
-app.use("/users", userRoutes);
+app.use("/users", userRoutes, settingsRoutes);
 
 // GitHub Emoji API
 app.use("/emojis", emojiRoutes);
 
 app.use(responseStatusMiddleware);
 
-// Start the server
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+export default app

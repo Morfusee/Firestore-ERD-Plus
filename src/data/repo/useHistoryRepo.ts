@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
 import { db } from "../db/db";
+import { saveProjectApi } from "../api/projectsApi";
+import { useUserStore } from "../../store/useUserStore";
 
 const useHistoryRepo = () => {
+  const user = useUserStore((state) => state.currentUser);
   const selectedProject = useProjectStore((state) => state.selectedProject);
   const editProjectState = useProjectStore((state) => state.editProject);
 
@@ -89,21 +92,28 @@ const useHistoryRepo = () => {
   const onSave = async () => {
     if (!selectedProject) return;
     if (!selectedProject.id) return;
+    if (!user) return;
 
     const snapshot = getDataSnap();
     const json = JSON.stringify(snapshot);
 
-    const timestamp = Date.now();
-    const data = {
-      diagramData: json,
-      updatedAt: timestamp,
-    };
+    // Save to server
+    const res = await saveProjectApi(
+      selectedProject.id,
+      json,
+      [user.id]
+    )
 
-    // Save to db
-    await db.projects.update(selectedProject.id, data);
+    if (!res.success) return
+
     // Save to state
-    editProjectState(selectedProject.id, data);
+    editProjectState(selectedProject.id, {
+      data: json,
+      updatedAt: res.data.project.updatedAt
+    });
     resetCounter();
+
+    return res
   };
 
   return {

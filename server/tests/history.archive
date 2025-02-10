@@ -1,0 +1,97 @@
+import { MongoMemoryServer } from "mongodb-memory-server"
+import request from "supertest"
+import app from "../app"
+import mongoose from "mongoose"
+import { beforeAll, afterAll, describe, it, expect, afterEach, beforeEach } from "@jest/globals"
+import Project from "../models/projectModel"
+import { History, Version } from "../models/historyModel"
+
+let mongoServer: MongoMemoryServer
+
+beforeAll(async () => {
+  process.env.NODE_ENV = "test"
+  mongoServer = await MongoMemoryServer.create()
+  const uri = mongoServer.getUri()
+  await mongoose.connect(uri)
+
+})
+
+afterAll(async () => {
+  await mongoose.disconnect()
+  await mongoServer.stop()
+})
+
+let projectId: string;
+
+beforeEach(async () => {
+  const project = await Project.create({ name: 'Test Project', icon: "1f600" });
+  projectId = project._id.toString();
+})
+
+afterEach(async ()=> {
+  await Project.deleteMany({})
+  await Version.deleteMany({})
+  await History.deleteMany({})
+})
+
+describe("History Tests", () => {
+
+  // Create Version 
+  it('should create a version along with its history', async () => {
+    const response = await request(app)
+      .post(`/projects/${projectId}/versions`)
+      .send({ name: '1.0.0', description: 'Initial Release' })
+      .expect(201)
+    
+    expect(response.body.data.createdVersion).toHaveProperty('id')
+    expect(response.body.data.createdVersion.name).toBe('1.0.0')
+
+    const version = await Version.findOne({ name: '1.0.0' });
+    const history = await History.findOne({ version: version?._id })
+
+    expect(version).not.toBeNull();
+    expect(history).not.toBeNull();
+    expect(history?.version.toString()).toBe(version?._id.toString())
+  });
+
+  // Get all Versions & History
+  it('should get all versions with their history', async () => {
+    const version = await Version.create({ name: '1.0.1', project: projectId })
+    await History.create({ version: version._id, data: 'Initial data' })
+
+    const response = await request(app)
+      .get(`/projects/${projectId}/versions`)
+      .expect(200)
+
+    expect(response.body.data.versions.length).toBe(1)
+    expect(response.body.data.versions[0].name).toBe('1.0.1')
+  });
+
+  // Get Version by ID
+  it('should get a specific version by ID', async () => {
+    const version = await Version.create({ name: '2.0.0', project: projectId })
+
+    const response = await request(app)
+      .get(`/projects/${projectId}/versions/${version._id}`)
+      .expect(200)
+
+    expect(response.body.data.version.name).toBe('2.0.0')
+  });
+
+  // Get History by Version ID
+  it('should get history by version ID', async () => {
+    const version = await Version.create({ name: '3.0.0', project: projectId })
+    const history = await History.create({
+      version: version._id,
+      data: 'Changelog for 3.0.0'
+    });
+
+    const response = await request(app)
+      .get(`/versions/${version._id}/histories`)
+      .expect(200);
+
+    expect(response.body.data.histories.length).toBe(1)
+    expect(response.body.data.histories[0].data).toBe('Changelog for 3.0.0')
+  });
+
+})

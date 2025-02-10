@@ -4,6 +4,13 @@ import { modals } from "@mantine/modals";
 import { IconEdit, IconHistory, IconHistoryToggle, IconLogout } from "@tabler/icons-react";
 import { useState } from "react";
 import { useProjectStore } from "../store/useProjectStore";
+import useUserRepo from "../data/repo/useUserRepo";
+import useChangelogRepo from "../data/repo/useChangelogRepo";
+import { IChangelog, IMember } from "../store/useChangelogStore";
+import useProjectRepo from "../data/repo/useProjectRepo";
+import useEditorRepo from "../data/repo/useEditorRepo";
+import { IProject } from "../types/ProjectTypes";
+import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
 
 
 
@@ -44,6 +51,8 @@ function ActionButtons({
   const { width } = useViewportSize();
 
   const [opened, handlers] = useDisclosure(false)
+
+  const { user } = useUserRepo()
 
   return(
     <Flex
@@ -86,9 +95,9 @@ function ActionButtons({
               size={72}
             />
 
-            <Stack gap={2}>
-              <Title order={2}>Test User</Title>
-              <Text >test@email.com</Text>
+            <Stack gap={2} justify="center">
+              <Title order={2} ta='center'>{user?.displayName}</Title>
+              <Text ta='center'>{user?.email}</Text>
             </Stack>
 
             <Group w='100%' gap='xs'>
@@ -174,26 +183,40 @@ function DrawerHeader() {
 
 function HistoryTimeline() {
 
-  const sampleTimeline: HistoryItemProps[] = [
-    {dateTime: new Date(Date.now()), currentVersion: true, memberChanges: ["Doggy", "Hatdog"]},
-    {dateTime: new Date(Date.now()), currentVersion: false, memberChanges: ["Doggy", "Hatdog", "Dog-san", "Bogie"]},
-    {dateTime: new Date(Date.now()), currentVersion: false, memberChanges: []},
-    {dateTime: new Date(Date.now()), currentVersion: false, memberChanges: []},
-    {dateTime: new Date(Date.now()), currentVersion: false, memberChanges: []},
-    {dateTime: new Date(Date.now()), currentVersion: false, memberChanges: []},
-    {dateTime: new Date(Date.now()), currentVersion: false, memberChanges: []},
-  ]
+  const { 
+    changelogs, 
+    activeChangelog,
+    selectChangelog,
+  } = useChangelogRepo();
+
+  const {
+    selectedProject,
+    loadProjectData,
+  } = useProjectRepo()
+
+  const handleSelectLog = async (changelog: IChangelog) => {
+    if(!selectedProject) return
+    if(!selectedProject.id) return
+
+    const res = await selectChangelog(selectedProject.id, changelog)
+
+    if (res.success){
+      const projectData = JSON.parse(res.data.changelog.data) as IEditorDataSnapshot
+      loadProjectData(projectData)
+    }
+  }
 
   return(
     <Box py='xs' px={6} className="w-full h-full overflow-x-auto beautifulScrollBar">
-      <Timeline active={6} reverseActive bulletSize={8} lineWidth={2} align="right">
+      <Timeline active={20} reverseActive bulletSize={8} lineWidth={2} align="right">
         {
-          sampleTimeline.map((item) => (
-            <Timeline.Item >
+          changelogs.map((item, idx) => (
+            <Timeline.Item key={item.id}>
               <HistoryItem
-                dateTime={item.dateTime}
-                currentVersion={item.currentVersion}
-                memberChanges={item.memberChanges}
+                dateTime={new Date(item.createdAt)}
+                currentVersion={activeChangelog ? activeChangelog.id == item.id : idx === 0 }
+                memberChanges={item.members || []}
+                onClick={() => handleSelectLog(item)}
               />
             </Timeline.Item>
           ))
@@ -207,13 +230,15 @@ function HistoryTimeline() {
 interface HistoryItemProps {
   dateTime: Date
   currentVersion: boolean
-  memberChanges: string[]
+  memberChanges: IMember[]
+  onClick: () => void
 }
 
 function HistoryItem({
   dateTime,
   currentVersion,
-  memberChanges
+  memberChanges,
+  onClick
 }: HistoryItemProps) {
 
   const dateFormat = new Intl.DateTimeFormat('en-US', {
@@ -228,30 +253,31 @@ function HistoryItem({
   })
 
   return(
-      <UnstyledButton 
-        className="w-full flex flex-col items-end px-2 py-1 rounded-md transition-colors hover:bg-neutral-500 hover:bg-opacity-20"
-        pr='xs' py={3}
-      >
-        <Stack gap={0} align="end">
-            <Text c="dimmed" size="sm">{timeFormat.format(dateTime)}</Text>
-            <Text fw={500}>{dateFormat.format(dateTime)}</Text>
-          </Stack>
-        { currentVersion ? <Text c="dimmed" fs="italic" size="xs" mt={4}>Current Version</Text> : null}
-
-        <Stack gap={0} align="end">
-          {
-            memberChanges.slice(0,3).map((member) => (
-              <Text c="dimmed" size="sm">{member}</Text>
-            ))
-          }
-          { 
-            memberChanges.length > 3 ?
-              <Text c="dimmed" size="sm">{`+${memberChanges.length - 3} more`}</Text>
-              :
-              null
-          }
+    <UnstyledButton 
+      className="w-full flex flex-col items-end px-2 py-1 rounded-md transition-colors hover:bg-neutral-500 hover:bg-opacity-20"
+      pr='xs' py={3}
+      onClick={onClick}
+    >
+      <Stack gap={0} align="end">
+          <Text c="dimmed" size="sm">{timeFormat.format(dateTime)}</Text>
+          <Text fw={500}>{dateFormat.format(dateTime)}</Text>
         </Stack>
-      </UnstyledButton>
+      { currentVersion ? <Text c="dimmed" fs="italic" size="xs" mt={4}>Current Version</Text> : null}
+
+      <Stack gap={0} align="end">
+        {
+          memberChanges.slice(0,3).map((member) => (
+            <Text key={member.id} c="dimmed" size="sm">{member.displayName}</Text>
+          ))
+        }
+        { 
+          memberChanges.length > 3 ?
+            <Text c="dimmed" size="sm">{`+${memberChanges.length - 3} more`}</Text>
+            :
+            null
+        }
+      </Stack>
+    </UnstyledButton>
   )
 }
 

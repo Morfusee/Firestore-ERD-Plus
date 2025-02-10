@@ -2,7 +2,7 @@
   "watch": ["."],
   "ext": "ts,js,json",
   "ignore": ["node_modules", "src/**/*.spec.ts", "coverage", "dist"],
-  "exec": "npx -y tsx app.ts",
+  "exec": "npx -y tsx server.ts",
   "env": {
     "NODE_ENV": "dev"
   }
