@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { IEditorState, IEditorActions } from "../types/EditorStoreTypes";
 import { devtools } from "zustand/middleware";
 import { addEdge, reconnectEdge } from "@xyflow/react";
+import { TableNode } from "../types/EditorTypes";
 
 
 export const useEditorStore = create<IEditorState & IEditorActions>()(
@@ -25,9 +26,19 @@ export const useEditorStore = create<IEditorState & IEditorActions>()(
       }),
       setNodes: (nodes) => set(() => ({ nodes: nodes })),
       addNode: (node) =>
-        set((state) => ({
-          nodes: [...state.nodes, node],
-        })),
+        set((state) => {
+          if (node.type === "table" && node.data.name === "") {
+            const data: typeof node = {
+              ...node,
+              data: {
+                ...node.data,
+                name: `Table ${state.nodes.length + 1}`
+              }
+            }
+            return { nodes: [...state.nodes, data] }
+          } 
+          return { nodes: [...state.nodes, node] }
+        }),
       changeNode: (node) =>
         set((state) => ({
           nodes: state.nodes.map((item) => {
