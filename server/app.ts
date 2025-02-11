@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.ts";
 import emojiRoutes from "./routes/emojiRoutes.ts";
 import changelogRoutes from "./routes/changelogRoutes.ts";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import { responseStatusMiddleware } from "./middleware/responseStatusMiddleware.ts";
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 app.options("*", cors()); // This will handle preflight requests for all routes
 
 // MongoDB connection URI
@@ -52,7 +54,13 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 // Use project routes
-app.use("/projects", projectRoutes, historyRoutes, memberRoutes, changelogRoutes);
+app.use(
+  "/projects",
+  projectRoutes,
+  historyRoutes,
+  memberRoutes,
+  changelogRoutes
+);
 
 // Use user routes
 app.use("/users", userRoutes, settingsRoutes);
@@ -62,5 +70,4 @@ app.use("/emojis", emojiRoutes);
 
 app.use(responseStatusMiddleware);
 
-
-export default app
+export default app;
