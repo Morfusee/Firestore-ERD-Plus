@@ -1,6 +1,16 @@
 import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import admin, { ServiceAccount } from "firebase-admin";
+import serviceAccount from "./firebasePrivateKey.json";
 
-export const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyA80dTz8MbQCNFoQ-DiWEWvElUUwcLlEk8",
   authDomain: "fir-erd-af873.firebaseapp.com",
   projectId: "fir-erd-af873",
@@ -12,3 +22,17 @@ export const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as ServiceAccount),
+});
+
+export {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  admin,
+};

@@ -22,6 +22,8 @@ import {
   validateProjectData,
   validateOnlyDataField,
 } from "@root/middleware/validators/projectValidator";
+import { verifyToken } from "@root/middleware/validators/authValidator";
+
 
 const router = express.Router();
 
@@ -34,7 +36,7 @@ const router = express.Router();
  * - validateUserIdQuery: Ensures the provided user ID in the query is valid.
  * - validate: General validation middleware.
  */
-router.get("", [validateUserIdQuery, validate], getProjects);
+router.get("", [verifyToken, validateUserIdQuery, validate], getProjects);
 
 /**
  * GET /projects/:id

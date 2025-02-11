@@ -8,6 +8,7 @@ import settingsRoutes from "./routes/settingsRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import emojiRoutes from "./routes/emojiRoutes.ts";
 import changelogRoutes from "./routes/changelogRoutes.ts";
+import authRoutes from "./routes/authRoutes.ts";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { responseStatusMiddleware } from "./middleware/responseStatusMiddleware.ts";
@@ -67,6 +68,9 @@ app.use("/users", userRoutes, settingsRoutes);
 
 // GitHub Emoji API
 app.use("/emojis", emojiRoutes);
+
+// Firebase Auth routes
+app.use("/auth", authRoutes);
 
 app.use(responseStatusMiddleware);
 
