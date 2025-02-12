@@ -22,6 +22,7 @@ import {
   validateProjectData,
   validateOnlyDataField,
 } from "@root/middleware/validators/projectValidator";
+import { verifyToken } from "@root/middleware/validators/authValidator";
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ const router = express.Router();
  * - validateUserIdQuery: Ensures the provided user ID in the query is valid.
  * - validate: General validation middleware.
  */
-router.get("", [validateUserIdQuery, validate], getProjects);
+router.get("", [verifyToken, validateUserIdQuery, validate], getProjects);
 
 /**
  * GET /projects/:id
@@ -43,7 +44,7 @@ router.get("", [validateUserIdQuery, validate], getProjects);
  * - validateProjectId: Ensures the provided project ID is valid.
  * - validate: General validation middleware.
  */
-router.get("/:id", [validateProjectId, validate], getProjectById);
+router.get("/:id", [verifyToken, validateProjectId, validate], getProjectById);
 
 /**
  * PATCH /projects/:id
@@ -58,6 +59,7 @@ router.get("/:id", [validateProjectId, validate], getProjectById);
 router.patch(
   "/:id",
   [
+    verifyToken,
     validateProjectId,
     validateRequestBodyNotEmpty,
     validateDataUpdateRestriction,
@@ -79,7 +81,13 @@ router.patch(
  */
 router.patch(
   "/:id/data",
-  [validateProjectId, validateProjectData, validateOnlyDataField, validate],
+  [
+    verifyToken,
+    validateProjectId,
+    validateProjectData,
+    validateOnlyDataField,
+    validate,
+  ],
   saveProject
 );
 
@@ -93,7 +101,7 @@ router.patch(
  */
 router.post(
   "",
-  [...validateProjectFields, validateUserId, validate],
+  [verifyToken, ...validateProjectFields, validateUserId, validate],
   createProject
 );
 
@@ -104,6 +112,10 @@ router.post(
  * - validateProjectId: Ensures the provided project ID is valid.
  * - validate: General validation middleware.
  */
-router.delete("/:id", [validateProjectId, validate], deleteProject);
+router.delete(
+  "/:id",
+  [verifyToken, validateProjectId, validate],
+  deleteProject
+);
 
 export default router;
