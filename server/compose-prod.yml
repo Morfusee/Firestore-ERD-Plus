@@ -25,6 +25,7 @@ services:
     ports: 
     - "127.0.0.1:3000:3000"
     environment:
+      SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
       MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
       IS_DOCKERIZED: true
     labels:
