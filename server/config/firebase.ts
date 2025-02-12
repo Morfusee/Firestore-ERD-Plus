@@ -7,8 +7,12 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import admin, { ServiceAccount } from "firebase-admin";
-import serviceAccount from "./firebasePrivateKey.json";
+import admin from "firebase-admin";
+import dotenv from "dotenv";
+import key from "../config/firebasePrivateKey.json";
+import zlib from "zlib";
+
+dotenv.config();
 
 const firebaseConfig = {
   apiKey: "AIzaSyA80dTz8MbQCNFoQ-DiWEWvElUUwcLlEk8",
@@ -23,8 +27,20 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+/* DONT REMOVE */
+// This is the code for turning the service account JSON into base64
+/* const zlib = require("zlib");
+const json = JSON.stringify(require("./config/firebasePrivateKey.json"));
+const compressed = zlib.gzipSync(json).toString("base64"); */
+
+const decompressedServiceAccount = JSON.parse(
+  zlib
+    .gunzipSync(Buffer.from(process.env.SERVICE_ACCOUNT!, "base64"))
+    .toString()
+);
+
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as ServiceAccount),
+  credential: admin.credential.cert(decompressedServiceAccount),
 });
 
 export {
