@@ -10,6 +10,7 @@ import {
 import BadRequestError from "@root/errors/BadRequestError";
 import CreatedResponse from "@root/success/CreatedResponse";
 import SuccessResponse from "@root/success/SuccessResponse";
+import { AuthRequest } from "@root/types/authTypes";
 
 const auth = getAuth();
 
@@ -73,6 +74,8 @@ export const loginUser = async (
 
     res.cookie("access_token", userIdToken, {
       httpOnly: true,
+      // secure: true,
+      // sameSite: "strict",
     });
 
     next(new SuccessResponse("User logged in successfully.", userCredential));
@@ -112,6 +115,24 @@ export const resetPassword = async (
     await sendPasswordResetEmail(auth, email);
 
     next(new SuccessResponse("Password reset email sent successfully.", null));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const authenticateUser = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authUser = req.user;
+
+    if (!authUser) {
+      throw new BadRequestError("User not authenticated.");
+    }
+
+    next(new SuccessResponse("User authenticated successfully.", authUser));
   } catch (error) {
     next(error);
   }

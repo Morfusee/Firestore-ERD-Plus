@@ -1,6 +1,14 @@
 import { useFetch } from "@mantine/hooks";
 import { IProject } from "../../types/ProjectTypes";
-import { APIResponse, CreatedProject, DeletedProject, FetchedProject, FetchedProjects, SavedProject, UpdatedProject } from "../../types/APITypes";
+import {
+  APIResponse,
+  CreatedProject,
+  DeletedProject,
+  FetchedProject,
+  FetchedProjects,
+  SavedProject,
+  UpdatedProject,
+} from "../../types/APITypes";
 
 export const createProjectApi = async (
   name: IProject["name"],
@@ -12,6 +20,7 @@ export const createProjectApi = async (
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify({
       name: name,
       icon: icon,
@@ -28,7 +37,10 @@ export const createProjectApi = async (
 
 export const getProjectsApi = async (userId: string) => {
   const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects?userId=${userId}`
+    import.meta.env.VITE_SERVER_URL + `/projects?userId=${userId}`,
+    {
+      credentials: "include",
+    }
   )
     .then((res) => res.json())
     .catch((err) => console.error(err));
@@ -39,16 +51,18 @@ export const getProjectsApi = async (userId: string) => {
   return response as APIResponse<FetchedProjects>;
 };
 
-
 export const getProjectByIdApi = async (projectId: string) => {
   const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`
+    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
+    {
+      credentials: "include",
+    }
   )
     .then((res) => res.json())
     .catch((err) => console.error(err));
 
-  return response as APIResponse<FetchedProject>
-}
+  return response as APIResponse<FetchedProject>;
+};
 
 export const editProjectApi = async (
   name: IProject["name"],
@@ -59,6 +73,7 @@ export const editProjectApi = async (
     import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
     {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -77,18 +92,19 @@ export const editProjectApi = async (
 export const saveProjectApi = async (
   projectId: IProject["id"],
   data: string,
-  members: string[],
+  members: string[]
 ) => {
   const response = await fetch(
     import.meta.env.VITE_SERVER_URL + `/projects/${projectId}/data`,
     {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         data: data,
-        members: members
+        members: members,
       }),
     }
   )
@@ -103,6 +119,7 @@ export const deleteProjectApi = async (projectId: string) => {
     import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
     {
       method: "DELETE",
+      credentials: "include",
     }
   )
     .then((res) => res.json())
@@ -110,8 +127,6 @@ export const deleteProjectApi = async (projectId: string) => {
 
   return response as APIResponse<DeletedProject>;
 };
-
-
 
 // NOTE: Unmaintained
 export const getProjectsHook = (userId: string) => {
