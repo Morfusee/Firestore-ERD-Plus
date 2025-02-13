@@ -6,6 +6,7 @@ import {
   Stack,
   Text,
   TextInput,
+  useMantineTheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
@@ -17,12 +18,22 @@ import {
 import useProjectRepo from "../../data/repo/useProjectRepo";
 import { useEditorStore } from "../../store/useEditorStore";
 import useDownloadRepo from "../../data/repo/useDownloadRepo";
+import { getViewportForBounds, useReactFlow } from "@xyflow/react";
+import { toJpeg, toPng } from "html-to-image";
+import { Options } from "html-to-image/lib/types";
+import useIsDarkMode from "../../utils/useIsDarkMode";
 
 function DownloadModal({ context, id, innerProps }: ContextModalProps) {
-
+  // Hook for getting project details for JSON download
   const { getProjectDetails } = useDownloadRepo();
-
   const projectDetails = getProjectDetails();
+  
+  // Hook for downloading as JPEG or PNG
+  const { getNodes, getNodesBounds } = useReactFlow();
+
+  // Theme
+  const theme = useMantineTheme();
+  const isDarkMode = useIsDarkMode();
 
   useEffect(() => {
     context.updateModal({
@@ -60,40 +71,156 @@ function DownloadModal({ context, id, innerProps }: ContextModalProps) {
 
   const handleDownload = (values: DownloadModalFormValues) => {
     switch (values.fileType) {
-      case "JSON": {
+      case "JSON":
         downloadAsJson(values, projectDetails);
         break;
-      }
 
-      default: {
-        console.log("Download as Image");
+      case "PNG":
+        downloadAsPng(values);
         break;
-      }
+
+      case "JPEG":
+        downloadAsJpeg(values);
+        break;
+
+      default:
+        break;
     }
   };
 
-  const downloadAsJson = (
-    values: DownloadModalFormValues,
-    projectDetails: DownloadModalProjectDetails
-  ) => {
-    const stringifiedData =
-      "data:application/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(projectDetails));
-
+  /**
+   * Responsible for creating a proxy download button to download the file
+   *
+   * @param fileName - Name of the file
+   * @param dataUrl - Data URL of the image
+   *
+   * @returns void
+   **/
+  const downloadFile = (
+    fileName: DownloadModalFormValues["fileName"],
+    dataUrl: string
+  ): void => {
     // Create a proxy download button to download the file
     const proxyDownloadButton = document.createElement("a");
-    proxyDownloadButton.setAttribute("href", stringifiedData);
-    proxyDownloadButton.setAttribute("download", `${values.fileName}.json`);
-
-    // Append the button to the body and "click" it
-    document.body.appendChild(proxyDownloadButton);
+    proxyDownloadButton.setAttribute("href", dataUrl);
+    proxyDownloadButton.setAttribute("download", fileName);
     proxyDownloadButton.click();
     proxyDownloadButton.remove();
   };
 
-  const downloadAsPng = () => {
-    
-  }
+  /**
+   * Responsible for getting the export settings for the image
+   *
+   * @param imageWidth
+   * @param imageHeight
+   * @param transform
+   * @returns Options
+   */
+  const getExportSettings = (
+    imageWidth: number,
+    imageHeight: number,
+    transform: { x: number; y: number; zoom: number },
+    backgroundColor?: string
+  ): Options => {
+    return {
+      filter: (node) =>
+        !(
+          node?.classList?.contains("react-flow__minimap") ||
+          node?.classList?.contains("react-flow__controls")
+        ),
+      backgroundColor: backgroundColor || "transparent",
+      width: imageWidth,
+      height: imageHeight,
+      style: {
+        transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom})`,
+      },
+    };
+  };
+
+  /**
+   * Responsible for downloading the project details as JSON
+   *
+   * @param values
+   * @param projectDetails
+   * @returns void
+   */
+  const downloadAsJson = (
+    values: DownloadModalFormValues,
+    projectDetails: DownloadModalProjectDetails
+  ) => {
+    const dataUrl =
+      "data:application/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(projectDetails));
+
+    const fileName = values.fileName + ".json";
+
+    // Download the file
+    downloadFile(fileName, dataUrl);
+  };
+
+  /**
+   * Responsible for downloading the image as PNG
+   *
+   * @param values
+   * @returns void
+   */
+  const downloadAsPng = (values: DownloadModalFormValues) => {
+    const nodesBounds = getNodesBounds(getNodes());
+    const imageWidth = 1920;
+    const imageHeight = 1080;
+
+    const transform = getViewportForBounds(
+      nodesBounds,
+      imageWidth,
+      imageHeight,
+      0,
+      1,
+      0
+    );
+
+    toPng(
+      document.querySelector(".react-flow__viewport") as HTMLElement,
+      getExportSettings(imageWidth, imageHeight, transform)
+    ).then((dataUrl) => {
+      const fileName = values.fileName + ".png";
+      // Download the file
+      downloadFile(fileName, dataUrl);
+    });
+  };
+
+  /**
+   * Responsible for downloading the image as JPEG
+   *
+   * @param values
+   */
+  const downloadAsJpeg = (values: DownloadModalFormValues) => {
+    const nodesBounds = getNodesBounds(getNodes());
+    const imageWidth = 1920;
+    const imageHeight = 1080;
+
+    const transform = getViewportForBounds(
+      nodesBounds,
+      imageWidth,
+      imageHeight,
+      0,
+      1,
+      0
+    );
+
+    toJpeg(
+      document.querySelector(".react-flow__viewport") as HTMLElement,
+      getExportSettings(
+        imageWidth,
+        imageHeight,
+        transform,
+        isDarkMode ? theme.colors.dark[8] : theme.colors.gray[3] // Set background color based on theme
+      )
+    ).then((dataUrl) => {
+      const fileName = values.fileName + ".jpeg";
+      // Download the file
+      downloadFile(fileName, dataUrl);
+    });
+  };
 
   return (
     <Box component="form" onSubmit={form.onSubmit(handleDownload)}>
