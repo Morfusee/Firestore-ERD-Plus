@@ -16,6 +16,8 @@ const useUserRepo = () => {
 
       // Set the current user to the user response from api
       setCurrentUser(loginResponse.data.user);
+
+      return loginResponse.success;
     } catch (err) {
       console.log(err);
     }
@@ -41,10 +43,6 @@ const useUserRepo = () => {
     try {
       const registerResponse = await registerUserApi(username, email, password);
 
-      if (!registerResponse.success) {
-        throw new Error("Failed to register user");
-      }
-
       setCurrentUser(registerResponse.data.createdUser);
     } catch (error) {
       console.log(error);
@@ -68,7 +66,7 @@ const useUserRepo = () => {
       // Set the current user to the user response from api
       setCurrentUser(authenticateUserResponse.data.user);
 
-      return authenticateUserResponse.success
+      return authenticateUserResponse.success;
     } catch (error) {
       console.log(error);
     }

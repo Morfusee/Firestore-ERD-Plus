@@ -6,6 +6,7 @@ import {
   Container,
   Divider,
   Group,
+  Loader,
   PasswordInput,
   Stack,
   Text,
@@ -17,8 +18,10 @@ import { GoogleButton } from "../../components/ui/SocialButtons";
 import { Navigate, useNavigate } from "react-router-dom";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../utils/useAuth";
+import { useState } from "react";
 
 function Login() {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { isAuthenticated, loading } = useAuth();
 
   const navigate = useNavigate();
@@ -36,9 +39,18 @@ function Login() {
   });
 
   const handleLogin = async (email: string, password: string) => {
-    await loginUser(email, password).then(() => {
-      navigate("/");
-    });
+    setIsLoggingIn(true);
+
+    // Login the user
+    await loginUser(email, password)
+      .then((status) => {
+        // Prevent the early redirecting of the user if the login fails
+        if (status) navigate("/");
+        setIsLoggingIn(false);
+      })
+      .catch(() => {
+        setIsLoggingIn(false);
+      });
   };
 
   // Show nothing while fetching data
@@ -84,7 +96,7 @@ function Login() {
                 />
 
                 <Button className=" mt-2" variant="filled" type="submit">
-                  Login
+                  {isLoggingIn ? <Loader size={"sm"} /> : "Login"}
                 </Button>
               </Stack>
             </form>
