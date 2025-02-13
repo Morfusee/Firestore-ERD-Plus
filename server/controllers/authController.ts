@@ -11,6 +11,7 @@ import BadRequestError from "@root/errors/BadRequestError";
 import CreatedResponse from "@root/success/CreatedResponse";
 import SuccessResponse from "@root/success/SuccessResponse";
 import { AuthRequest } from "@root/types/authTypes";
+import User from "@root/models/userModel";
 
 const auth = getAuth();
 
@@ -20,7 +21,7 @@ export const registerUser = async (
   next: NextFunction
 ) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password, displayName } = req.body;
 
     if (!email || !password) {
       return next(new BadRequestError("Email and password are required."));
@@ -38,7 +39,35 @@ export const registerUser = async (
       (err) => next(new BadRequestError("Error sending email verification."))
     );
 
-    next(new SuccessResponse("User registered successfully.", user.user));
+    // Get the user token
+    const userIdToken = await user.user.getIdToken();
+
+    if (!userIdToken) {
+      return next(new BadRequestError("Error getting user token."));
+    }
+
+    // Set the access token in a cookie
+    res.cookie("access_token", userIdToken, {
+      httpOnly: true,
+      // secure: true,
+      // sameSite: "strict",
+    });
+
+    // Create the user
+    const newUser = new User({
+      username,
+      email,
+      displayName: displayName || username,
+    });
+
+    // Save the user to the database
+    const savedUser = await newUser.save();
+
+    next(
+      new SuccessResponse("User registered successfully.", {
+        createdUser: savedUser,
+      })
+    );
   } catch (error) {
     next(error);
   }

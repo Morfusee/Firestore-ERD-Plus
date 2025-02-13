@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { checkAuthApi } from "../api/authApi";
-import useUserRepo from "./useUserRepo";
+import { checkAuthApi } from "../data/api/authApi";
+import useUserRepo from "../data/repo/useUserRepo";
 
 function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);

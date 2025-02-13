@@ -1,6 +1,6 @@
 import { useUserStore } from "../../store/useUserStore";
-import { loginUserApi } from "../api/authApi";
-import { getUserApi, updateUserApi } from "../api/userApi";
+import { loginUserApi, registerUserApi } from "../api/authApi";
+import { createUserApi, getUserApi, updateUserApi } from "../api/userApi";
 
 const useUserRepo = () => {
   const user = useUserStore((state) => state.currentUser);
@@ -11,10 +11,8 @@ const useUserRepo = () => {
     try {
       const loginResponse = await loginUserApi(email, password);
 
-      console.log(loginResponse)
-
       // Set the current user to the user response from api
-      getUser(testUserId);
+      await getUser(testUserId);
     } catch (err) {
       console.log(err);
     }
@@ -32,6 +30,24 @@ const useUserRepo = () => {
     }
   };
 
+  const registerUser = async (
+    username: string,
+    email: string,
+    password: string
+  ) => {
+    try {
+      const registerResponse = await registerUserApi(username, email, password);
+
+      if (!registerResponse.success) {
+        throw new Error("Failed to register user");
+      }
+
+      setCurrentUser(registerResponse.data.createdUser);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const changeUserDisplayname = async (userId: string, displayName: string) => {
     try {
       const res = await updateUserApi(userId, displayName);
@@ -46,6 +62,7 @@ const useUserRepo = () => {
     user,
     getUser,
     loginUser,
+    registerUser,
     changeUserDisplayname,
   };
 };

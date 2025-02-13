@@ -16,7 +16,7 @@ import { useForm } from "@mantine/form";
 import { GoogleButton } from "../../components/ui/SocialButtons";
 import { Navigate, useNavigate } from "react-router-dom";
 import useUserRepo from "../../data/repo/useUserRepo";
-import useAuth from "../../data/repo/useAuth";
+import useAuth from "../../utils/useAuth";
 
 function Login() {
   const { isAuthenticated, loading } = useAuth();
@@ -36,8 +36,9 @@ function Login() {
   });
 
   const handleLogin = async (email: string, password: string) => {
-    await loginUser(email, password);
-    navigate("/");
+    await loginUser(email, password).then(() => {
+      navigate("/");
+    });
   };
 
   // Show nothing while fetching data
