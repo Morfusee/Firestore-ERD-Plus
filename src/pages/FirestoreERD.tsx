@@ -22,28 +22,8 @@ function FirestoreERD() {
 
   // Invoke the useBlocker hook
   // This is a blocker for unsaved changes
-  useBlocker(hasPendingChanges);
-
-  // Show an alert if there are unsaved changes if the user tries to leave
-  const handleBeforeUnload = async (event: any) => {
-    const message = "Confirm refresh";
-
-    // Standard for most browsers
-    event.returnValue = message;
-
-    // For older browsers (optional)
-    return message;
-  };
-
-  // useEffect(() => {
-  //   // Set up the beforeunload event listener
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   // Cleanup the event listener on component unmount
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
+  // This is causing logging out issues
+  // useBlocker(hasPendingChanges);
 
   return (
     <Paper

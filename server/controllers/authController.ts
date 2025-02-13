@@ -10,6 +10,8 @@ import {
 import BadRequestError from "@root/errors/BadRequestError";
 import CreatedResponse from "@root/success/CreatedResponse";
 import SuccessResponse from "@root/success/SuccessResponse";
+import { AuthRequest, AuthUser } from "@root/types/authTypes";
+import User from "@root/models/userModel";
 
 const auth = getAuth();
 
@@ -19,7 +21,7 @@ export const registerUser = async (
   next: NextFunction
 ) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password, displayName } = req.body;
 
     if (!email || !password) {
       return next(new BadRequestError("Email and password are required."));
@@ -37,7 +39,39 @@ export const registerUser = async (
       (err) => next(new BadRequestError("Error sending email verification."))
     );
 
-    next(new SuccessResponse("User registered successfully.", user.user));
+    // Get the user token
+    const userIdToken = await user.user.getIdToken();
+
+    if (!userIdToken) {
+      return next(new BadRequestError("Error getting user token."));
+    }
+
+    // Set the access token in a cookie
+    res.cookie("access_token", userIdToken, {
+      httpOnly: true,
+      // secure: true,
+      // sameSite: "strict",
+    });
+
+    // Create the user
+    const newUser = new User({
+      username,
+      email,
+      displayName: displayName || username,
+    });
+
+    // Save the user to the database
+    const savedUser = await newUser.save();
+
+    if (!savedUser) {
+      throw new BadRequestError("Error saving user to database.");
+    }
+
+    next(
+      new CreatedResponse("User registered successfully.", {
+        createdUser: savedUser,
+      })
+    );
   } catch (error) {
     next(error);
   }
@@ -65,17 +99,30 @@ export const loginUser = async (
       return next(new BadRequestError("Error signing in user."));
     }
 
+    // Get the user token
     const userIdToken = await userCredential.user.getIdToken();
 
     if (!userIdToken) {
       return next(new BadRequestError("Error getting user token."));
     }
 
+    // Set the access token in a cookie
     res.cookie("access_token", userIdToken, {
       httpOnly: true,
+      // secure: true,
+      // sameSite: "strict",
     });
 
-    next(new SuccessResponse("User logged in successfully.", userCredential));
+    // Get user from database
+    const user = await User.find({
+      email: { $regex: email, $options: "i" },
+    }).then((res) => res[0]);
+
+    if (!user) {
+      return next(new BadRequestError("Error getting user."));
+    }
+
+    next(new SuccessResponse("User logged in successfully.", { user }));
   } catch (error) {
     next(error);
   }
@@ -112,6 +159,37 @@ export const resetPassword = async (
     await sendPasswordResetEmail(auth, email);
 
     next(new SuccessResponse("Password reset email sent successfully.", null));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const authenticateUser = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authUser: AuthUser = req.user;
+
+    if (!authUser) {
+      throw new BadRequestError("User not authenticated.");
+    }
+
+    // Get user from database
+    const user = await User.find({
+      email: { $regex: authUser.email, $options: "i" },
+    }).then((res) => res[0]);
+
+    if (!user) {
+      throw new BadRequestError("Error getting user.");
+    }
+
+    next(
+      new SuccessResponse("User authenticated successfully.", {
+        user,
+      })
+    );
   } catch (error) {
     next(error);
   }

@@ -1,56 +1,57 @@
-import { IChangelog } from "../store/useChangelogStore"
-import { IUser } from "../store/useUserStore"
-import { IProject } from "./ProjectTypes"
-
+import { IChangelog } from "../store/useChangelogStore";
+import { IUser } from "../store/useUserStore";
+import { IProject } from "./ProjectTypes";
 
 export interface APIResponse<T> {
-  success: boolean
-  message: string
-  data: T
+  success: boolean;
+  message: string;
+  data: T;
 }
 
 // Projects
 export interface CreatedProject {
-  createdProject: IProject
+  createdProject: IProject;
 }
 
 export interface UpdatedProject {
-  updatedProject: IProject
+  updatedProject: IProject;
 }
 
 export interface FetchedProject {
-  project: IProject
+  project: IProject;
 }
 
 export interface FetchedProjects {
-  projects: IProject[]
+  projects: IProject[];
 }
 
 export interface SavedProject {
-  project: IProject
-  changelog: IChangelog
+  project: IProject;
+  changelog: IChangelog;
 }
 
 export interface DeletedProject {
-  deletedProjectId: string
+  deletedProjectId: string;
 }
 
-
 // Users
+export interface CreatedUser {
+  createdUser: IUser;
+}
+
 export interface FetchedUser {
-  user: IUser
+  user: IUser;
 }
 
 export interface UpdatedUser {
-  updatedUser: IUser
+  updatedUser: IUser;
 }
-
 
 // Changelogs
 export interface FetchedChangelogs {
-  changelogs: IChangelog[]
+  changelogs: IChangelog[];
 }
 
 export interface FetchedChangelog {
-  changelog: IChangelog
+  changelog: IChangelog;
 }

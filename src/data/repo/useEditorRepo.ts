@@ -1,18 +1,17 @@
+import { useMantineTheme } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
 import { Connection, Edge, MarkerType, XYPosition } from "@xyflow/react";
-import { useEditorStore } from "../../store/useEditorStore";
-import {
-  EditorNode,
-  TableField,
-} from "../../types/EditorTypes";
 import { nanoid } from "nanoid";
+import { useEditorStore } from "../../store/useEditorStore";
 import {
   IEditorDataSnapshot,
   NodeDataBase,
 } from "../../types/EditorStoreTypes";
-import { useDebouncedCallback } from "@mantine/hooks";
+import { EditorNode, TableField } from "../../types/EditorTypes";
 
 const useEditorRepo = () => {
-  
+  const theme = useMantineTheme();
+
   const addNodeState = useEditorStore((state) => state.addNode);
   const moveNodeState = useEditorStore((state) => state.moveNode);
   const deleteNodeState = useEditorStore((state) => state.deleteNode);
@@ -44,10 +43,9 @@ const useEditorRepo = () => {
     (state) => state.setHasPendingChanges
   );
 
-
   /**
    * Adds a new React Flow node
-   * 
+   *
    * @param type - The type of node to add (e.g. 'note', 'table')
    * @param position - An optional position for the new node. If not provided, it defaults to `{ x: 0, y: 0 }`
    */
@@ -60,20 +58,20 @@ const useEditorRepo = () => {
         y: position?.y || 0,
       },
       data: {},
-    }
+    };
 
-    switch(type) {
-      case 'note': {
+    switch (type) {
+      case "note": {
         data = {
           ...data,
           data: {
             note: "",
           },
           type: type,
-        }
-        break
+        };
+        break;
       }
-      case 'table': {
+      case "table": {
         data = {
           ...data,
           data: {
@@ -82,8 +80,8 @@ const useEditorRepo = () => {
             fields: [],
           },
           type: type,
-        }
-        break
+        };
+        break;
       }
     }
 
@@ -92,7 +90,6 @@ const useEditorRepo = () => {
     // Add a node to state
     addNodeState(data);
   };
-
 
   /**
    * Moves a node to a new position.
@@ -131,7 +128,7 @@ const useEditorRepo = () => {
     };
 
     // Run onChange
-    onChange()
+    onChange();
     // Add a field in node data state
     addNodeDataFieldState(id, data);
   };
@@ -155,47 +152,46 @@ const useEditorRepo = () => {
   };
 
   const addEdge = (conn: Connection) => {
-
-    if (!conn.sourceHandle || !conn.targetHandle) return
+    if (!conn.sourceHandle || !conn.targetHandle) return;
 
     const edge: Edge = {
       ...conn,
       id: `${conn.sourceHandle}->${conn.targetHandle}`,
       markerEnd: {
-        type: MarkerType.Arrow
+        type: MarkerType.Arrow,
       },
       style: {
-        strokeWidth: 2
-      }
-    }
+        strokeWidth: 2,
+        stroke: theme.colors.dark[4], // Fixes the missing edges
+      },
+    };
 
     // Run onChange
     onChange();
 
     // Add edge
-    addEdgeState(edge)
+    addEdgeState(edge);
   };
 
   const changeEdge = (oldEdge: Edge, conn: Connection) => {
-    if (!conn.sourceHandle || !conn.targetHandle) return
+    if (!conn.sourceHandle || !conn.targetHandle) return;
 
     // Check if reconnected on same handle
-    if (oldEdge.targetHandle === conn.targetHandle) return
+    if (oldEdge.targetHandle === conn.targetHandle) return;
 
     // Run onChange
-    onChange();    
+    onChange();
 
     // Change edge source/target
-    changeEdgeState(oldEdge, conn)
+    changeEdgeState(oldEdge, conn);
   };
 
   const deleteEdge = (id: string) => {
     // Run onChange
     onChange();
     // Delete edge
-    deleteEdgeState(id)
+    deleteEdgeState(id);
   };
-
 
   const onChange = () => {
     const data = getDataSnap();
