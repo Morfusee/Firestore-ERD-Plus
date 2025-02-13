@@ -36,7 +36,9 @@ export const loginUserApi = async (email: string, password: string) => {
     .then((res) => res.json())
     .catch((err) => console.error(err));
 
-  console.log(response);
+  if (!response.success) {
+    throw new Error("Failed to login user");
+  }
 
   return response as APIResponse<FetchedUser>;
 };
@@ -63,6 +65,10 @@ export const registerUserApi = async (
   )
     .then((res) => res.json())
     .catch((err) => console.error(err));
+
+  if (!response.success) {
+    throw new Error("Failed to register user");
+  }
 
   return response as APIResponse<CreatedUser>;
 };
