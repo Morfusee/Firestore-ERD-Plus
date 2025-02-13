@@ -2,6 +2,7 @@ import { useUserStore } from "../../store/useUserStore";
 import {
   authenticateUserApi,
   loginUserApi,
+  logoutUserApi,
   registerUserApi,
 } from "../api/authApi";
 import { createUserApi, getUserApi, updateUserApi } from "../api/userApi";
@@ -74,6 +75,19 @@ const useUserRepo = () => {
     }
   };
 
+  const logoutUser = async () => {
+    try {
+      const logoutUserResponse = await logoutUserApi();
+
+      // Set the current user to null
+      setCurrentUser(null);
+
+      return logoutUserResponse.success;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return {
     user,
     getUser,
@@ -81,6 +95,7 @@ const useUserRepo = () => {
     registerUser,
     changeUserDisplayname,
     authenticateUser,
+    logoutUser,
   };
 };
 

@@ -72,3 +72,24 @@ export const registerUserApi = async (
 
   return response as APIResponse<CreatedUser>;
 };
+
+export const logoutUserApi = async () => {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/auth/logout`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
+    .then((res) => res.json())
+    .catch((err) => console.error(err));
+
+  if (!response.success) {
+    throw new Error("Failed to logout user");
+  }
+
+  return response as APIResponse<null>;
+};
