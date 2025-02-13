@@ -11,6 +11,7 @@ import useUserRepo from "./useUserRepo";
 import useChangelogRepo from "./useChangelogRepo";
 
 export const useDataInitializer = () => {
+  const { user } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
 
@@ -38,16 +39,15 @@ export const useDataInitializer = () => {
     }
   }, [id, isLoaded]);
 
-  const testUserId = "67a89f3a14e42f94a3b68a2d";
-
   const loadProjects = async () => {
     console.log("Loading projects from local storage");
 
     // Dexie fetching of projects
     // NOTE: Not needed anymore
     // const projectList = await db.projects.toArray();
+    if (!user) return;
 
-    const getProjectList = await getProjectsApi(testUserId);
+    const getProjectList = await getProjectsApi(user?.id);
 
     // Backend fetching of projects
     setProjectList(getProjectList.data.projects);

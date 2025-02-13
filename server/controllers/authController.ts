@@ -10,7 +10,7 @@ import {
 import BadRequestError from "@root/errors/BadRequestError";
 import CreatedResponse from "@root/success/CreatedResponse";
 import SuccessResponse from "@root/success/SuccessResponse";
-import { AuthRequest } from "@root/types/authTypes";
+import { AuthRequest, AuthUser } from "@root/types/authTypes";
 import User from "@root/models/userModel";
 
 const auth = getAuth();
@@ -63,8 +63,12 @@ export const registerUser = async (
     // Save the user to the database
     const savedUser = await newUser.save();
 
+    if (!savedUser) {
+      throw new BadRequestError("Error saving user to database.");
+    }
+
     next(
-      new SuccessResponse("User registered successfully.", {
+      new CreatedResponse("User registered successfully.", {
         createdUser: savedUser,
       })
     );
@@ -95,19 +99,30 @@ export const loginUser = async (
       return next(new BadRequestError("Error signing in user."));
     }
 
+    // Get the user token
     const userIdToken = await userCredential.user.getIdToken();
 
     if (!userIdToken) {
       return next(new BadRequestError("Error getting user token."));
     }
 
+    // Set the access token in a cookie
     res.cookie("access_token", userIdToken, {
       httpOnly: true,
       // secure: true,
       // sameSite: "strict",
     });
 
-    next(new SuccessResponse("User logged in successfully.", userCredential));
+    // Get user from database
+    const user = await User.find({
+      email: { $regex: email, $options: "i" },
+    }).then((res) => res[0]);
+
+    if (!user) {
+      return next(new BadRequestError("Error getting user."));
+    }
+
+    next(new SuccessResponse("User logged in successfully.", { user }));
   } catch (error) {
     next(error);
   }
@@ -155,13 +170,26 @@ export const authenticateUser = async (
   next: NextFunction
 ) => {
   try {
-    const authUser = req.user;
+    const authUser: AuthUser = req.user;
 
     if (!authUser) {
       throw new BadRequestError("User not authenticated.");
     }
 
-    next(new SuccessResponse("User authenticated successfully.", authUser));
+    // Get user from database
+    const user = await User.find({
+      email: { $regex: authUser.email, $options: "i" },
+    }).then((res) => res[0]);
+
+    if (!user) {
+      throw new BadRequestError("Error getting user.");
+    }
+
+    next(
+      new SuccessResponse("User authenticated successfully.", {
+        user,
+      })
+    );
   } catch (error) {
     next(error);
   }

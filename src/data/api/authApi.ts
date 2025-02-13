@@ -1,6 +1,6 @@
-import { APIResponse, CreatedUser } from "../../types/APITypes";
+import { APIResponse, CreatedUser, FetchedUser } from "../../types/APITypes";
 
-export const checkAuthApi = async () => {
+export const authenticateUserApi = async () => {
   const response = await fetch(
     `${import.meta.env.VITE_SERVER_URL}/auth/check-auth`,
     {
@@ -15,7 +15,7 @@ export const checkAuthApi = async () => {
     throw new Error("User is not authenticated");
   }
 
-  return response;
+  return response as APIResponse<FetchedUser>;
 };
 
 export const loginUserApi = async (email: string, password: string) => {
@@ -36,7 +36,9 @@ export const loginUserApi = async (email: string, password: string) => {
     .then((res) => res.json())
     .catch((err) => console.error(err));
 
-  return response;
+  console.log(response);
+
+  return response as APIResponse<FetchedUser>;
 };
 
 export const registerUserApi = async (

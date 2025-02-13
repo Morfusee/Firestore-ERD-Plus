@@ -1,18 +1,21 @@
 import { useUserStore } from "../../store/useUserStore";
-import { loginUserApi, registerUserApi } from "../api/authApi";
+import {
+  authenticateUserApi,
+  loginUserApi,
+  registerUserApi,
+} from "../api/authApi";
 import { createUserApi, getUserApi, updateUserApi } from "../api/userApi";
 
 const useUserRepo = () => {
   const user = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
-  const testUserId = "67a89f3a14e42f94a3b68a2d";
 
   const loginUser = async (email: string, password: string) => {
     try {
       const loginResponse = await loginUserApi(email, password);
 
       // Set the current user to the user response from api
-      await getUser(testUserId);
+      setCurrentUser(loginResponse.data.user);
     } catch (err) {
       console.log(err);
     }
@@ -21,10 +24,10 @@ const useUserRepo = () => {
   const getUser = async (userId: string) => {
     try {
       // Get user from api base on id
-      const res = await getUserApi(userId);
+      const getUserResponse = await getUserApi(userId);
 
       // Set the current user to the user response from api
-      setCurrentUser(res.data.user);
+      setCurrentUser(getUserResponse.data.user);
     } catch (err) {
       console.log(err);
     }
@@ -58,12 +61,26 @@ const useUserRepo = () => {
     }
   };
 
+  const authenticateUser = async () => {
+    try {
+      const authenticateUserResponse = await authenticateUserApi();
+
+      // Set the current user to the user response from api
+      setCurrentUser(authenticateUserResponse.data.user);
+
+      return authenticateUserResponse.success
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return {
     user,
     getUser,
     loginUser,
     registerUser,
     changeUserDisplayname,
+    authenticateUser,
   };
 };
 
