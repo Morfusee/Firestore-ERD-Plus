@@ -18,9 +18,10 @@ const verifyToken = async (
       return next();
     }
 
-    const userIdToken = req.cookies.access_token;
+    const userIdToken = req.cookies?.access_token;
+
     if (!userIdToken) {
-      next(new ValidationError("No token provided."));
+      throw new ValidationError("No token provided.");
     }
 
     // Verify the token
@@ -32,7 +33,7 @@ const verifyToken = async (
     next();
   } catch (error) {
     // If the token is invalid, return a 409 Conflict error
-    next(new ConflictError("Invalid token."));
+    next(error);
   }
 };
 
