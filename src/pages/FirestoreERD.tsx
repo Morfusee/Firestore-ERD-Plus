@@ -22,7 +22,8 @@ function FirestoreERD() {
 
   // Invoke the useBlocker hook
   // This is a blocker for unsaved changes
-  useBlocker(hasPendingChanges);
+  // This is causing logging out issues
+  // useBlocker(hasPendingChanges);
 
   return (
     <Paper

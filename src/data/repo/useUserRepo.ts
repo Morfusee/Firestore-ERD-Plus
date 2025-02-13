@@ -1,3 +1,5 @@
+import { useEditorStore } from "../../store/useEditorStore";
+import { useProjectStore } from "../../store/useProjectStore";
 import { useUserStore } from "../../store/useUserStore";
 import {
   authenticateUserApi,
@@ -10,6 +12,12 @@ import { createUserApi, getUserApi, updateUserApi } from "../api/userApi";
 const useUserRepo = () => {
   const user = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
+  const clearSelectedProject = useProjectStore(
+    (state) => state.clearSelectedProject
+  );
+  const clearStateSnapshot = useEditorStore(
+    (state) => state.clearStateSnapshot
+  );
 
   const loginUser = async (email: string, password: string) => {
     try {
@@ -81,6 +89,15 @@ const useUserRepo = () => {
 
       // Set the current user to null
       setCurrentUser(null);
+
+      /* These two solves the appearance of pending/unsaved changes 
+        from one account to another when logging in */
+
+      // Clear the selected project
+      clearSelectedProject();
+
+      // Clear the editor state snapshot
+      clearStateSnapshot();
 
       return logoutUserResponse.success;
     } catch (error) {
