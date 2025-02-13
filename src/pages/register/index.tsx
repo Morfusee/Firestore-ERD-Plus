@@ -6,6 +6,7 @@ import {
   Container,
   Divider,
   Group,
+  Loader,
   PasswordInput,
   Stack,
   Text,
@@ -13,12 +14,17 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { GoogleButton } from "../../components/ui/SocialButtons";
 import useUserRepo from "../../data/repo/useUserRepo";
+import useAuth from "../../utils/useAuth";
+import { useState } from "react";
 
 function Register() {
+  const [isRegistering, setIsRegistering] = useState(false);
+
   const { registerUser } = useUserRepo();
+  const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm({
@@ -49,10 +55,28 @@ function Register() {
     email: string,
     password: string
   ) => {
-    await registerUser(username, email, password).then(() => {
-      navigate("/");
-    });
+    setIsRegistering(true);
+
+    // Register the user
+    await registerUser(username, email, password)
+      .then((status) => {
+        if (status) navigate("/");
+        setIsRegistering(false);
+      })
+      .catch(() => {
+        setIsRegistering(false);
+      });
   };
+
+  // Show nothing while fetching data
+  if (loading) {
+    return null;
+  }
+
+  // If the user is logged in already, redirect to the main page
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <>
@@ -95,7 +119,7 @@ function Register() {
                 />
 
                 <Button className=" mt-2" variant="filled" type="submit">
-                  Sign up
+                  {isRegistering ? <Loader size={"sm"} /> : "Sign up"}
                 </Button>
               </Stack>
             </form>

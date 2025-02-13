@@ -44,6 +44,8 @@ const useUserRepo = () => {
       const registerResponse = await registerUserApi(username, email, password);
 
       setCurrentUser(registerResponse.data.createdUser);
+
+      return registerResponse.success;
     } catch (error) {
       console.log(error);
     }
