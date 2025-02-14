@@ -25,7 +25,7 @@ function ImageCropperModal({
           {"Crop Image"}
         </Text>
       ),
-      size: "md",
+      size: "xl",
       centered: false,
     });
   }, []);
@@ -47,7 +47,7 @@ function ImageCropperModal({
     if (canvas) {
       setImageData(canvas.toDataURL());
     }
-  }, 1);
+  }, 10);
 
   return (
     <Box className="">
