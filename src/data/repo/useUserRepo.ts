@@ -12,6 +12,7 @@ import { createUserApi, getUserApi, updateUserApi } from "../api/userApi";
 const useUserRepo = () => {
   const user = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
+  const setProfilePic = useUserStore((state) => state.setProfileImage);
   const clearSelectedProject = useProjectStore(
     (state) => state.clearSelectedProject
   );
@@ -105,6 +106,14 @@ const useUserRepo = () => {
     }
   };
 
+  // This is just for local state update
+  const setProfileImage = (profilePic: string) => {
+    setProfilePic(profilePic);
+  };
+
+  // Upload profile image to backend data store
+  const uploadProfileImage = () => {};
+
   return {
     user,
     getUser,
@@ -113,6 +122,8 @@ const useUserRepo = () => {
     changeUserDisplayname,
     authenticateUser,
     logoutUser,
+    setProfileImage,
+    uploadProfileImage,
   };
 };
 
