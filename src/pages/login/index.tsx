@@ -53,6 +53,14 @@ function Login() {
       });
   };
 
+  const handleSignInWithGoogle = () => {
+    // Redirect to the Google OAuth route
+    window.open(
+      `${import.meta.env.VITE_SERVER_URL}/auth/google/callback`,
+      "_self"
+    );
+  };
+
   // Show nothing while fetching data
   if (loading) {
     return null;
@@ -104,7 +112,7 @@ function Login() {
             <Divider my="md" label="or" labelPosition="center" />
 
             <Stack>
-              <GoogleButton>Login with Google</GoogleButton>
+              <GoogleButton onClick={handleSignInWithGoogle}>Login with Google</GoogleButton>
             </Stack>
 
             <Center mt="lg">
