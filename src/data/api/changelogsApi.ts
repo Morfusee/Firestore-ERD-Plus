@@ -9,8 +9,7 @@ import axiosInstance from "../../utils/axiosInstance";
 export const getChangelogsApi = async (projectId: string) => {
   const response = await axiosInstance
     .get<APIResponse<FetchedChangelogs>>(`/projects/${projectId}/changelogs`)
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };
@@ -23,8 +22,7 @@ export const getChangelogByIdApi = async (
     .get<APIResponse<FetchedChangelog>>(
       `/projects/${projectId}/changelogs/${changelogId}`
     )
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };

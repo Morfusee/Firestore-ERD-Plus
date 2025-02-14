@@ -11,7 +11,6 @@ export const authenticateUserApi = async () => {
 
       return res.data;
     })
-    .catch((err) => console.error(err));
 
   return response;
 };
@@ -28,8 +27,7 @@ export const loginUserApi = async (email: string, password: string) => {
       }
 
       return res.data;
-    })
-    .catch((err) => console.error(err));
+    });
 
   return response;
 };
@@ -51,8 +49,7 @@ export const registerUserApi = async (
       }
 
       return res.data;
-    })
-    .catch((err) => console.error(err));
+    });
 
   return response;
 };
@@ -66,8 +63,7 @@ export const logoutUserApi = async () => {
       }
 
       return res.data;
-    })
-    .catch((err) => console.error(err));
+    });
 
   return response;
 };

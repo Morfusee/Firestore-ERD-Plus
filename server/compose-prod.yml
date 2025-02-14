@@ -25,7 +25,12 @@ services:
     ports: 
     - "127.0.0.1:3000:3000"
     environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
       SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      CLIENT_URL: ${CLIENT_URL}
+      BASE_URL: ${BASE_URL}
       MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
       IS_DOCKERIZED: true
     labels:
