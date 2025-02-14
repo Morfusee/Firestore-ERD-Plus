@@ -22,8 +22,7 @@ export const createProjectApi = async (
       icon: icon,
       userId: userId,
     })
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };
@@ -31,8 +30,7 @@ export const createProjectApi = async (
 export const getProjectsApi = async (userId: string) => {
   const response = await axiosInstance
     .get<APIResponse<FetchedProjects>>(`/projects?userId=${userId}`)
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };
@@ -40,8 +38,7 @@ export const getProjectsApi = async (userId: string) => {
 export const getProjectByIdApi = async (projectId: string) => {
   const response = await axiosInstance
     .get<APIResponse<FetchedProject>>(`/projects/${projectId}`)
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };
@@ -56,8 +53,7 @@ export const editProjectApi = async (
       name: name,
       icon: icon,
     })
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };
@@ -72,8 +68,7 @@ export const saveProjectApi = async (
       data: data,
       members: members,
     })
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };
@@ -81,8 +76,7 @@ export const saveProjectApi = async (
 export const deleteProjectApi = async (projectId: string) => {
   const response = await axiosInstance
     .delete<APIResponse<SavedProject>>(`/projects/${projectId}`)
-    .then((res) => res.data)
-    .catch((err) => console.error(err));
+    .then((res) => res.data);
 
   return response;
 };

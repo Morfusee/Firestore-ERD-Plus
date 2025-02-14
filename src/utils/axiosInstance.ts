@@ -9,4 +9,15 @@ const axiosInstance = axios.create({
   },
 });
 
+// Response interceptor to handle errors globally
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.config?.skipInterceptor) return Promise.reject(error);
+
+    console.log("Error from interceptor", error);
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;
