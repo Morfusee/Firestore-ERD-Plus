@@ -25,6 +25,7 @@ import ShareModal from "./components/modals/ShareModal";
 import DownloadModal from "./components/modals/DownloadModal";
 import DrawerModal from "./components/modals/DrawerModal";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import ImageCropperModal from "./components/modals/ImageCropperModal";
 
 const modals = {
   drawer: DrawerModal,
@@ -34,6 +35,7 @@ const modals = {
   download: DownloadModal,
   shareModal: ShareModal,
   manageAcc: ManageAccountModal,
+  cropImage: ImageCropperModal,
 };
 
 declare module "@mantine/modals" {
