@@ -1,18 +1,21 @@
-import { NextFunction, Request, Response } from "express";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-} from "../config/firebase";
 import BadRequestError from "@root/errors/BadRequestError";
+import User from "@root/models/userModel";
 import CreatedResponse from "@root/success/CreatedResponse";
 import SuccessResponse from "@root/success/SuccessResponse";
 import { AuthRequest, AuthUser } from "@root/types/authTypes";
-import User from "@root/models/userModel";
+import { NextFunction, Request, Response } from "express";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+} from "../config/firebase";
+import passport from "../config/passport";
+import dotenv from "dotenv";
 
+dotenv.config();
 const auth = getAuth();
 
 export const registerUser = async (
@@ -36,7 +39,7 @@ export const registerUser = async (
 
     // Send email verification
     const emailVerification = await sendEmailVerification(user.user).catch(
-      (err) => next(new BadRequestError("Error sending email verification."))
+      (_err) => next(new BadRequestError("Error sending email verification."))
     );
 
     // Get the user token
@@ -49,8 +52,9 @@ export const registerUser = async (
     // Set the access token in a cookie
     res.cookie("access_token", userIdToken, {
       httpOnly: true,
+      // Enable this for production
       // secure: true,
-      // sameSite: "strict",
+      sameSite: "strict",
     });
 
     // Create the user
@@ -109,8 +113,9 @@ export const loginUser = async (
     // Set the access token in a cookie
     res.cookie("access_token", userIdToken, {
       httpOnly: true,
+      // Enable this for production
       // secure: true,
-      // sameSite: "strict",
+      sameSite: "strict",
     });
 
     // Get user from database
@@ -134,9 +139,22 @@ export const logoutUser = async (
   next: NextFunction
 ) => {
   try {
+    // Log the user out of Firebase Auth
     await signOut(auth).then(() => {
       res.clearCookie("access_token");
     });
+
+    // Log the user out if they are using sessions
+    // This auto purges the session from the database
+    req.logout((err: any) => {
+      if (err) {
+        next(err);
+      }
+    });
+
+    // Clear authentication-related cookies from the client
+    res.clearCookie("access_token");
+    res.clearCookie("connect.sid", { path: "/" });
 
     next(new SuccessResponse("User logged out successfully.", null));
   } catch (error) {
@@ -146,7 +164,7 @@ export const logoutUser = async (
 
 export const resetPassword = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -166,7 +184,7 @@ export const resetPassword = async (
 
 export const authenticateUser = async (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -193,4 +211,24 @@ export const authenticateUser = async (
   } catch (error) {
     next(error);
   }
+};
+
+// Handle Google OAuth callback
+export const googleCallback = passport.authenticate("google", {
+  successRedirect: process.env.CLIENT_URL!,
+  failureRedirect: "/google/callback/failed",
+});
+
+// Authenticate with Google OAuth
+export const googleAuth = passport.authenticate("google", {
+  scope: ["email", "profile"],
+  prompt: "select_account",
+});
+
+export const googleAuthFailed = (
+  _req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  next(new BadRequestError("Google authentication failed."));
 };
