@@ -9,59 +9,41 @@ import {
   SavedProject,
   UpdatedProject,
 } from "../../types/APITypes";
+import axiosInstance from "../../utils/axiosInstance";
 
 export const createProjectApi = async (
   name: IProject["name"],
   icon: IProject["icon"],
   userId: string
 ) => {
-  const response = await fetch(import.meta.env.VITE_SERVER_URL + "/projects", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
+  const response = await axiosInstance
+    .post<APIResponse<CreatedProject>>("/projects", {
       name: name,
       icon: icon,
       userId: userId,
-    }),
-  })
-    .then((res) => res.json())
-    .catch((err) => {
-      console.error(err);
-    });
+    })
+    .then((res) => res.data)
+    .catch((err) => console.error(err));
 
-  return response as APIResponse<CreatedProject>;
+  return response;
 };
 
 export const getProjectsApi = async (userId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects?userId=${userId}`,
-    {
-      credentials: "include",
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .get<APIResponse<FetchedProjects>>(`/projects?userId=${userId}`)
+    .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  // // If response is empty, return an empty array
-  // if (!response) return [];
-
-  return response as APIResponse<FetchedProjects>;
+  return response;
 };
 
 export const getProjectByIdApi = async (projectId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
-    {
-      credentials: "include",
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .get<APIResponse<FetchedProject>>(`/projects/${projectId}`)
+    .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  return response as APIResponse<FetchedProject>;
+  return response;
 };
 
 export const editProjectApi = async (
@@ -69,24 +51,15 @@ export const editProjectApi = async (
   icon: IProject["icon"],
   projectId: IProject["id"]
 ) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
-    {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name,
-        icon: icon,
-      }),
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .patch<APIResponse<UpdatedProject>>(`/projects/${projectId}`, {
+      name: name,
+      icon: icon,
+    })
+    .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  return response as APIResponse<UpdatedProject>;
+  return response;
 };
 
 export const saveProjectApi = async (
@@ -94,38 +67,24 @@ export const saveProjectApi = async (
   data: string,
   members: string[]
 ) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}/data`,
-    {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: data,
-        members: members,
-      }),
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .patch<APIResponse<SavedProject>>(`/projects/${projectId}/data`, {
+      data: data,
+      members: members,
+    })
+    .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  return response as APIResponse<SavedProject>;
+  return response;
 };
 
 export const deleteProjectApi = async (projectId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    }
-  )
-    .then((res) => res.json())
-    .catch((err) => console.log(err));
+  const response = await axiosInstance
+    .delete<APIResponse<SavedProject>>(`/projects/${projectId}`)
+    .then((res) => res.data)
+    .catch((err) => console.error(err));
 
-  return response as APIResponse<DeletedProject>;
+  return response;
 };
 
 // NOTE: Unmaintained
