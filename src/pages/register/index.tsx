@@ -68,6 +68,14 @@ function Register() {
       });
   };
 
+  const handleContinueWithGoogle = () => {
+    // Redirect to the Google OAuth route
+    window.open(
+      `${import.meta.env.VITE_SERVER_URL}/auth/google/callback`,
+      "_self"
+    );
+  };
+
   // Show nothing while fetching data
   if (loading) {
     return null;
@@ -127,7 +135,9 @@ function Register() {
             <Divider my="md" label="or" labelPosition="center" />
 
             <Stack>
-              <GoogleButton>Continue with Google</GoogleButton>
+              <GoogleButton onClick={handleContinueWithGoogle}>
+                Continue with Google
+              </GoogleButton>
             </Stack>
 
             <Center mt="lg">

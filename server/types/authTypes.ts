@@ -1,6 +1,8 @@
 import { Request } from "express";
+import { Session } from "express-session";
 
-export interface AuthRequest extends Request {
+export interface AuthRequest<P = {}, B = {}> extends Request<P, {}, B> {
+  session: CustomSession;
   user?: any;
 }
 
@@ -21,4 +23,20 @@ export interface AuthUser {
 export interface AuthUserFirebaseField {
   identities: { email: Array<string> };
   sign_in_provider: string;
+}
+
+export interface CustomSession extends Session {
+  passport?: {
+    user: {
+      id: string;
+      username?: string;
+      email?: string;
+      displayName?: string;
+      token?: string;
+      ownedProjects?: any[];
+      sharedProjects?: any[];
+      createdAt?: string;
+      updatedAt?: string;
+    };
+  };
 }

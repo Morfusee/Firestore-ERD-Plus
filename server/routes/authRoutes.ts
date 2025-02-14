@@ -5,16 +5,33 @@ import {
   logoutUser,
   resetPassword,
   authenticateUser,
+  googleAuthFailed,
+  googleCallback,
+  googleAuth,
 } from "@root/controllers/authController";
-import { verifyToken } from "@root/middleware/validators/authValidator";
+import {
+  validateToken,
+  validate,
+} from "@root/middleware/validators/authValidator";
 import { validateUser } from "@root/middleware/validators/userValidator";
+import dotenv from "dotenv";
+import passport from "../config/passport";
+
+dotenv.config();
 
 const router = express.Router();
 
-router.post("/register", [...validateUser], registerUser);
+// Firebase Auth routes
+router.post("/register", [...validateUser, validate], registerUser);
 router.post("/login", loginUser);
-router.post("/logout", [verifyToken], logoutUser);
+router.post("/logout", [validateToken, validate], logoutUser);
 router.post("/reset-password", resetPassword);
-router.get("/check-auth", [verifyToken], authenticateUser);
+router.get("/check-auth", [validateToken, validate], authenticateUser);
+
+// Google OAuth routes
+router.get("/google/callback", googleCallback);
+router.get("/google", googleAuth);
+router.get("/google/callback/failed", googleAuthFailed);
+
 
 export default router;
