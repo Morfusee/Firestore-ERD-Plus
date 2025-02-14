@@ -16,9 +16,7 @@ export const getEmojiGroup = async (
     // Fetch data from the server
     const response = await axiosInstance(`/emojis?group=${group}`).then(
       (res) => {
-        console.log(res);
         // Throw an error if the response is not ok
-
         if (res.statusText != "OK") {
           throw new Error("There was an error fetching emojis.");
         }

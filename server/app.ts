@@ -16,6 +16,7 @@ import memberRoutes from "./routes/memberRoutes.ts";
 import projectRoutes from "./routes/projectRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
+import helmet from "helmet";
 
 dotenv.config();
 
@@ -30,13 +31,31 @@ app.use(
   })
 );
 
-// CORS preflight
-app.options("*", cors());
+// Apply helmet middleware
+app.use(
+  helmet({
+    frameguard: {
+      action: "deny",
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    noSniff: true,
+    permittedCrossDomainPolicies: {
+      permittedPolicies: "none",
+    },
+  })
+);
 
 app.use(express.json());
 
 // Cookie parser
 app.use(cookieParser());
+
+// CORS preflight
+app.options("*", cors());
 
 if (process.env.NODE_ENV !== "test") {
   const isDockerRunning = process.env.IS_DOCKERIZED;
@@ -68,10 +87,10 @@ if (process.env.NODE_ENV !== "test") {
         ttl: 14 * 24 * 60 * 60, // Session expiration time (14 days)
       }),
       cookie: {
+        httpOnly: true,
         // Enable this for production
         // secure: true,
-        httpOnly: true,
-        sameSite: "strict",
+        // sameSite: "none",
       },
     })
   );
