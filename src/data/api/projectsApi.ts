@@ -25,7 +25,7 @@ export const createProjectApi = async (
     .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  return response as APIResponse<CreatedProject>;
+  return response;
 };
 
 export const getProjectsApi = async (userId: string) => {
@@ -84,7 +84,7 @@ export const deleteProjectApi = async (projectId: string) => {
     .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  return response as APIResponse<SavedProject>;
+  return response;
 };
 
 // NOTE: Unmaintained

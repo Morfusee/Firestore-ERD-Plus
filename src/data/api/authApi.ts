@@ -1,46 +1,37 @@
 import { APIResponse, CreatedUser, FetchedUser } from "../../types/APITypes";
+import axiosInstance from "../../utils/axiosInstance";
 
 export const authenticateUserApi = async () => {
-  const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/auth/check-auth`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .get<APIResponse<FetchedUser>>(`/auth/check-auth`)
+    .then((res) => {
+      if (!res.data.success) {
+        throw new Error("Failed to authenticate user");
+      }
+
+      return res.data;
+    })
     .catch((err) => console.error(err));
 
-  if (!response.success) {
-    throw new Error("User is not authenticated");
-  }
-
-  return response as APIResponse<FetchedUser>;
+  return response;
 };
 
 export const loginUserApi = async (email: string, password: string) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/auth/login`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .post<APIResponse<FetchedUser>>(`/auth/login`, {
+      email,
+      password,
+    })
+    .then((res) => {
+      if (!res.data.success) {
+        throw new Error("Failed to login user");
+      }
+
+      return res.data;
+    })
     .catch((err) => console.error(err));
 
-  if (!response.success) {
-    throw new Error("Failed to login user");
-  }
-
-  return response as APIResponse<FetchedUser>;
+  return response;
 };
 
 export const registerUserApi = async (
@@ -48,48 +39,35 @@ export const registerUserApi = async (
   email: string,
   password: string
 ) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/auth/register`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        email,
-        password,
-      }),
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .post<APIResponse<CreatedUser>>(`/auth/register`, {
+      username,
+      email,
+      password,
+    })
+    .then((res) => {
+      if (!res.data.success) {
+        throw new Error("Failed to register user");
+      }
+
+      return res.data;
+    })
     .catch((err) => console.error(err));
 
-  if (!response.success) {
-    throw new Error("Failed to register user");
-  }
-
-  return response as APIResponse<CreatedUser>;
+  return response;
 };
 
 export const logoutUserApi = async () => {
-  const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/auth/logout`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .post<APIResponse<null>>(`/auth/logout`)
+    .then((res) => {
+      if (!res.data.success) {
+        throw new Error("Failed to register user");
+      }
+
+      return res.data;
+    })
     .catch((err) => console.error(err));
 
-  if (!response.success) {
-    throw new Error("Failed to logout user");
-  }
-
-  return response as APIResponse<null>;
+  return response;
 };
