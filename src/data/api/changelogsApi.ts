@@ -1,22 +1,29 @@
-import { APIResponse, FetchedChangelog, FetchedChangelogs, FetchedUser } from "../../types/APITypes";
-
+import {
+  APIResponse,
+  FetchedChangelog,
+  FetchedChangelogs,
+  FetchedUser,
+} from "../../types/APITypes";
+import axiosInstance from "../../utils/axiosInstance";
 
 export const getChangelogsApi = async (projectId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}/changelogs`
-  )
-    .then((res) => res.json())
+  const response = await axiosInstance
+    .get<APIResponse<FetchedChangelogs>>(`/projects/${projectId}/changelogs`)
+    .then((res) => res.data)
     .catch((err) => console.error(err));
 
-  return response as APIResponse<FetchedChangelogs>;
+  return response;
 };
 
-
-export const getChangelogByIdApi = async (projectId: string, changelogId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}/changelogs/${changelogId}`
-  )
-    .then((res) => res.json())
+export const getChangelogByIdApi = async (
+  projectId: string,
+  changelogId: string
+) => {
+  const response = await axiosInstance
+    .get<APIResponse<FetchedChangelog>>(
+      `/projects/${projectId}/changelogs/${changelogId}`
+    )
+    .then((res) => res.data)
     .catch((err) => console.error(err));
 
   return response as APIResponse<FetchedChangelog>;
