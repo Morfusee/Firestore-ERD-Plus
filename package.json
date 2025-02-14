@@ -33,6 +33,7 @@
     "@tiptap/react": "^2.4.0",
     "@tiptap/starter-kit": "^2.4.0",
     "@xyflow/react": "^12.3.5",
+    "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.11",
     "dexie": "^4.0.10",
