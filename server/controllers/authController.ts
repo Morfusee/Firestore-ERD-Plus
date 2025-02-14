@@ -54,7 +54,7 @@ export const registerUser = async (
       httpOnly: true,
       // Enable this for production
       // secure: true,
-      sameSite: "strict",
+      // sameSite: "none",
     });
 
     // Create the user
@@ -115,7 +115,7 @@ export const loginUser = async (
       httpOnly: true,
       // Enable this for production
       // secure: true,
-      sameSite: "strict",
+      // sameSite: "none",
     });
 
     // Get user from database
