@@ -14,10 +14,10 @@ import {
   TextInput,
   useMantineTheme,
 } from "@mantine/core";
-import TextSelect from "../../../components/TextSelect";
+import TextSelect from "../../../components/ui/TextSelect";
 import { ChangeEvent, memo, useState } from "react";
 import { IconCopyPlus, IconPlus, IconTrash } from "@tabler/icons-react";
-import useIsDarkMode from "../../../utils/useIsDarkMode";
+import useIsDarkMode from "../../../hooks/useIsDarkMode";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
 import { useDidUpdate, useThrottledCallback } from "@mantine/hooks";
 import { useContextMenu } from 'mantine-contextmenu';

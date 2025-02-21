@@ -17,7 +17,7 @@ import { EditorNode } from "../../types/EditorTypes";
 import TableNode from "./nodes/TableNode";
 
 import "@xyflow/react/dist/style.css";
-import useIsDarkMode from "../../utils/useIsDarkMode";
+import useIsDarkMode from "../../hooks/useIsDarkMode";
 import { useCallback, useMemo, useRef } from "react";
 import useEditorRepo from "../../data/repo/useEditorRepo";
 import { useEditorStore } from "../../store/useEditorStore";

@@ -17,11 +17,11 @@ import {
   IconWorld,
   IconHeart,
 } from "@tabler/icons-react";
-import { EmojiData, EmojiGroup } from "../types/EmojiData";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import { EmojiData, EmojiGroup } from "../../types/EmojiData";
+import useIsDarkMode from "../../hooks/useIsDarkMode";
 import { useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
-import DeferredRender from "./DeferredRender";
+import DeferredRender from "../utils/DeferredRender";
 
 interface IComboboxOption {
   icon: React.ForwardRefExoticComponent<

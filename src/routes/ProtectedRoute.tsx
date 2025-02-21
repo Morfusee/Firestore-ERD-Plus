@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useAuth from "../utils/useAuth";
+import useAuth from "../hooks/useAuth";
 import { Box, Loader } from "@mantine/core";
 
 function ProtectedRoute() {

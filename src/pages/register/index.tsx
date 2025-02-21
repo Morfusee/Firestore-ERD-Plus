@@ -17,7 +17,7 @@ import { useForm } from "@mantine/form";
 import { Navigate, useNavigate } from "react-router-dom";
 import { GoogleButton } from "../../components/ui/SocialButtons";
 import useUserRepo from "../../data/repo/useUserRepo";
-import useAuth from "../../utils/useAuth";
+import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
 
 function Register() {

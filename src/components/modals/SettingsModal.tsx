@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
 import { useEffect } from "react";
-import useIsDarkMode from "../../utils/useIsDarkMode";
+import useIsDarkMode from "../../hooks/useIsDarkMode";
 import {
   IconPhoto,
   IconMessageCircle,

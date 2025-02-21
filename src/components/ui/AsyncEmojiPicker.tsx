@@ -29,13 +29,13 @@ import {
   IconBallTennis,
   IconComponents,
 } from "@tabler/icons-react";
-import { EmojiAsyncGroup, EmojiData, EmojiGroup } from "../types/EmojiData";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import { EmojiAsyncGroup, EmojiData, EmojiGroup } from "../../types/EmojiData";
+import useIsDarkMode from "../../hooks/useIsDarkMode";
 import { useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
-import DeferredRender from "./DeferredRender";
+import DeferredRender from "../utils/DeferredRender";
 import { useIsFirstRender } from "@mantine/hooks";
-import useEmojiData from "../utils/useEmojiData";
+import useEmojiData from "../../hooks/useEmojiData";
 
 interface IComboboxOption {
   icon: React.ForwardRefExoticComponent<

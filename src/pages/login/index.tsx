@@ -19,7 +19,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { GoogleButton } from "../../components/ui/SocialButtons";
 import useUserRepo from "../../data/repo/useUserRepo";
 import { getErrorMessage } from "../../utils/errorHelpers";
-import useAuth from "../../utils/useAuth";
+import useAuth from "../../hooks/useAuth";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
