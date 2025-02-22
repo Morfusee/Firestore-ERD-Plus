@@ -9,7 +9,6 @@ import {
 } from "firebase/auth";
 import admin from "firebase-admin";
 import dotenv from "dotenv";
-import key from "../config/firebasePrivateKey.json";
 import zlib from "zlib";
 
 dotenv.config();

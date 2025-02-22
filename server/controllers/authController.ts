@@ -14,6 +14,7 @@ import {
 } from "../config/firebase";
 import passport from "../config/passport";
 import dotenv from "dotenv";
+import ConflictError from "@root/errors/ConflictError";
 
 dotenv.config();
 const auth = getAuth();
@@ -28,6 +29,30 @@ export const registerUser = async (
 
     if (!email || !password) {
       return next(new BadRequestError("Email and password are required."));
+    }
+
+    // Check if email or username already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
+    // This prevents hitting the database and Firebase Auth if the user already exists
+    if (existingUser) {
+      return next(new ConflictError("Email or username is already in use."));
+    }
+
+    // Create the user
+    const newUser = new User({
+      username,
+      email,
+      displayName: displayName || username,
+    });
+
+    // Save the user to the database
+    const savedUser = await newUser.save();
+
+    if (!savedUser) {
+      throw new BadRequestError("Error saving user to database.");
     }
 
     // Create the user in Firebase Auth
@@ -57,20 +82,6 @@ export const registerUser = async (
       // sameSite: "none",
     });
 
-    // Create the user
-    const newUser = new User({
-      username,
-      email,
-      displayName: displayName || username,
-    });
-
-    // Save the user to the database
-    const savedUser = await newUser.save();
-
-    if (!savedUser) {
-      throw new BadRequestError("Error saving user to database.");
-    }
-
     next(
       new CreatedResponse("User registered successfully.", {
         createdUser: savedUser,
@@ -90,6 +101,16 @@ export const loginUser = async (
     const { email, password } = req.body;
     if (!email || !password) {
       return next(new BadRequestError("Email and password are required."));
+    }
+
+    // Get user from database
+    const user = await User.findOne({
+      email: { $regex: email, $options: "i" },
+    });
+
+    // This prevents hitting the database and Firebase Auth if the user doesn't exist
+    if (!user) {
+      return next(new BadRequestError("Invalid email or password."));
     }
 
     // Sign in the user with email and password
@@ -117,15 +138,6 @@ export const loginUser = async (
       // secure: true,
       // sameSite: "none",
     });
-
-    // Get user from database
-    const user = await User.find({
-      email: { $regex: email, $options: "i" },
-    }).then((res) => res[0]);
-
-    if (!user) {
-      return next(new BadRequestError("Error getting user."));
-    }
 
     next(new SuccessResponse("User logged in successfully.", { user }));
   } catch (error) {
