@@ -94,7 +94,7 @@ function Register() {
       form.setErrors({
         username: " ",
         email: " ",
-        password: getErrorMessage(response.error || response.message),
+        password: getErrorMessage(response.error, response.message),
       });
 
     setIsRegistering(false);

@@ -52,7 +52,7 @@ function Login() {
     else
       form.setErrors({
         email: " ",
-        password: getErrorMessage(response.error),
+        password: getErrorMessage(response.error, response.message),
       });
 
     setIsLoggingIn(false);
