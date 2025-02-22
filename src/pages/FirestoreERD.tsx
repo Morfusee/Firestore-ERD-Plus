@@ -1,9 +1,9 @@
 import { Box, Loader, Paper, useMantineTheme } from "@mantine/core";
 import "@xyflow/react/dist/style.css";
-import TopMiddleBar from "../components/TopMiddleBar";
-import TopLeftBar from "../components/TopLeftBar";
-import BottomMiddleBar from "../components/BottomMiddleBar";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import TopMiddleBar from "../layouts/TopMiddleBar";
+import TopLeftBar from "../layouts/TopLeftBar";
+import BottomMiddleBar from "../layouts/BottomMiddleBar";
+import useIsDarkMode from "../hooks/useIsDarkMode";
 import Editor from "./editor";
 import { useDataInitializer } from "../data/repo/useDataInitializer";
 import { ReactFlowProvider } from "@xyflow/react";
@@ -12,7 +12,7 @@ import useProjectRepo from "../data/repo/useProjectRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { useEffect } from "react";
 import useHistoryRepo from "../data/repo/useHistoryRepo";
-import TopRightBar from "../components/TopRightBar";
+import TopRightBar from "../layouts/TopRightBar";
 
 function FirestoreERD() {
   const theme = useMantineTheme();

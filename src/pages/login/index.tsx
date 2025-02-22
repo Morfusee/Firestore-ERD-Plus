@@ -14,11 +14,12 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { GoogleButton } from "../../components/ui/SocialButtons";
-import { Navigate, useNavigate } from "react-router-dom";
-import useUserRepo from "../../data/repo/useUserRepo";
-import useAuth from "../../utils/useAuth";
 import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { GoogleButton } from "../../components/ui/SocialButtons";
+import useUserRepo from "../../data/repo/useUserRepo";
+import { getErrorMessage } from "../../utils/errorHelpers";
+import useAuth from "../../hooks/useAuth";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -35,6 +36,7 @@ function Login() {
     },
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      password: (value) => (!value.trim() ? "Password is required" : null),
     },
   });
 
@@ -42,15 +44,18 @@ function Login() {
     setIsLoggingIn(true);
 
     // Login the user
-    await loginUser(email, password)
-      .then((status) => {
-        // Prevent the early redirecting of the user if the login fails
-        if (status) navigate("/");
-        setIsLoggingIn(false);
-      })
-      .catch(() => {
-        setIsLoggingIn(false);
+    const response = await loginUser(email, password);
+
+    // Prevent the early redirecting of the user if the login fails
+    if (response.success) navigate("/");
+    // Show an error message if the login fails
+    else
+      form.setErrors({
+        email: " ",
+        password: getErrorMessage(response.error),
       });
+
+    setIsLoggingIn(false);
   };
 
   const handleSignInWithGoogle = () => {
@@ -112,7 +117,9 @@ function Login() {
             <Divider my="md" label="or" labelPosition="center" />
 
             <Stack>
-              <GoogleButton onClick={handleSignInWithGoogle}>Login with Google</GoogleButton>
+              <GoogleButton onClick={handleSignInWithGoogle}>
+                Login with Google
+              </GoogleButton>
             </Stack>
 
             <Center mt="lg">

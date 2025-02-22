@@ -1,13 +1,15 @@
+import axios from "axios";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
 import { useUserStore } from "../../store/useUserStore";
+import { APIResponse, FetchedUser } from "../../types/APITypes";
 import {
   authenticateUserApi,
   loginUserApi,
   logoutUserApi,
   registerUserApi,
 } from "../api/authApi";
-import { createUserApi, getUserApi, updateUserApi } from "../api/userApi";
+import { getUserApi, updateUserApi } from "../api/userApi";
 
 const useUserRepo = () => {
   const user = useUserStore((state) => state.currentUser);
@@ -20,16 +22,29 @@ const useUserRepo = () => {
     (state) => state.clearStateSnapshot
   );
 
-  const loginUser = async (email: string, password: string) => {
+  const loginUser = async (
+    email: string,
+    password: string
+  ): Promise<APIResponse<FetchedUser>> => {
     try {
       const loginResponse = await loginUserApi(email, password);
 
       // Set the current user to the user response from api
       setCurrentUser(loginResponse.data.user);
 
-      return loginResponse.success;
-    } catch (err) {
+      // Return the whole login response to get the message and success status
+      return loginResponse;
+    } catch (err: any | APIResponse<FetchedUser>) {
+      // Log the error
       console.log(err);
+
+      // Check if the error is an AxiosError
+      if (axios.isAxiosError(err)) {
+        return err.response?.data;
+      }
+
+      // Return the error response either way
+      return err.response?.data;
     }
   };
 
@@ -58,6 +73,7 @@ const useUserRepo = () => {
       return registerResponse.success;
     } catch (error) {
       console.log(error);
+      return false;
     }
   };
 
@@ -81,6 +97,7 @@ const useUserRepo = () => {
       return authenticateUserResponse.success;
     } catch (error) {
       console.log(error);
+      return false;
     }
   };
 
@@ -103,6 +120,7 @@ const useUserRepo = () => {
       return logoutUserResponse.success;
     } catch (error) {
       console.log(error);
+      return false;
     }
   };
 

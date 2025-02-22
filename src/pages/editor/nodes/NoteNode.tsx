@@ -3,7 +3,7 @@ import { NodeProps, NodeResizer } from "@xyflow/react";
 import { memo, useState } from "react";
 import { NoteNode } from "../../../types/EditorTypes";
 import { IconNote } from "@tabler/icons-react";
-import useIsDarkMode from "../../../utils/useIsDarkMode";
+import useIsDarkMode from "../../../hooks/useIsDarkMode";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
 import { useThrottledCallback, useDidUpdate } from "@mantine/hooks";
 

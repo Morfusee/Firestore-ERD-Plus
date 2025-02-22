@@ -4,7 +4,7 @@ import {
   IconPointerFilled,
   IconTableFilled,
 } from "@tabler/icons-react";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import useIsDarkMode from "../hooks/useIsDarkMode";
 import useEditorRepo from "../data/repo/useEditorRepo";
 import useProjectRepo from "../data/repo/useProjectRepo";
 

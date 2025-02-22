@@ -17,9 +17,9 @@ import {
   IconTool,
 } from "@tabler/icons-react";
 import { useProjectStore } from "../store/useProjectStore";
-import useProjectIcon from "../utils/useProjectIcon";
-import ConditionalHoverCard from "./ConditionalHoverCard";
-import useIsTruncated from "../utils/useIsTruncated";
+import useProjectIcon from "../hooks/useProjectIcon";
+import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
+import useIsTruncated from "../hooks/useIsTruncated";
 import { ReactNode } from "react";
 import { modals } from "@mantine/modals";
 

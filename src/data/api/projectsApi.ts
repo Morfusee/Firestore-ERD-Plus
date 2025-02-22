@@ -75,7 +75,7 @@ export const saveProjectApi = async (
 
 export const deleteProjectApi = async (projectId: string) => {
   const response = await axiosInstance
-    .delete<APIResponse<SavedProject>>(`/projects/${projectId}`)
+    .delete<APIResponse<DeletedProject>>(`/projects/${projectId}`)
     .then((res) => res.data);
 
   return response;

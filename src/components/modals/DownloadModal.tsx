@@ -21,7 +21,7 @@ import useDownloadRepo from "../../data/repo/useDownloadRepo";
 import { getViewportForBounds, useReactFlow } from "@xyflow/react";
 import { toJpeg, toPng } from "html-to-image";
 import { Options } from "html-to-image/lib/types";
-import useIsDarkMode from "../../utils/useIsDarkMode";
+import useIsDarkMode from "../../hooks/useIsDarkMode";
 
 function DownloadModal({ context, id, innerProps }: ContextModalProps) {
   // Hook for getting project details for JSON download

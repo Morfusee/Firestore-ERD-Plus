@@ -8,14 +8,14 @@ import {
 } from "react-router-dom";
 import FirestoreERD from "./pages/FirestoreERD";
 import { useThemeStore } from "./store/globalStore";
-import useTheme from "./utils/useTheme";
+import useTheme from "./hooks/useTheme";
 import { useEffect } from "react";
 import { Notifications } from "@mantine/notifications";
 import { ReactFlowProvider } from "@xyflow/react";
 import { ModalsProvider } from "@mantine/modals";
 import DeleteModal from "./components/modals/DeleteModal";
 import SettingsModal from "./components/modals/SettingsModal";
-import useGlobalHotkeys from "./utils/useGlobalHotkeys";
+import useGlobalHotkeys from "./hooks/useGlobalHotkeys";
 import { ContextMenuProvider } from "mantine-contextmenu";
 import Login from "./pages/login";
 import Register from "./pages/register";
