@@ -40,7 +40,10 @@ const decompressedServiceAccount = JSON.parse(
 
 admin.initializeApp({
   credential: admin.credential.cert(decompressedServiceAccount),
+  storageBucket: firebaseConfig.storageBucket
 });
+
+const bucket = admin.storage().bucket();
 
 export {
   getAuth,
@@ -49,5 +52,6 @@ export {
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  bucket,
   admin,
 };

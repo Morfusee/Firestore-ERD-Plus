@@ -1,10 +1,13 @@
 import express from "express";
+import { RequestHandler } from 'express';
+
 import {
   createUser,
   getAllUsers,
   getUserById,
   getUserByEmail,
   updateUser,
+  uploadProfilePicture,
   deleteUser,
   getOwnedProjectsByUserId,
 } from "../controllers/userController";
@@ -17,6 +20,7 @@ import {
   validate,
   validateToken,
 } from "../middleware/validators/authValidator";
+import upload from "../middleware/multer";
 
 const router = express.Router();
 
@@ -48,5 +52,12 @@ router.patch("/:id", [validateToken, validate], updateUser);
 
 // Route for deleting a user by ID
 router.delete("/:id", [validateToken, validate], deleteUser);
+
+// Route for uploading a profile picture
+router.patch(
+  "/:id/profile-picture",
+  [validateToken, validate, upload.single('profilePicture')] as RequestHandler[],
+  uploadProfilePicture
+);
 
 export default router;
