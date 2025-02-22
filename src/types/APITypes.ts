@@ -1,6 +1,7 @@
 import { IChangelog } from "../store/useChangelogStore";
 import { IUser } from "../store/useUserStore";
 import { IProject } from "./ProjectTypes";
+import { EmojiData } from "./EmojiData";
 
 export interface APIResponse<T> {
   success: boolean;
@@ -59,4 +60,9 @@ export interface FetchedChangelogs {
 
 export interface FetchedChangelog {
   changelog: IChangelog;
+}
+
+// Emojis
+export interface FetchedEmojiGroup {
+  emojisByGroup: EmojiData[];
 }

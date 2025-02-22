@@ -1,5 +1,7 @@
 import { useEmojiStore } from "../../store/globalStore";
-import { EmojiData } from "../../types/EmojiData";
+import { EmojiAsyncGroup, EmojiData } from "../../types/EmojiData";
+import axiosInstance from "../../utils/axiosInstance";
+import { emojiGroupApi } from "../api/emojiApi";
 import { db } from "../db/db";
 
 const useEmojiRepo = () => {
@@ -39,12 +41,44 @@ const useEmojiRepo = () => {
     resetState();
   };
 
+  const getEmojiGroup = async (
+    group: keyof EmojiAsyncGroup,
+    props: {
+      setEmojiData: (data: EmojiData[]) => void;
+      setLoading: (loading: boolean) => void;
+      setError: (error: string | null) => void;
+    }
+  ) => {
+    try {
+      // Always set loading to true before fetching data
+      props.setLoading(true);
+
+      // Fetch data from the server
+      const getEmojiGroupResponse = await emojiGroupApi(group);
+
+      // Set the emoji data to return
+      props.setEmojiData(getEmojiGroupResponse.data.emojisByGroup);
+
+      // Reset the error state
+      props.setError(null);
+    } catch (err) {
+      // Set the error state
+      props.setError(
+        err instanceof Error ? err.message : "An unknown error occurred."
+      );
+    } finally {
+      // Always set loading to false after fetching data
+      props.setLoading(false);
+    }
+  };
+
   return {
     getEmojisList,
     getEmojiByHex,
     getHexByEmoji,
     setEmojis,
     resetEmojis,
+    getEmojiGroup,
   };
 };
 
