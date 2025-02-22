@@ -44,6 +44,9 @@ export const validateToken = async (
     // If no token is present, return a 409 Conflict error
     throw new ConflictError("No valid tokens provided.");
   } catch (error) {
+    // Clear the cookie if the connect.sid is invalid
+    res.clearCookie("connect.sid");
+    
     // If the token is invalid, return a 409 Conflict error
     next(error);
   }
@@ -63,7 +66,7 @@ const verifyFirebaseToken = async (
 
     next();
   } catch (error) {
-    // Remove the access token in the cookie
+    // Clear the cookie if the access token is invalid
     res.clearCookie("access_token");
 
     // Get the error message
