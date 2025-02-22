@@ -147,7 +147,7 @@ export const createProject = async (
       members: [
         {
           userId: userId,
-          role: "owner",
+          role: "Owner",
         },
       ],
     });
