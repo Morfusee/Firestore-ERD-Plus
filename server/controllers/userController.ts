@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import ValidationError from "@root/errors/ValidationError.ts";
 import CreatedResponse from "@root/success/CreatedResponse.ts";
+import { bucket } from "@root/config/firebase";
 
 export const getAllUsers = async (
   req: Request,
@@ -141,6 +142,7 @@ export const updateUser = async (
   }
 };
 
+
 export const getUserByEmail = async (
   req: Request,
   res: Response,
@@ -186,6 +188,84 @@ export const deleteUser = async (
         deleteUser: user,
       })
     );
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+
+export const uploadProfilePicture = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Check if user exists
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      throw new NotFoundError("User not found.");
+    }
+
+    // Check if file was uploaded
+    if (!req.file) {
+      throw new ValidationError("No file uploaded.");
+    }
+
+    // Delete existing profile picture from Firebase if it exists
+    if (user.profilePicture) {
+      try {
+        const fileName = user.profilePicture.split('/').pop()?.split('?')[0];
+        if (fileName) {
+          await bucket.file(`profile-pictures/${fileName}`).delete();
+        }
+      } catch (error) {
+        console.error("Error deleting old profile picture:", error);
+        // Continue with upload even if delete fails
+      }
+    }
+
+    // Create a unique filename
+    const timestamp = Date.now();
+    const fileName = `${user._id}-${timestamp}.${req.file.originalname.split('.').pop()}`;
+    const filePath = `profile-pictures/${fileName}`;
+
+    // Create a new blob in the bucket and upload the file data
+    const blob = bucket.file(filePath);
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: req.file.mimetype,
+      },
+    });
+
+    // Handle errors during upload
+    blobStream.on('error', (error: { message: any; }) => {
+      throw new Error(`Unable to upload image, ${error.message}`);
+    });
+
+    // Handle successful upload
+    blobStream.on('finish', async () => {
+      // Make the file public
+      await blob.makePublic();
+
+      // Get the public URL
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+
+      // Update user profile picture URL in database
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        { profilePicture: publicUrl },
+        { new: true }
+      );
+
+      next(
+        new SuccessResponse("Profile picture uploaded successfully.", {
+          user: updatedUser,
+        })
+      );
+    });
+
+    // Write the file to Firebase Storage
+    blobStream.end(req.file.buffer);
   } catch (error: any) {
     next(error);
   }
