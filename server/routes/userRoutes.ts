@@ -1,5 +1,5 @@
 import express from "express";
-import { RequestHandler } from 'express';
+import { RequestHandler } from "express";
 
 import {
   createUser,
@@ -21,6 +21,7 @@ import {
   validateToken,
 } from "../middleware/validators/authValidator";
 import upload from "../middleware/multer";
+import { compressImage } from "../middleware/compressImageMiddleware";
 
 const router = express.Router();
 
@@ -56,7 +57,12 @@ router.delete("/:id", [validateToken, validate], deleteUser);
 // Route for uploading a profile picture
 router.patch(
   "/:id/profile-picture",
-  [validateToken, validate, upload.single('profilePicture')] as RequestHandler[],
+  [
+    validateToken,
+    validate,
+    upload.single("profilePicture"),
+    compressImage,
+  ] as RequestHandler[],
   uploadProfilePicture
 );
 
