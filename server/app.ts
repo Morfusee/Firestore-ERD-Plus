@@ -77,7 +77,7 @@ if (process.env.NODE_ENV !== "test") {
   // This is required for passport to work
   app.use(
     session({
-      secret: process.env.TUNNEL_TOKEN || "default_secret",
+      secret: process.env.SESSION_KEY || "default_secret",
       resave: false,
       saveUninitialized: false,
       // Responsible for storing sessions in the database

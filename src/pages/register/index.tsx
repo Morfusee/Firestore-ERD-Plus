@@ -19,6 +19,7 @@ import { GoogleButton } from "../../components/ui/SocialButtons";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
+import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -84,15 +85,19 @@ function Register() {
   ) => {
     setIsRegistering(true);
 
-    // Register the user
-    await registerUser(username, email, password)
-      .then((status) => {
-        if (status) navigate("/");
-        setIsRegistering(false);
-      })
-      .catch(() => {
-        setIsRegistering(false);
+    const response = await registerUser(username, email, password);
+
+    // Prevent the early redirecting of the user if the registering fails
+    if (response.success) navigate("/");
+    // Show an error message if the register fails
+    else
+      form.setErrors({
+        username: " ",
+        email: " ",
+        password: getErrorMessage(response.error || response.message),
       });
+
+    setIsRegistering(false);
   };
 
   const handleContinueWithGoogle = () => {
