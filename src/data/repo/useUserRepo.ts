@@ -9,7 +9,11 @@ import {
   logoutUserApi,
   registerUserApi,
 } from "../api/authApi";
-import { getUserApi, updateUserApi } from "../api/userApi";
+import {
+  getUserApi,
+  updateUserApi,
+  uploadProfilePictureApi,
+} from "../api/userApi";
 
 const useUserRepo = () => {
   const user = useUserStore((state) => state.currentUser);
@@ -139,7 +143,41 @@ const useUserRepo = () => {
   };
 
   // Upload profile image to backend data store
-  const uploadProfileImage = () => {};
+  const uploadProfileImage = async (
+    userId: string,
+    profilePicture: File
+  ): Promise<APIResponse<FetchedUser>> => {
+    try {
+      // Create a new FormData object
+      const formData = new FormData();
+
+      // Append the file to the formData object
+      formData.append("profilePicture", profilePicture);
+
+      // Send the file to the backend
+      const uploadProfilePictureResponse = await uploadProfilePictureApi(
+        userId,
+        formData
+      );
+
+      // Re-set the user again
+      setCurrentUser(uploadProfilePictureResponse.data.user);
+
+      // Return the response
+      return uploadProfilePictureResponse;
+    } catch (err: any | APIResponse<FetchedUser>) {
+      // Log the error
+      console.log(err);
+
+      // Check if the error is an AxiosError
+      if (axios.isAxiosError(err)) {
+        return err.response?.data;
+      }
+
+      // Return the error response either way
+      return err.response?.data;
+    }
+  };
 
   return {
     user,

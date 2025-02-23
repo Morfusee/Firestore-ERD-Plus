@@ -33,6 +33,7 @@ import useEditorRepo from "../data/repo/useEditorRepo";
 import { IProject } from "../types/ProjectTypes";
 import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
 import { useNavigate } from "react-router-dom";
+import ProfileAvatar from "../components/ui/ProfileAvatar";
 
 function TopRightBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -63,6 +64,7 @@ function ActionButtons({
   openedDrawer: boolean;
 }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const navigate = useNavigate();
 
@@ -119,12 +121,18 @@ function ActionButtons({
             component="button"
             size={34}
             onClick={() => handlers.toggle()}
+            src={user?.profilePicture}
           />
         </Popover.Target>
 
         <Popover.Dropdown>
           <Stack align="center" gap="sm">
-            <Avatar size={72} />
+            <ProfileAvatar
+              isImageLoaded={isImageLoaded}
+              setIsImageLoaded={setIsImageLoaded}
+              profilePicture={user?.profilePicture}
+              avatarSize={72}
+            />
 
             <Stack gap={2} justify="center">
               <Title order={2} ta="center">
