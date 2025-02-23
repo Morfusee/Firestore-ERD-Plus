@@ -29,6 +29,8 @@
     "multer-gridfs-storage": "^5.0.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "server": "file:",
+    "sharp": "^0.33.5",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
