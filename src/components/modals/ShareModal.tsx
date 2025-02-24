@@ -147,14 +147,14 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
       showNotification({
         color: "green",
         title: "Success",
-        message: "Member removed successfully",
+        message: memberId === user?.id ? "You have left the project" : "Member removed successfully",
       });
     } catch (error) {
       console.error("Failed to remove member:", error);
       showNotification({
         color: "red",
         title: "Error",
-        message: "Failed to remove member. Please try again.",
+        message: memberId === user?.id ? "Failed to remove yourself from the project" : "Failed to remove member. Please try again.",
       });
     }
   };
