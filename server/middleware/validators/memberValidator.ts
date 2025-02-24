@@ -27,12 +27,19 @@ export const validateUserId =
 export const validateRoleRequired = 
   body('role')
     .trim()
-    .isIn(['admin', 'editor', 'viewer'])
+    .isIn(['Admin', 'Editor', 'Viewer'])
     .withMessage('Invalid role')
 
 export const validateRoleOptional = 
   body('role')
     .optional()
     .trim()
-    .isIn(['admin', 'editor', 'viewer'])
+    .isIn(['Admin', 'Editor', 'Viewer'])
     .withMessage('Invalid role')
+
+export const validateMemberEmail = 
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail()

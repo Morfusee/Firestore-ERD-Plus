@@ -7,6 +7,7 @@ import {
   DeletedProjectMember,
 } from "../../types/APITypes";
 import axiosInstance from "../../utils/axiosInstance";
+import axios from "axios";
 
 export const getProjectMembersApi = async (projectId: string) => {
   const response = await axiosInstance
@@ -20,15 +21,38 @@ export const addProjectMemberApi = async (
   projectId: string,
   email: string,
   role: string
-) => {
-  const response = await axiosInstance
-    .post<APIResponse<CreatedProjectMember>>(`/projects/${projectId}/members`, {
-      email,
-      role,
-    })
-    .then((res) => res.data);
+): Promise<APIResponse<CreatedProjectMember>> => {
+  console.log("addProjectMemberApi: Project ID:", projectId);
+  console.log("addProjectMemberApi: Email:", email);
+  console.log("addProjectMemberApi: Role:", role);
 
-  return response;
+  try {
+    if (!projectId || !email || !role) {
+      throw new Error("Invalid input parameters");
+    }
+
+    const response = await axiosInstance.post<APIResponse<CreatedProjectMember>>(
+      `/projects/${projectId}/members`,
+      { email, role }
+    );
+    console.log("addProjectMemberApi: Response:", response.data);
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.log(
+        "addProjectMemberApi: API error:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(
+        `API error: ${error.response.status} ${error.response.data}`
+      );
+    } else {
+      console.log("addProjectMemberApi: Unexpected error:", error);
+    }
+    throw new Error("An unexpected error occurred");
+  }
 };
 
 export const updateProjectMemberApi = async (

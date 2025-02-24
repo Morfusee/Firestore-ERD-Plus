@@ -67,20 +67,27 @@ export const addMember = async (
   next: NextFunction
 ) => {
   const { projectId } = req.params;
-  const { userId, role } = req.body;
+  const { email, role } = req.body;
 
   try {
+    console.log("addMember: Request body:", req.body);
+    console.log("addMember: Request params:", req.params);
+
     // Check if ObjectId in url params is valid
-    // Check if the body either has userId and role
-    // Check if ObjectId in body is valid
+    // Check if the body either has email and role
+    // Check if email is valid
 
     // Check if project exists
     const project = await Project.findById(projectId).select("-data -members");
     if (!project) throw new NotFoundError("Project not found");
 
-    // Check if member exists
-    const user = await User.findById(userId);
+    console.log("addMember: Project found:", project);
+
+    // Check if member exists by email
+    const user = await User.findOne({ email });
     if (!user) throw new NotFoundError("User not found");
+
+    console.log("addMember: User found:", user);
 
     // Check if member is already in the member list
     const isMember = await Project.exists({
@@ -88,17 +95,25 @@ export const addMember = async (
       "members.userId": user.id,
     });
     if (isMember)
-      throw new ConflictError("User is already a member of this project");
+      throw new ConflictError(
+        "User with this email is already a member of this project"
+      );
+
+    console.log("addMember: User is not a member of the project");
 
     // Check if the role of the one adding is an owner or admin
     // TODO when auth is implemented
 
     const memberData = { userId: user.id, role: role || "Viewer" };
 
+    console.log("addMember: Member data to be added:", memberData);
+
     // Add member to project
     await project.updateOne({ $push: { members: memberData } });
     // Add project to user
     await user.updateOne({ $push: { sharedProjects: project.id } });
+
+    console.log("addMember: Member added successfully");
 
     next(
       new SuccessResponse("Member has been added successfully.", {
@@ -106,6 +121,7 @@ export const addMember = async (
       })
     );
   } catch (error) {
+    console.log("addMember: Error:", error);
     next(error);
   }
 };
