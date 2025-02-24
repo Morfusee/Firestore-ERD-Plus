@@ -52,7 +52,7 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
     context.updateModal({
       modalId: id,
       title: (
-        <Group spacing="xs">
+        <Group gap="xs">
           {selectedProject?.icon && (
             <Avatar src={selectedProject.icon} size="sm" />
           )}
