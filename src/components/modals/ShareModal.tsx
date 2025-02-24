@@ -329,7 +329,7 @@ function MemberItem({
             size="md"
             value={role}
             data={["Viewer", "Editor", "Admin"]}
-            onChange={onRoleChange}
+            onChange={(value) => value && onRoleChange(value)}
           />
         )}
 
