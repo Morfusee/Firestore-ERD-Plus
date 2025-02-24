@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { EmojiAsyncGroup, EmojiData } from "../types/EmojiData";
 import { usePrevious } from "@mantine/hooks";
-import { getEmojiGroup } from "../data/api/emojiApi";
+import useEmojiRepo from "../data/repo/useEmojiRepo";
 
 const useEmojiData = (group: keyof EmojiAsyncGroup) => {
   // Define the state variables
@@ -10,6 +10,8 @@ const useEmojiData = (group: keyof EmojiAsyncGroup) => {
   // Define the loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { getEmojiGroup } = useEmojiRepo();
 
   // Fetch the emoji data when the group changes
   useEffect(() => {

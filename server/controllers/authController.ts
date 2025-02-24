@@ -207,9 +207,9 @@ export const authenticateUser = async (
     }
 
     // Get user from database
-    const user = await User.find({
+    const user = await User.findOne({
       email: { $regex: authUser.email, $options: "i" },
-    }).then((res) => res[0]);
+    });
 
     if (!user) {
       throw new BadRequestError("Error getting user.");

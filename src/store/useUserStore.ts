@@ -6,7 +6,7 @@ export interface IUser {
   username: string;
   email: string;
   displayName?: string;
-  profileImage?: string;
+  profilePicture?: string;
   token: string;
 }
 

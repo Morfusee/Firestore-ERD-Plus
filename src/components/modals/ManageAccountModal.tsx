@@ -4,6 +4,7 @@ import {
   Button,
   FileButton,
   Group,
+  Skeleton,
   Stack,
   Text,
   TextInput,
@@ -14,9 +15,12 @@ import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { Cropper, CropperRef } from "react-advanced-cropper";
 import useUserRepo from "../../data/repo/useUserRepo";
+import ProfileAvatar from "../ui/ProfileAvatar";
 
 function ManageAccountModal({ context, id, innerProps }: ContextModalProps) {
   const { user, changeUserDisplayname } = useUserRepo();
+
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     context.updateModal({
@@ -34,17 +38,11 @@ function ManageAccountModal({ context, id, innerProps }: ContextModalProps) {
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
-      image: user?.profileImage || "",
       name: "",
     },
     validate: {
-      image: (value) => {
-        if (!value) {
-          return "Image is required";
-        }
-      },
       name: (value) => {
-        if (!value) {
+        if (!value && !user?.displayName) {
           return "Name is required";
         }
       },
@@ -90,7 +88,11 @@ function ManageAccountModal({ context, id, innerProps }: ContextModalProps) {
       >
         <Stack px="md">
           <Group ml="lg" align="center" gap="md">
-            <Avatar size={100} src={form.getValues().image} />
+            <ProfileAvatar
+              isImageLoaded={isImageLoaded}
+              setIsImageLoaded={setIsImageLoaded}
+              profilePicture={user?.profilePicture}
+            />
             <Group gap="xs">
               <FileButton onChange={onUpload} accept="image/*">
                 {(props) => (

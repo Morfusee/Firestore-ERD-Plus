@@ -5,6 +5,7 @@ import ConflictError from "@root/errors/ConflictError";
 import dotenv from "dotenv";
 import { AuthRequest } from "@root/types/authTypes";
 import { validationResult } from "express-validator";
+import { getFirebaseAuthErrorMessage } from "@root/utils/getFirebaseAuthErrorMessage";
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ export const validateToken = async (
     // If a token is present, verify it
     const userIdToken = req.cookies?.access_token;
     if (userIdToken) {
-      return verifyFirebaseToken(userIdToken, req, next);
+      return verifyFirebaseToken(userIdToken, res, req, next);
     }
 
     // Check if a session is present
@@ -43,6 +44,9 @@ export const validateToken = async (
     // If no token is present, return a 409 Conflict error
     throw new ConflictError("No valid tokens provided.");
   } catch (error) {
+    // Clear the cookie if the connect.sid is invalid
+    res.clearCookie("connect.sid");
+    
     // If the token is invalid, return a 409 Conflict error
     next(error);
   }
@@ -50,22 +54,24 @@ export const validateToken = async (
 
 const verifyFirebaseToken = async (
   token: string,
+  res: Response,
   req: AuthRequest,
   next: NextFunction
 ) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // If the token is invalid, return a 409 Conflict error
-    if (!decodedToken) {
-      throw new ConflictError("Invalid token.");
-    }
-
     // Attach the user object to the request object
     req.user = decodedToken;
 
     next();
   } catch (error) {
-    next(error);
+    // Clear the cookie if the access token is invalid
+    res.clearCookie("access_token");
+
+    // Get the error message
+    const errorMessage = getFirebaseAuthErrorMessage(error);
+
+    next(new ConflictError(errorMessage));
   }
 };

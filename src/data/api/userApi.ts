@@ -34,3 +34,18 @@ export const createUserApi = async (username: string, email: string) => {
 
   return response;
 };
+
+export const uploadProfilePictureApi = async (
+  userId: string,
+  formData: FormData
+) => {
+  const response = await axiosInstance
+    .patch<APIResponse<FetchedUser>>(`/users/${userId}/profile-picture`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+
+  return response;
+};
