@@ -52,7 +52,7 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
     context.updateModal({
       modalId: id,
       title: (
-        <Group spacing="xs">
+        <Group gap="xs">
           {selectedProject?.icon && (
             <Avatar src={selectedProject.icon} size="sm" />
           )}
@@ -246,7 +246,11 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
               { value: "Admin", label: "Admin" },
             ]}
           />
-          <Button onClick={handleAddMember} loading={isAddingMember}>
+          <Button
+            onClick={handleAddMember}
+            loading={isAddingMember}
+            variant="filled"
+          >
             Add
           </Button>
         </Group>
@@ -340,7 +344,7 @@ function MemberItem({
             size="md"
             value={role}
             data={["Viewer", "Editor", "Admin"]}
-            onChange={onRoleChange}
+            onChange={(value) => value && onRoleChange(value)}
           />
         )}
 
