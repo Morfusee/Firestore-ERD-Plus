@@ -32,7 +32,7 @@ import useUserRepo from "../../data/repo/useUserRepo";
 
 function ShareModal({ context, id, innerProps }: ContextModalProps) {
   const { user } = useUserRepo();
-  const { selectedProject } = useProjectRepo();
+  const { selectedProject, clearProject } = useProjectRepo();
   const {
     projectMembers,
     fetchProjectMembers,
@@ -147,14 +147,25 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
       showNotification({
         color: "green",
         title: "Success",
-        message: memberId === user?.id ? "You have left the project" : "Member removed successfully",
+        message:
+          memberId === user?.id
+            ? "You have left the project"
+            : "Member removed successfully",
       });
+
+      if (memberId === user?.id) {
+        context.closeModal(id);
+        clearProject();
+      }
     } catch (error) {
       console.error("Failed to remove member:", error);
       showNotification({
         color: "red",
         title: "Error",
-        message: memberId === user?.id ? "Failed to remove yourself from the project" : "Failed to remove member. Please try again.",
+        message:
+          memberId === user?.id
+            ? "Failed to remove yourself from the project"
+            : "Failed to remove member. Please try again.",
       });
     }
   };
@@ -342,7 +353,9 @@ function MemberItem({
           <Menu.Dropdown>
             {/* <Menu.Item >Remove Member</Menu.Item> */}
             {role === "Owner" && <Menu.Item>Change Owner</Menu.Item>}
-            <Menu.Item onClick={onRemove}>{isCurrentUser ? "Leave Project" : "Remove Member"}</Menu.Item>
+            <Menu.Item onClick={onRemove}>
+              {isCurrentUser ? "Leave Project" : "Remove Member"}
+            </Menu.Item>
           </Menu.Dropdown>
         </Menu>
       </Group>
