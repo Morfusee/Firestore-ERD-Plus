@@ -42,7 +42,6 @@ export const useDataInitializer = () => {
   const loadProjects = async () => {
     console.log("Loading projects from local storage");
 
-    // TODO: Please check the commented lines below, encountered an issue where the user is stuck on the loading state of login page even if the user is logged in
     // Dexie fetching of projects
     // NOTE: Not needed anymore
     // const projectList = await db.projects.toArray();
@@ -64,12 +63,12 @@ export const useDataInitializer = () => {
 
   const loadEmojis = async () => {
     console.log("Loading emojis from local storage");
-    // const emojiDB = await db.emojis.count();
+    const emojiDB = await db.emojis.count();
 
-    // if (emojiDB > 0) {
-    //   const emojiList = await db.emojis.toArray();
-    //   return setEmojisStore(emojiList);
-    // }
+    if (emojiDB > 0) {
+      const emojiList = await db.emojis.toArray();
+      return setEmojisStore(emojiList);
+    }
 
     console.log("Loading emojis from API");
     return fetchEmojis().then((data) => {
