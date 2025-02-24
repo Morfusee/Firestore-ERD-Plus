@@ -147,14 +147,20 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
       showNotification({
         color: "green",
         title: "Success",
-        message: memberId === user?.id ? "You have left the project" : "Member removed successfully",
+        message:
+          memberId === user?.id
+            ? "You have left the project"
+            : "Member removed successfully",
       });
     } catch (error) {
       console.error("Failed to remove member:", error);
       showNotification({
         color: "red",
         title: "Error",
-        message: memberId === user?.id ? "Failed to remove yourself from the project" : "Failed to remove member. Please try again.",
+        message:
+          memberId === user?.id
+            ? "Failed to remove yourself from the project"
+            : "Failed to remove member. Please try again.",
       });
     }
   };
@@ -235,7 +241,11 @@ function ShareModal({ context, id, innerProps }: ContextModalProps) {
               { value: "Admin", label: "Admin" },
             ]}
           />
-          <Button onClick={handleAddMember} loading={isAddingMember}>
+          <Button
+            onClick={handleAddMember}
+            loading={isAddingMember}
+            variant="filled"
+          >
             Add
           </Button>
         </Group>
@@ -342,7 +352,9 @@ function MemberItem({
           <Menu.Dropdown>
             {/* <Menu.Item >Remove Member</Menu.Item> */}
             {role === "Owner" && <Menu.Item>Change Owner</Menu.Item>}
-            <Menu.Item onClick={onRemove}>{isCurrentUser ? "Leave Project" : "Remove Member"}</Menu.Item>
+            <Menu.Item onClick={onRemove}>
+              {isCurrentUser ? "Leave Project" : "Remove Member"}
+            </Menu.Item>
           </Menu.Dropdown>
         </Menu>
       </Group>
