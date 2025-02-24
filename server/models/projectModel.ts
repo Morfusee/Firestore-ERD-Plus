@@ -5,6 +5,22 @@ import mongooseTransformPlugin from "@root/utils/mongooseTransformPlugin";
 import Changelog from "./changelogModel";
 
 // Define a schema
+const memberSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["Owner", "Editor", "Viewer"],
+      default: "Viewer",
+      required: true,
+    },
+  }
+);
+
 const projectSchema = new mongoose.Schema(
   {
     name: {
@@ -15,21 +31,7 @@ const projectSchema = new mongoose.Schema(
     icon: { type: String, required: true, trim: true },
     data: { type: String },
     members: {
-      type: [
-        {
-          userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-          },
-          role: {
-            type: String,
-            enum: ["owner", "admin", "editor", "viewer"],
-            default: "viewer",
-            required: true,
-          },
-        },
-      ],
+      type: [memberSchema],
       required: true,
     },
   },

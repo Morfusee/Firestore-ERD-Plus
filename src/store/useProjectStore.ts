@@ -24,6 +24,7 @@ interface IProjectActions {
   deleteProject: (id: string) => void;
   saveCache: (cache: IProjectCache) => void;
   getCache: () => IProjectCache[];
+  
 }
 
 export const useProjectStore = create<IProjectState & IProjectActions>()(
@@ -98,3 +99,4 @@ export const useProjectStore = create<IProjectState & IProjectActions>()(
     }
   )
 );
+

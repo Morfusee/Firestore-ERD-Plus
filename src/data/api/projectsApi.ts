@@ -1,117 +1,85 @@
 import { useFetch } from "@mantine/hooks";
 import { IProject } from "../../types/ProjectTypes";
-import { APIResponse, CreatedProject, DeletedProject, FetchedProject, FetchedProjects, SavedProject, UpdatedProject } from "../../types/APITypes";
+import {
+  APIResponse,
+  CreatedProject,
+  DeletedProject,
+  FetchedProject,
+  FetchedProjects,
+  SavedProject,
+  UpdatedProject,
+} from "../../types/APITypes";
+import axiosInstance from "../../utils/axiosInstance";
 
 export const createProjectApi = async (
   name: IProject["name"],
   icon: IProject["icon"],
   userId: string
 ) => {
-  const response = await fetch(import.meta.env.VITE_SERVER_URL + "/projects", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const response = await axiosInstance
+    .post<APIResponse<CreatedProject>>("/projects", {
       name: name,
       icon: icon,
       userId: userId,
-    }),
-  })
-    .then((res) => res.json())
-    .catch((err) => {
-      console.error(err);
-    });
+    })
+    .then((res) => res.data);
 
-  return response as APIResponse<CreatedProject>;
+  return response;
 };
 
 export const getProjectsApi = async (userId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects?userId=${userId}`
-  )
-    .then((res) => res.json())
-    .catch((err) => console.error(err));
+  const response = await axiosInstance
+    .get<APIResponse<FetchedProjects>>(`/projects?userId=${userId}`)
+    .then((res) => res.data);
 
-  // // If response is empty, return an empty array
-  // if (!response) return [];
-
-  return response as APIResponse<FetchedProjects>;
+  return response;
 };
 
-
 export const getProjectByIdApi = async (projectId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`
-  )
-    .then((res) => res.json())
-    .catch((err) => console.error(err));
+  const response = await axiosInstance
+    .get<APIResponse<FetchedProject>>(`/projects/${projectId}`)
+    .then((res) => res.data);
 
-  return response as APIResponse<FetchedProject>
-}
+  return response;
+};
 
 export const editProjectApi = async (
   name: IProject["name"],
   icon: IProject["icon"],
   projectId: IProject["id"]
 ) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name,
-        icon: icon,
-      }),
-    }
-  )
-    .then((res) => res.json())
-    .catch((err) => console.error(err));
+  const response = await axiosInstance
+    .patch<APIResponse<UpdatedProject>>(`/projects/${projectId}`, {
+      name: name,
+      icon: icon,
+    })
+    .then((res) => res.data);
 
-  return response as APIResponse<UpdatedProject>;
+  return response;
 };
 
 export const saveProjectApi = async (
   projectId: IProject["id"],
   data: string,
-  members: string[],
+  members: string[]
 ) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}/data`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: data,
-        members: members
-      }),
-    }
-  )
-    .then((res) => res.json())
-    .catch((err) => console.error(err));
+  const response = await axiosInstance
+    .patch<APIResponse<SavedProject>>(`/projects/${projectId}/data`, {
+      data: data,
+      members: members,
+    })
+    .then((res) => res.data);
 
-  return response as APIResponse<SavedProject>;
+  return response;
 };
 
 export const deleteProjectApi = async (projectId: string) => {
-  const response = await fetch(
-    import.meta.env.VITE_SERVER_URL + `/projects/${projectId}`,
-    {
-      method: "DELETE",
-    }
-  )
-    .then((res) => res.json())
-    .catch((err) => console.log(err));
+  const response = await axiosInstance
+    .delete<APIResponse<DeletedProject>>(`/projects/${projectId}`)
+    .then((res) => res.data);
 
-  return response as APIResponse<DeletedProject>;
+  return response;
 };
-
-
 
 // NOTE: Unmaintained
 export const getProjectsHook = (userId: string) => {

@@ -1,9 +1,9 @@
 import { Box, Loader, Paper, useMantineTheme } from "@mantine/core";
 import "@xyflow/react/dist/style.css";
-import TopMiddleBar from "../components/TopMiddleBar";
-import TopLeftBar from "../components/TopLeftBar";
-import BottomMiddleBar from "../components/BottomMiddleBar";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import TopMiddleBar from "../layouts/TopMiddleBar";
+import TopLeftBar from "../layouts/TopLeftBar";
+import BottomMiddleBar from "../layouts/BottomMiddleBar";
+import useIsDarkMode from "../hooks/useIsDarkMode";
 import Editor from "./editor";
 import { useDataInitializer } from "../data/repo/useDataInitializer";
 import { ReactFlowProvider } from "@xyflow/react";
@@ -12,7 +12,7 @@ import useProjectRepo from "../data/repo/useProjectRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { useEffect } from "react";
 import useHistoryRepo from "../data/repo/useHistoryRepo";
-import TopRightBar from "../components/TopRightBar";
+import TopRightBar from "../layouts/TopRightBar";
 
 function FirestoreERD() {
   const theme = useMantineTheme();
@@ -22,28 +22,8 @@ function FirestoreERD() {
 
   // Invoke the useBlocker hook
   // This is a blocker for unsaved changes
-  useBlocker(hasPendingChanges);
-
-  // Show an alert if there are unsaved changes if the user tries to leave
-  const handleBeforeUnload = async (event: any) => {
-    const message = "Confirm refresh";
-
-    // Standard for most browsers
-    event.returnValue = message;
-
-    // For older browsers (optional)
-    return message;
-  };
-
-  // useEffect(() => {
-  //   // Set up the beforeunload event listener
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   // Cleanup the event listener on component unmount
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
+  // This is causing logging out issues
+  // useBlocker(hasPendingChanges);
 
   return (
     <Paper

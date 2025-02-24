@@ -1,56 +1,84 @@
-import { IChangelog } from "../store/useChangelogStore"
-import { IUser } from "../store/useUserStore"
-import { IProject } from "./ProjectTypes"
-
+import { IChangelog } from "../store/useChangelogStore";
+import { IUser } from "../store/useUserStore";
+import { IProject, IProjectMembers } from "./ProjectTypes";
+import { EmojiData } from "./EmojiData";
 
 export interface APIResponse<T> {
-  success: boolean
-  message: string
-  data: T
+  success: boolean;
+  message: string;
+  data: T;
+  error:
+    | string
+    | {
+        code: string;
+      };
 }
 
 // Projects
 export interface CreatedProject {
-  createdProject: IProject
+  createdProject: IProject;
 }
 
 export interface UpdatedProject {
-  updatedProject: IProject
+  updatedProject: IProject;
 }
 
 export interface FetchedProject {
-  project: IProject
+  project: IProject;
 }
 
 export interface FetchedProjects {
-  projects: IProject[]
+  projects: IProject[];
 }
 
 export interface SavedProject {
-  project: IProject
-  changelog: IChangelog
+  project: IProject;
+  changelog: IChangelog;
 }
 
 export interface DeletedProject {
-  deletedProjectId: string
+  deletedProjectId: string;
 }
 
+export interface FetchedProjectMembers {
+  members: IProjectMembers[];
+}
+
+export interface CreatedProjectMember {
+  createdMember: IProjectMembers;
+}
+
+export interface UpdatedProjectMember {
+  updatedMember: IProjectMembers;
+}
+
+export interface DeletedProjectMember {
+  deletedMember: IProjectMembers;
+}
 
 // Users
+export interface CreatedUser {
+  createdUser: IUser;
+}
+
 export interface FetchedUser {
-  user: IUser
+  user: IUser;
 }
 
 export interface UpdatedUser {
-  updatedUser: IUser
+  updatedUser: IUser;
 }
-
 
 // Changelogs
 export interface FetchedChangelogs {
-  changelogs: IChangelog[]
+  changelogs: IChangelog[];
 }
 
 export interface FetchedChangelog {
-  changelog: IChangelog
+  changelog: IChangelog;
+}
+
+// Emojis
+export interface FetchedEmojiGroup {
+  emojisByGroup: EmojiData[];
 }

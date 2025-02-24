@@ -11,7 +11,7 @@ import useUserRepo from "./useUserRepo";
 import useChangelogRepo from "./useChangelogRepo";
 
 export const useDataInitializer = () => {
-  const { loginUser } = useUserRepo();
+  const { user } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
 
@@ -27,7 +27,7 @@ export const useDataInitializer = () => {
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    Promise.all([loadProjects(), loadEmojis(), loadLoggedInUser()]).then(() => {
+    Promise.all([loadProjects(), loadEmojis()]).then(() => {
       setIsLoaded(true);
     });
   }, []);
@@ -35,15 +35,9 @@ export const useDataInitializer = () => {
   useEffect(() => {
     if (id) {
       selectProject(id);
-      loadChangelogs(id)
+      loadChangelogs(id);
     }
   }, [id, isLoaded]);
-
-  const testUserId = "67a89f3a14e42f94a3b68a2d"
-
-  const loadLoggedInUser = async () => {
-    loginUser(testUserId)
-  }
 
   const loadProjects = async () => {
     console.log("Loading projects from local storage");
@@ -51,8 +45,9 @@ export const useDataInitializer = () => {
     // Dexie fetching of projects
     // NOTE: Not needed anymore
     // const projectList = await db.projects.toArray();
+    if (!user) return;
 
-    const getProjectList = await getProjectsApi(testUserId) 
+    const getProjectList = await getProjectsApi(user?.id);
 
     // Backend fetching of projects
     setProjectList(getProjectList.data.projects);
@@ -67,6 +62,7 @@ export const useDataInitializer = () => {
   };
 
   const loadEmojis = async () => {
+    console.log("Loading emojis from local storage");
     const emojiDB = await db.emojis.count();
 
     if (emojiDB > 0) {
@@ -74,6 +70,7 @@ export const useDataInitializer = () => {
       return setEmojisStore(emojiList);
     }
 
+    console.log("Loading emojis from API");
     return fetchEmojis().then((data) => {
       setEmojisDB(data);
     });

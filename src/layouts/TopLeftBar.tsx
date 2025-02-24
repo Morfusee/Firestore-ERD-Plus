@@ -47,7 +47,7 @@ import {
   IconDeviceFloppy,
 } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
-import useIsDarkMode from "../utils/useIsDarkMode";
+import useIsDarkMode from "../hooks/useIsDarkMode";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   useDisclosure,
@@ -56,8 +56,8 @@ import {
   useViewportSize,
 } from "@mantine/hooks";
 import { EmojiData, EmojiGroup } from "../types/EmojiData";
-import Virtualizer, { Refs } from "./Virtualizer";
-import EmojiPicker from "./EmojiPicker";
+import Virtualizer, { Refs } from "../components/utils/Virtualizer";
+import EmojiPicker from "../components/ui/EmojiPicker";
 import { useEmojiStore } from "../store/globalStore";
 import { useProjectStore } from "../store/useProjectStore";
 import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
@@ -66,10 +66,10 @@ import useEmojiRepo from "../data/repo/useEmojiRepo";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../data/db/db";
 import { IProject } from "../types/ProjectTypes";
-import useProjectIcon from "../utils/useProjectIcon";
+import useProjectIcon from "../hooks/useProjectIcon";
 import { notifications } from "@mantine/notifications";
-import useIsTruncated from "../utils/useIsTruncated";
-import ConditionalHoverCard from "./ConditionalHoverCard";
+import useIsTruncated from "../hooks/useIsTruncated";
+import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
 import useHistoryRepo from "../data/repo/useHistoryRepo";
 import {
   unstable_usePrompt,
@@ -80,14 +80,14 @@ import {
 import useEditorRepo from "../data/repo/useEditorRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import { modals } from "@mantine/modals";
-import AsyncEmojiPicker from "./AsyncEmojiPicker";
-import DrawerModal from "./modals/DrawerModal";
+import AsyncEmojiPicker from "../components/ui/AsyncEmojiPicker";
+import DrawerModal from "../components/modals/DrawerModal";
 import {
   createProjectApi,
   deleteProjectApi,
   editProjectApi,
 } from "../data/api/projectsApi";
-import { StatusIcon } from "./icons/StatusIcon";
+import { StatusIcon } from "../components/icons/StatusIcon";
 import { determineTitle, isSuccessStatus } from "../utils/successHelpers";
 import useUserRepo from "../data/repo/useUserRepo";
 import useChangelogRepo from "../data/repo/useChangelogRepo";

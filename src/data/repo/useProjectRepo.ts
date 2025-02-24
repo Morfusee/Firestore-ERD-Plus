@@ -196,6 +196,7 @@ const useProjectRepo  = () => {
       name: project.name + " (copy)",
       createdAt: timestamp,
       updatedAt: timestamp,
+      members: project.members.map((member) => ({ userId: member.id, role: member.role })),
     };
 
     // Save to db

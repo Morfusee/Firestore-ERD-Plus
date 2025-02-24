@@ -9,19 +9,18 @@ import {
 } from "firebase/auth";
 import admin from "firebase-admin";
 import dotenv from "dotenv";
-import key from "../config/firebasePrivateKey.json";
 import zlib from "zlib";
 
 dotenv.config();
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA80dTz8MbQCNFoQ-DiWEWvElUUwcLlEk8",
-  authDomain: "fir-erd-af873.firebaseapp.com",
-  projectId: "fir-erd-af873",
-  storageBucket: "fir-erd-af873.firebasestorage.app",
-  messagingSenderId: "433005157423",
-  appId: "1:433005157423:web:817c632fd9a71f08ddbada",
-  measurementId: "G-VDSYEWHNPZ",
+  apiKey: "AIzaSyB5Rfgt5iAYhC28CZNKy4FXyNvwHhl7wws",
+  authDomain: "firestore-cd9dc.firebaseapp.com",
+  projectId: "firestore-cd9dc",
+  storageBucket: "firestore-cd9dc.firebasestorage.app",
+  messagingSenderId: "719958333872",
+  appId: "1:719958333872:web:d2337762f8e5a257229e75",
+  measurementId: "G-YFS1BGK5SV"
 };
 
 // Initialize Firebase
@@ -41,7 +40,10 @@ const decompressedServiceAccount = JSON.parse(
 
 admin.initializeApp({
   credential: admin.credential.cert(decompressedServiceAccount),
+  storageBucket: firebaseConfig.storageBucket
 });
+
+const bucket = admin.storage().bucket();
 
 export {
   getAuth,
@@ -50,5 +52,6 @@ export {
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  bucket,
   admin,
 };

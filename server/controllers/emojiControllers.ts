@@ -1,5 +1,6 @@
 import ConflictError from "@root/errors/ConflictError";
 import NotFoundError from "@root/errors/NotFoundError";
+import SuccessResponse from "@root/success/SuccessResponse";
 import { IEmoji } from "@root/types/emojiTypes";
 import { NextFunction, Request, Response } from "express";
 
@@ -29,7 +30,7 @@ export const getAllEmojis = async (
 
     if (!emojis) throw new NotFoundError("No emojis found.");
 
-    res.status(200).json(emojis);
+    next(new SuccessResponse("Emojis fetched successfully.", { emojis }));
   } catch (error: any) {
     next(error);
   }
@@ -52,7 +53,9 @@ export const getEmojisByGroup = async (
 
     if (!emojisByGroup) throw new NotFoundError("No emojis found.");
 
-    res.status(200).json(emojisByGroup);
+    next(
+      new SuccessResponse("Emojis fetched successfully.", { emojisByGroup })
+    );
   } catch (error: any) {
     next(error);
   }

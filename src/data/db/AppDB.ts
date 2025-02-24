@@ -9,7 +9,7 @@ export default class AppDB extends Dexie {
   constructor() {
     super("FirestoreERDDB");
     this.version(1).stores({
-      projects: "@id",
+      projects: "++id",
       emojis: "hexcode, emoji, group",
     });
     this.projects.mapToClass(Project);

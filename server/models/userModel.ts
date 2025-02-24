@@ -9,6 +9,7 @@ export interface IUser {
   username: string;
   email: string;
   displayName?: string;
+  profilePicture?: string;
   token: string;
   ownedProjects: mongoose.Types.ObjectId[];
 }
@@ -31,6 +32,9 @@ const userSchema = new mongoose.Schema(
     displayName: {
       type: String,
       trim: true,
+    },
+    profilePicture: { // Firebase URL
+      type: String,
     },
     token: {
       type: String,

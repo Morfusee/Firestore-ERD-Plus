@@ -8,15 +8,15 @@ import {
 } from "react-router-dom";
 import FirestoreERD from "./pages/FirestoreERD";
 import { useThemeStore } from "./store/globalStore";
-import useTheme from "./utils/useTheme";
+import useTheme from "./hooks/useTheme";
 import { useEffect } from "react";
 import { Notifications } from "@mantine/notifications";
 import { ReactFlowProvider } from "@xyflow/react";
 import { ModalsProvider } from "@mantine/modals";
 import DeleteModal from "./components/modals/DeleteModal";
 import SettingsModal from "./components/modals/SettingsModal";
-import useGlobalHotkeys from "./utils/useGlobalHotkeys";
-import { ContextMenuProvider } from 'mantine-contextmenu';
+import useGlobalHotkeys from "./hooks/useGlobalHotkeys";
+import { ContextMenuProvider } from "mantine-contextmenu";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import CodeGenModal from "./components/modals/CodeGenModal";
@@ -24,7 +24,8 @@ import ManageAccountModal from "./components/modals/ManageAccountModal";
 import ShareModal from "./components/modals/ShareModal";
 import DownloadModal from "./components/modals/DownloadModal";
 import DrawerModal from "./components/modals/DrawerModal";
-
+import ProtectedRoute from "./routes/ProtectedRoute";
+import ImageCropperModal from "./components/modals/ImageCropperModal";
 
 const modals = {
   drawer: DrawerModal,
@@ -34,6 +35,7 @@ const modals = {
   download: DownloadModal,
   shareModal: ShareModal,
   manageAcc: ManageAccountModal,
+  cropImage: ImageCropperModal,
 };
 
 declare module "@mantine/modals" {
@@ -44,7 +46,7 @@ declare module "@mantine/modals" {
 
 function App() {
   const { theme } = useThemeStore();
-  
+
   // Invoke the global hotkeys
   useGlobalHotkeys();
 
@@ -65,10 +67,12 @@ function App() {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<FirestoreERD />} />
-      <Route path="/:projectId" element={<FirestoreERD />} />
-      <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
+      <Route path="login" element={<Login />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<FirestoreERD />} />
+        <Route path="/:projectId" element={<FirestoreERD />} />
+      </Route>
     </>
   ),
   {
