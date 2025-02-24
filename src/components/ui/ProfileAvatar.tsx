@@ -20,14 +20,15 @@ function ProfileAvatar({
 }: ProfileAvatarProps) {
   return (
     <>
-      {!isImageLoaded && (
-        <Skeleton width={avatarSize} height={avatarSize} circle radius="xl" />
-      )}
+      {!isImageLoaded ||
+        (!profilePicture && (
+          <Skeleton width={avatarSize} height={avatarSize} circle radius="xl" />
+        ))}
       <Avatar
         component={component}
         size={avatarSize}
         src={profilePicture}
-        style={{ display: isImageLoaded ? "block" : "none" }} // Hide until loaded
+        style={{ display: isImageLoaded || !profilePicture ? "block" : "none" }} // Hide until loaded
         onLoad={() => setIsImageLoaded(true)}
         onError={() => setIsImageLoaded(false)} // Handle broken images
         onClick={onClick}

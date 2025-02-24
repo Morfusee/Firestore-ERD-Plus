@@ -1,6 +1,6 @@
 import { IChangelog } from "../store/useChangelogStore";
 import { IUser } from "../store/useUserStore";
-import { IProject } from "./ProjectTypes";
+import { IProject, IProjectMembers } from "./ProjectTypes";
 import { EmojiData } from "./EmojiData";
 
 export interface APIResponse<T> {
@@ -38,6 +38,22 @@ export interface SavedProject {
 
 export interface DeletedProject {
   deletedProjectId: string;
+}
+
+export interface FetchedProjectMembers {
+  members: IProjectMembers[];
+}
+
+export interface CreatedProjectMember {
+  createdMember: IProjectMembers;
+}
+
+export interface UpdatedProjectMember {
+  updatedMember: IProjectMembers;
+}
+
+export interface DeletedProjectMember {
+  deletedMember: IProjectMembers;
 }
 
 // Users

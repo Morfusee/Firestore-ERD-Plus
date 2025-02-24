@@ -62,6 +62,7 @@ export const useDataInitializer = () => {
   };
 
   const loadEmojis = async () => {
+    console.log("Loading emojis from local storage");
     const emojiDB = await db.emojis.count();
 
     if (emojiDB > 0) {
@@ -69,6 +70,7 @@ export const useDataInitializer = () => {
       return setEmojisStore(emojiList);
     }
 
+    console.log("Loading emojis from API");
     return fetchEmojis().then((data) => {
       setEmojisDB(data);
     });

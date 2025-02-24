@@ -10,8 +10,10 @@ import {
   validateProjectId,
   validateRoleOptional,
   validateRoleRequired,
+  validateMemberEmail,
   validateUserId,
 } from "@root/middleware/validators/memberValidator";
+import { validateEmailQuery } from "@root/middleware/validators/userValidator";
 import { Router } from "express";
 
 const router = Router();
@@ -26,7 +28,7 @@ router.post(
   [
     validateToken,
     validateProjectId,
-    validateUserId,
+    validateMemberEmail,
     validateRoleOptional,
     validate,
   ],
