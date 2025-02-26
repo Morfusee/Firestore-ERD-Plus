@@ -51,6 +51,11 @@ function ShareModal({ context, id }: ContextModalProps) {
   // useState to keep track project members locally.
   const [localMembers, setLocalMembers] = useState<IProjectMembers[]>([]);
 
+  const currentUserRole = useMemo(() => {
+    const currentMember = localMembers.find((member) => member.id === user?.id);
+    return currentMember?.role || "Viewer";
+  }, [localMembers, user?.id]);
+
   // Update local members whenever project members changes or the seleted projected changes
   useEffect(() => {
     if (selectedProject?.id && projectMembers[selectedProject.id]) {
@@ -234,15 +239,17 @@ function ShareModal({ context, id }: ContextModalProps) {
 
       <Group justify="space-between">
         <Title order={5}>Members</Title>
-        <ActionIcon
-          radius="lg"
-          variant="subtle"
-          onClick={() => setShowAddMember(true)}
-        >
-          <Tooltip label="Add new member">
-            <IconPlus size={16} />
-          </Tooltip>
-        </ActionIcon>
+        {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
+          <ActionIcon
+            radius="lg"
+            variant="subtle"
+            onClick={() => setShowAddMember(true)}
+          >
+            <Tooltip label="Add new member">
+              <IconPlus size={16} />
+            </Tooltip>
+          </ActionIcon>
+        )}
       </Group>
 
       {showAddMember && (
@@ -288,6 +295,7 @@ function ShareModal({ context, id }: ContextModalProps) {
                   handleUpdateRole(member.id, newRole)
                 }
                 onRemove={() => handleRemoveMember(member.id)}
+                currentUserRole={currentUserRole}
               />
             ) : null
           )
@@ -300,17 +308,23 @@ function ShareModal({ context, id }: ContextModalProps) {
         General Access
       </Title>
 
-      <GeneralItem accessType="restricted" role="Viewer" />
+      <GeneralItem
+        accessType="restricted"
+        role="Viewer"
+        currentUserRole={currentUserRole}
+      />
 
-      <Button
-        variant="outline"
-        fullWidth={true}
-        mt={10}
-        loading={initialLoading}
-        onClick={handleSave}
-      >
-        Save
-      </Button>
+      {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
+        <Button
+          variant="outline"
+          fullWidth={true}
+          mt={10}
+          loading={initialLoading}
+          onClick={handleSave}
+        >
+          Save
+        </Button>
+      )}
     </Box>
   );
 }
@@ -324,6 +338,7 @@ interface MemberItemProps {
   onRoleChange: (newRole: string) => void;
   onRemove: () => void;
   isCurrentUser: boolean;
+  currentUserRole: string;
 }
 
 function MemberItem({
@@ -335,6 +350,7 @@ function MemberItem({
   onRoleChange,
   onRemove,
   isCurrentUser,
+  currentUserRole,
 }: MemberItemProps) {
   const truncatedEmail = email.length > 25 ? `${email.slice(0, 22)}...` : email;
 
@@ -365,8 +381,9 @@ function MemberItem({
 
       <Group>
         {role === "Owner" ? (
-          <Text fw={500}>Owner</Text>
-        ) : (
+          <Text fw={500}>{role}</Text>
+        ) : // Ensure only Admin and Owner can update member roles
+        currentUserRole === "Admin" || currentUserRole === "Owner" ? (
           <Select
             variant="unstyled"
             w={90}
@@ -376,22 +393,28 @@ function MemberItem({
             data={["Viewer", "Editor", "Admin"]}
             onChange={(value) => value && onRoleChange(value)}
           />
+        ) : (
+          <Text fw={500}>{role}</Text>
         )}
 
-        <Menu>
-          <Menu.Target>
-            <ActionIcon variant="subtle">
-              <IconDotsVertical />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            {/* <Menu.Item >Remove Member</Menu.Item> */}
-            {role === "Owner" && <Menu.Item>Change Owner</Menu.Item>}
-            <Menu.Item onClick={onRemove}>
-              {isCurrentUser ? "Leave Project" : "Remove Member"}
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
+        {/* Ensure only owner or admin can remove members, but not the owner */}
+        {(currentUserRole === "Admin" || currentUserRole === "Owner") &&
+          role !== "Owner" && (
+            <Menu>
+              <Menu.Target>
+                <ActionIcon variant="subtle">
+                  <IconDotsVertical />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {/* <Menu.Item >Remove Member</Menu.Item> */}
+                {role === "Owner" && <Menu.Item>Change Owner</Menu.Item>}
+                <Menu.Item onClick={onRemove}>
+                  {isCurrentUser ? "Leave Project" : "Remove Member"}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
       </Group>
     </Group>
   );
@@ -402,9 +425,10 @@ type AccessType = "restricted" | "anyone";
 interface GeneralItemProps {
   accessType: AccessType;
   role: string;
+  currentUserRole: string;
 }
 
-function GeneralItem({ accessType, role }: GeneralItemProps) {
+function GeneralItem({ accessType, role, currentUserRole }: GeneralItemProps) {
   const typeDisplay: Record<AccessType, { title: string; subtext: string }> = {
     restricted: {
       title: "Restricted",
@@ -434,6 +458,9 @@ function GeneralItem({ accessType, role }: GeneralItemProps) {
             size="md"
             value={typeDisplay[accessType].title}
             data={["Restricted", "Anyone with a link"]}
+            disabled={
+              !(currentUserRole === "Admin" || currentUserRole === "Owner")
+            } // Disable if not Admin or Owner
           />
           <Text c="dimmed" size="sm">
             {typeDisplay[accessType].subtext}
@@ -448,6 +475,7 @@ function GeneralItem({ accessType, role }: GeneralItemProps) {
         size="md"
         value={role}
         data={["Viewer", "Editor", "Admin"]}
+        disabled={!(currentUserRole === "Admin" || currentUserRole === "Owner")} // Disable if not Admin or Owner
       />
     </Group>
   );
