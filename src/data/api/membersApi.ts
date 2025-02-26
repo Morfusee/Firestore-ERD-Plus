@@ -33,8 +33,8 @@ export const addProjectMemberApi = async (
 
     const response = await axiosInstance.post<APIResponse<CreatedProjectMember>>(
       `/projects/${projectId}/members`,
-      { email, role }
-    );
+       { email, role }
+      );
     console.log("addProjectMemberApi: Response:", response.data);
 
     return response.data;
@@ -77,7 +77,7 @@ export const updateProjectMemberRoleApi = async (
 ) => {
   const response = await axiosInstance
     .patch<APIResponse<UpdatedProjectMember>>(
-      `/projects/${projectId}/members/${memberId}/role`,
+      `/projects/${projectId}/members/${memberId}`,
       {
         role,
       }
