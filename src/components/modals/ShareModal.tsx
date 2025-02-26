@@ -103,12 +103,6 @@ function ShareModal({ context, id }: ContextModalProps) {
       }
     };
 
-    if (!projectMembers[selectedProject.id]) {
-      loadMembers();
-    } else {
-      setLocalMembers(projectMembers[selectedProject.id]);
-    }
-
     loadMembers();
   }, [selectedProject?.id]);
 
