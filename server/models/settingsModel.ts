@@ -23,7 +23,7 @@ const settingsSchema = new mongoose.Schema(
       type: String,
       required: false,
       enum: ["Auto", "Light", "Dark"],
-      default: "auto",
+      default: "Auto",
     },
   },
   {
