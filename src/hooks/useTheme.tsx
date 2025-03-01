@@ -16,17 +16,18 @@ import {
 } from "@mantine/core";
 import "../css/variants.css";
 import { Notifications } from "@mantine/notifications";
+import { useThemeStore } from "../store/globalStore";
 
 function useTheme() {
   const isDarkMode = useIsDarkMode();
   const mantineTheme = useMantineTheme();
-  const [theme, setTheme] = useState(themeCurator(isDarkMode, mantineTheme));
+  const { theme: globalTheme, setTheme: setGlobalTheme } = useThemeStore();
 
   useEffect(() => {
-    setTheme(themeCurator(isDarkMode, mantineTheme));
+    setGlobalTheme(themeCurator(isDarkMode, mantineTheme));
   }, [isDarkMode]);
 
-  return theme;
+  return globalTheme;
 }
 
 function themeCurator(isDarkMode: boolean, mantineTheme: MantineTheme) {
