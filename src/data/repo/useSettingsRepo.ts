@@ -1,15 +1,31 @@
 import { getSettingsApi, updateSettingsApi } from "../api/settingsApi";
 import { IUserSettings, useSettingsStore } from "../../store/useSettingsStore";
 import { BackgroundVariant } from "@xyflow/react";
+import { MantineColorScheme, useMantineColorScheme } from "@mantine/core";
 
 export const useSettingsRepo = () => {
-  const { settings, setSettings, updateSettings } = useSettingsStore();
+  const {
+    settings,
+    setSettings,
+    updateSettings: updateSettingsStore,
+  } = useSettingsStore();
+  const { setColorScheme } = useMantineColorScheme({
+    keepTransitions: true,
+  });
 
   const fetchUserSettings = async (userId: string) => {
     try {
       const response = await getSettingsApi(userId);
       if (response.success) {
+        // Set settings in store
         setSettings(response.data.settings);
+
+        // Set the color scheme as it's also a setting
+        // We are also triggering the useTheme hook this way
+        setColorScheme(
+          response.data.settings.theme.toLowerCase() as MantineColorScheme
+        );
+
         return response.data.settings;
       } else {
         console.error("Failed to fetch settings:", response.message);
@@ -28,7 +44,14 @@ export const useSettingsRepo = () => {
 
       const response = await updateSettingsApi(userId, updatedSettings);
       if (response.success) {
+        // Set settings in store
         setSettings(response.data.updatedSettings);
+
+        // Set the color scheme as it's also a setting
+        // We are also triggering the useTheme hook this way
+        setColorScheme(
+          response.data.updatedSettings.theme.toLowerCase() as MantineColorScheme
+        );
       } else {
         console.error("Failed to update settings:", response.message);
       }
@@ -44,6 +67,13 @@ export const useSettingsRepo = () => {
       BackgroundVariant[canvasBg as keyof typeof BackgroundVariant] ||
       BackgroundVariant.Dots
     );
+  };
+
+  const updateSettings = <K extends keyof IUserSettings>(
+    key: K,
+    value: IUserSettings[K]
+  ) => {
+    updateSettingsStore(key, value);
   };
 
   return {
