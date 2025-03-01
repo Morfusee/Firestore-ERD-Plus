@@ -1,96 +1,49 @@
 import {
-  Flex,
   ActionIcon,
+  Button,
+  Flex,
+  Loader,
+  Menu,
   Paper,
   Text,
-  Button,
-  useMantineColorScheme,
-  Modal,
-  TextInput,
-  Combobox,
-  useCombobox,
-  InputBase,
-  Input,
-  rem,
-  Menu,
-  Burger,
-  Transition,
-  Box,
-  Pagination,
-  useMantineTheme,
-  Tabs,
-  ComboboxOptionProps,
-  Dialog,
-  ThemeIcon,
-  HoverCard,
-  Loader,
+  Transition
 } from "@mantine/core";
 import {
-  IconMenu2,
-  IconArrowBackUp,
-  IconSettings,
-  IconPlus,
-  IconSchool,
-  IconMoon,
-  IconSun,
-  Icon,
-  IconProps,
-  IconBriefcase2,
-  IconDots,
-  IconTrash,
-  IconEdit,
-  IconCopy,
-  IconX,
-  IconMessageCircle,
-  IconPhoto,
-  IconCheck,
-  IconDeviceFloppy,
-} from "@tabler/icons-react";
-import { useForm } from "@mantine/form";
-import useIsDarkMode from "../hooks/useIsDarkMode";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import {
   useDisclosure,
-  useHotkeys,
   useLocalStorage,
-  useViewportSize,
+  useViewportSize
 } from "@mantine/hooks";
-import { EmojiData, EmojiGroup } from "../types/EmojiData";
-import Virtualizer, { Refs } from "../components/utils/Virtualizer";
-import EmojiPicker from "../components/ui/EmojiPicker";
-import { useEmojiStore } from "../store/globalStore";
-import { useProjectStore } from "../store/useProjectStore";
-import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
-import useProjectRepo from "../data/repo/useProjectRepo";
-import useEmojiRepo from "../data/repo/useEmojiRepo";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../data/db/db";
-import { IProject } from "../types/ProjectTypes";
-import useProjectIcon from "../hooks/useProjectIcon";
-import { notifications } from "@mantine/notifications";
-import useIsTruncated from "../hooks/useIsTruncated";
-import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
-import useHistoryRepo from "../data/repo/useHistoryRepo";
-import {
-  unstable_usePrompt,
-  useBlocker,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
-import useEditorRepo from "../data/repo/useEditorRepo";
-import { useEditorStore } from "../store/useEditorStore";
 import { modals } from "@mantine/modals";
-import AsyncEmojiPicker from "../components/ui/AsyncEmojiPicker";
-import DrawerModal from "../components/modals/DrawerModal";
+import { notifications } from "@mantine/notifications";
 import {
-  createProjectApi,
-  deleteProjectApi,
-  editProjectApi,
-} from "../data/api/projectsApi";
+  IconArrowBackUp,
+  IconCopy,
+  IconDeviceFloppy,
+  IconDots,
+  IconEdit,
+  IconMenu2,
+  IconPlus,
+  IconSettings,
+  IconTrash,
+  IconX
+} from "@tabler/icons-react";
+import {
+  useNavigate,
+  useParams
+} from "react-router-dom";
 import { StatusIcon } from "../components/icons/StatusIcon";
-import { determineTitle, isSuccessStatus } from "../utils/successHelpers";
-import useUserRepo from "../data/repo/useUserRepo";
+import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
 import useChangelogRepo from "../data/repo/useChangelogRepo";
+import useHistoryRepo from "../data/repo/useHistoryRepo";
+import useProjectRepo from "../data/repo/useProjectRepo";
+import useUserRepo from "../data/repo/useUserRepo";
+import useIsDarkMode from "../hooks/useIsDarkMode";
+import useIsTruncated from "../hooks/useIsTruncated";
+import useProjectIcon from "../hooks/useProjectIcon";
+import { useEditorStore } from "../store/useEditorStore";
+import { IProject } from "../types/ProjectTypes";
+import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
+import { determineTitle } from "../utils/successHelpers";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -123,8 +76,6 @@ function ActionButtons({
   toggleDrawer: () => void;
   openedDrawer: boolean;
 }) {
-  const { toggleColorScheme } = useMantineColorScheme();
-  const isDarkMode = useIsDarkMode();
   const { height, width } = useViewportSize();
 
   const { onSave, onUndo, canUndo, canRedo, onRedo } = useHistoryRepo();
@@ -132,13 +83,13 @@ function ActionButtons({
   const { hasPendingChanges } = useEditorStore();
 
   const handleSave = async () => {
-    const res = await onSave()
+    const res = await onSave();
 
     if (res?.success) {
-      const changelog = res.data.changelog
-      await saveChangelog(changelog)
+      const changelog = res.data.changelog;
+      await saveChangelog(changelog);
     }
-  }
+  };
 
   return (
     <Flex
@@ -193,14 +144,6 @@ function ActionButtons({
       >
         <IconSettings />
       </ActionIcon>
-      <ActionIcon
-        variant="subtle"
-        size="lg"
-        radius="xl"
-        onClick={toggleColorScheme}
-      >
-        {isDarkMode ? <IconSun /> : <IconMoon />}
-      </ActionIcon>
     </Flex>
   );
 }
@@ -252,19 +195,17 @@ function DrawerHeader() {
   const navigate = useNavigate();
 
   const handleCreateProject = async (values: DrawerModalFormValues) => {
-
     if (!user) return;
 
     // Get status of response
-    const response = await addProject(values.name, values.icon, user.id)
+    const response = await addProject(values.name, values.icon, user.id);
 
     // Only attempt to add the project if the success status is true
     if (response.success) {
-
       // Select the project on creation in STATE
       selectProject(response.data.createdProject.id);
 
-      loadChangelogs(response.data.createdProject.id)
+      loadChangelogs(response.data.createdProject.id);
 
       // Navigate/Enter the project on creation
       navigate(`/${response.data.createdProject.id}`);
@@ -339,7 +280,7 @@ function DrawerItems({ project }: { project: IProject }) {
     projectId
   );
 
-  const { selectProject } = useProjectRepo()
+  const { selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
 
   return (
@@ -367,7 +308,7 @@ function DrawerItems({ project }: { project: IProject }) {
           onClick={() => {
             navigate(`/${project.id}`, { replace: true });
             selectProject(project.id);
-            loadChangelogs(project.id)
+            loadChangelogs(project.id);
           }}
           rightSection={
             <ActionIcon
@@ -430,21 +371,16 @@ function DrawerItemMenu({
     values: DrawerModalFormValues,
     projectId: IProject["id"]
   ) => {
+    if (!projectId) return;
 
-    if (!projectId) return
-
-    const res = await editProject(
-      projectId,
-      values.name,
-      values.icon,
-    );
+    const res = await editProject(projectId, values.name, values.icon);
 
     // Only attempt to locally edit the project if the success status is true
     if (res?.success) {
-
       // If the user is currently editing the selected project,
       // just reselect the project to update the values.
-      if (params.projectId == res.data.updatedProject.id) selectProject(params.projectId);
+      if (params.projectId == res.data.updatedProject.id)
+        selectProject(params.projectId);
     }
 
     // Show notification
@@ -452,7 +388,11 @@ function DrawerItemMenu({
       icon: <StatusIcon status={res?.success ? "success" : "error"} />,
       withBorder: true,
       autoClose: 5000,
-      title: determineTitle("Project Edited", "Failed to Edit Project", res?.success || false),
+      title: determineTitle(
+        "Project Edited",
+        "Failed to Edit Project",
+        res?.success || false
+      ),
       message: res?.message,
     });
 
