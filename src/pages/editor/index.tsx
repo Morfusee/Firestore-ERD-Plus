@@ -22,7 +22,7 @@ import { useCallback, useMemo, useRef } from "react";
 import useEditorRepo from "../../data/repo/useEditorRepo";
 import { useEditorStore } from "../../store/useEditorStore";
 import NoteNode from "./nodes/NoteNode";
-import { usePartialUserSettingsStore } from "../../store/globalStore";
+import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
 
 function Editor() {
   const nodeTypes: NodeTypes = useMemo(
@@ -39,8 +39,10 @@ function Editor() {
 
   const theme = useMantineTheme();
   const isDarkMode = useIsDarkMode();
-  const { canvasBackground } = usePartialUserSettingsStore();
-  const { screenToFlowPosition } = useReactFlow()
+  const { getCanvasBackground } = useSettingsRepo();
+  const canvasBackground = getCanvasBackground();
+
+  const { screenToFlowPosition } = useReactFlow();
 
   const nodes = useEditorStore((state) => state.nodes);
   const edges = useEditorStore((state) => state.edges);
@@ -73,15 +75,13 @@ function Editor() {
     []
   );
 
-  const onPaneClick = useCallback(
-    (event: React.MouseEvent) => {
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      })
-      console.log(position)
-    }, []
-  )
+  const onPaneClick = useCallback((event: React.MouseEvent) => {
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    console.log(position);
+  }, []);
 
   const { moveNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
 
@@ -107,7 +107,7 @@ function Editor() {
       >
         <Background
           color={!isDarkMode ? theme.colors.dark[9] : theme.colors.dark[4]}
-          variant={canvasBackground}
+          variant={canvasBackground as BackgroundVariant}
           gap={40}
         />
         <Controls />
