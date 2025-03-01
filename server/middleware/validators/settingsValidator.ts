@@ -23,7 +23,7 @@ export const validateSettings = [
 
   body("theme")
     .optional()
-    .isIn(["Auto", "Light", "Dark"])
+    .isIn(["System", "Light", "Dark"])
     .withMessage("Theme must be one of: System, Light, or Dark."),
 
   validate,
