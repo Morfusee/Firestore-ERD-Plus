@@ -5,7 +5,7 @@ import { BackgroundVariant } from "@xyflow/react";
 export interface IUserSettings {
   autoSaveInterval: number;
   canvasBackground: BackgroundVariant;
-  theme: "System" | "Light" | "Dark";
+  theme: "Light" | "Dark";
 }
 
 interface ISettingsState {

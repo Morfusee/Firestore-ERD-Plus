@@ -1,27 +1,30 @@
 import {
-  Flex,
   Button,
-  Text,
-  Tabs,
+  Divider,
+  Flex,
+  MantineColorScheme,
+  NumberInput,
   SegmentedControl,
+  Tabs,
+  Text,
   rem,
   useMantineColorScheme,
-  NumberInput,
-  Divider,
-  MantineColorScheme,
 } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
-import { useEffect } from "react";
-import { IconEye, IconBuilding } from "@tabler/icons-react";
-import { useUserStore } from "../../store/useUserStore";
+import { IconBuilding, IconEye } from "@tabler/icons-react";
 import { BackgroundVariant } from "@xyflow/react";
+import { useEffect } from "react";
 import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
+import { useUserStore } from "../../store/useUserStore";
+import { IUserSettings } from "../../store/useSettingsStore";
 
 function SettingsModal({ context, id }: ContextModalProps) {
   const { currentUser } = useUserStore();
   const { settings, fetchUserSettings, updateUserSettings, updateSettings } =
     useSettingsRepo();
-  const { setColorScheme } = useMantineColorScheme({ keepTransitions: true });
+  const { setColorScheme } = useMantineColorScheme({
+    keepTransitions: true,
+  });
 
   useEffect(() => {
     context.updateModal({
@@ -45,6 +48,21 @@ function SettingsModal({ context, id }: ContextModalProps) {
       await updateUserSettings(currentUser.id, settings);
       closeModal(id);
     }
+  };
+
+  const handleThemeChange = (value: string) => {
+    const theme = value as IUserSettings["theme"];
+    updateSettings("theme", theme);
+    
+    setColorScheme(theme.toLowerCase() as MantineColorScheme);
+  };
+
+  const handleCanvasChange = (value: string) => {
+    updateSettings("canvasBackground", value as BackgroundVariant);
+  };
+
+  const handleAutoSaveChange = (value: string | number) => {
+    updateSettings("autoSaveInterval", Number(value));
   };
 
   return (
@@ -94,9 +112,7 @@ function SettingsModal({ context, id }: ContextModalProps) {
                 allowNegative={false}
                 allowDecimal={false}
                 value={settings?.autoSaveInterval ?? 0}
-                onChange={(value) =>
-                  updateSettings("autoSaveInterval", Number(value))
-                }
+                onChange={handleAutoSaveChange}
               />
             </Flex>
           </Flex>
@@ -124,11 +140,7 @@ function SettingsModal({ context, id }: ContextModalProps) {
                 size="xs"
                 data={["Light", "Dark"]}
                 value={settings?.theme ?? "Light"}
-                onChange={(value) => {
-                  const theme = value as "Light" | "Dark";
-                  updateSettings("theme", theme);
-                  setColorScheme(theme.toLowerCase() as MantineColorScheme);
-                }}
+                onChange={handleThemeChange}
               />
             </Flex>
             <Flex direction={"column"} gap={"xs"}>
@@ -142,9 +154,7 @@ function SettingsModal({ context, id }: ContextModalProps) {
                 size="xs"
                 data={["Dots", "Lines", "Cross"]}
                 value={settings?.canvasBackground}
-                onChange={(value) =>
-                  updateSettings("canvasBackground", value as BackgroundVariant)
-                }
+                onChange={handleCanvasChange}
               />
             </Flex>
           </Flex>
@@ -152,7 +162,7 @@ function SettingsModal({ context, id }: ContextModalProps) {
       </Tabs>
 
       <Flex justify="flex-end" mt="md">
-        <Button onClick={handleSave} variant="outline">
+        <Button onClick={handleSave} variant="filled">
           Save
         </Button>
       </Flex>
