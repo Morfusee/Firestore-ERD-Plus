@@ -14,6 +14,7 @@ interface ISettingsState {
 
 interface ISettingsActions {
   setSettings: (settings: IUserSettings) => void;
+  getSettings: () => IUserSettings | null;
   updateSettings: <K extends keyof IUserSettings>(
     key: K,
     value: IUserSettings[K]
@@ -22,10 +23,11 @@ interface ISettingsActions {
 
 export const useSettingsStore = create<ISettingsState & ISettingsActions>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       settings: null,
 
       setSettings: (settings) => set({ settings }),
+      getSettings: () => get().settings,
 
       updateSettings: (key, value) =>
         set((state) => ({

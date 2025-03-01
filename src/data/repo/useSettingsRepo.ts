@@ -1,12 +1,13 @@
-import { getSettingsApi, updateSettingsApi } from "../api/settingsApi";
-import { IUserSettings, useSettingsStore } from "../../store/useSettingsStore";
-import { BackgroundVariant } from "@xyflow/react";
 import { MantineColorScheme, useMantineColorScheme } from "@mantine/core";
+import { BackgroundVariant } from "@xyflow/react";
+import { IUserSettings, useSettingsStore } from "../../store/useSettingsStore";
+import { getSettingsApi, updateSettingsApi } from "../api/settingsApi";
 
 export const useSettingsRepo = () => {
   const {
     settings,
     setSettings,
+    getSettings,
     updateSettings: updateSettingsStore,
   } = useSettingsStore();
   const { setColorScheme } = useMantineColorScheme({
@@ -78,6 +79,7 @@ export const useSettingsRepo = () => {
 
   return {
     settings,
+    getSettings,
     fetchUserSettings,
     updateUserSettings,
     updateSettings,

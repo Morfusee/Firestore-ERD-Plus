@@ -1,5 +1,4 @@
 import {
-  Button,
   Divider,
   Flex,
   MantineColorScheme,
@@ -8,20 +7,25 @@ import {
   Tabs,
   Text,
   rem,
-  useMantineColorScheme,
+  useMantineColorScheme
 } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
 import { IconBuilding, IconEye } from "@tabler/icons-react";
 import { BackgroundVariant } from "@xyflow/react";
 import { useEffect } from "react";
 import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
-import { useUserStore } from "../../store/useUserStore";
 import { IUserSettings } from "../../store/useSettingsStore";
+import { useUserStore } from "../../store/useUserStore";
 
 function SettingsModal({ context, id }: ContextModalProps) {
   const { currentUser } = useUserStore();
-  const { settings, fetchUserSettings, updateUserSettings, updateSettings } =
-    useSettingsRepo();
+  const {
+    settings,
+    getSettings,
+    fetchUserSettings,
+    updateUserSettings,
+    updateSettings,
+  } = useSettingsRepo();
   const { setColorScheme } = useMantineColorScheme({
     keepTransitions: true,
   });
@@ -36,6 +40,7 @@ function SettingsModal({ context, id }: ContextModalProps) {
       ),
       size: "lg",
       centered: true,
+      onClose: () => handleSave(),
     });
 
     if (currentUser?.id) {
@@ -44,24 +49,26 @@ function SettingsModal({ context, id }: ContextModalProps) {
   }, []);
 
   const handleSave = async () => {
-    if (currentUser?.id && settings) {
-      await updateUserSettings(currentUser.id, settings);
-      closeModal(id);
-    }
+    if (!currentUser?.id || !settings) return;
+
+    await updateUserSettings(currentUser.id, getSettings()!);
+    closeModal(id);
   };
 
   const handleThemeChange = (value: string) => {
+    // Update theme immediately
     const theme = value as IUserSettings["theme"];
     updateSettings("theme", theme);
-    
     setColorScheme(theme.toLowerCase() as MantineColorScheme);
   };
 
   const handleCanvasChange = (value: string) => {
+    // Update canvas background immediately
     updateSettings("canvasBackground", value as BackgroundVariant);
   };
 
   const handleAutoSaveChange = (value: string | number) => {
+    // Update auto save interval immediately
     updateSettings("autoSaveInterval", Number(value));
   };
 
@@ -161,11 +168,11 @@ function SettingsModal({ context, id }: ContextModalProps) {
         </Tabs.Panel>
       </Tabs>
 
-      <Flex justify="flex-end" mt="md">
+      {/* <Flex justify="flex-end" mt="md">
         <Button onClick={handleSave} variant="filled">
           Save
         </Button>
-      </Flex>
+      </Flex> */}
     </>
   );
 }
