@@ -5,7 +5,7 @@ import { body, query, validationResult } from "express-validator";
 const validate = (req: Request, _res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new ValidationError(errors.array())
+    throw new ValidationError(errors.array());
   }
   next();
 };
@@ -23,8 +23,8 @@ export const validateSettings = [
 
   body("theme")
     .optional()
-    .isIn(["System", "Light", "Dark"])
+    .isIn(["Light", "Dark"])
     .withMessage("Theme must be one of: System, Light, or Dark."),
 
   validate,
-]
+];
