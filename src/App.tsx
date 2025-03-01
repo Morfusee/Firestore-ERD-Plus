@@ -7,7 +7,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-  RouterProvider
+  RouterProvider,
 } from "react-router-dom";
 import { customModals } from "./constants/modalConstants";
 import useGlobalHotkeys from "./hooks/useGlobalHotkeys";
@@ -17,6 +17,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { useThemeStore } from "./store/globalStore";
+import { AppRoutes } from "./routes/AppRoutes";
 
 function App() {
   const { theme } = useThemeStore();
@@ -34,30 +35,8 @@ function App() {
   );
 }
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <>
-      <Route path="register" element={<Register />} />
-      <Route path="login" element={<Login />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<FirestoreERD />} />
-        <Route path="/:projectId" element={<FirestoreERD />} />
-      </Route>
-    </>
-  ),
-  {
-    future: {
-      v7_fetcherPersist: true,
-      v7_normalizeFormMethod: true,
-      v7_partialHydration: true,
-      v7_relativeSplatPath: true,
-      v7_skipActionErrorRevalidation: true,
-    },
-  }
-);
-
 function AppRouting() {
-  const { theme, setTheme } = useThemeStore();
+  const { theme } = useThemeStore();
 
   // Invoke the useTheme hook to update the theme
   const themeData = useTheme();
@@ -75,7 +54,7 @@ function AppRouting() {
       future={{
         v7_startTransition: true,
       }}
-      router={router}
+      router={AppRoutes}
     />
   );
 }
