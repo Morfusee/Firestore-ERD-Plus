@@ -22,8 +22,8 @@ const settingsSchema = new mongoose.Schema(
     theme: {
       type: String,
       required: false,
-      enum: ["System", "Light", "Dark"],
-      default: "System",
+      enum: ["auto", "light", "dark"],
+      default: "auto",
     },
   },
   {
