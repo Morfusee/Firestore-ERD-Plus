@@ -3,10 +3,14 @@ import { db } from "../db/db";
 import { IProject } from "../../types/ProjectTypes";
 import { useEditorStore } from "../../store/useEditorStore";
 import { IEditorDataSnapshot } from "../../types/EditorStoreTypes";
-import { createProjectApi, editProjectApi, deleteProjectApi, getProjectByIdApi } from "../api/projectsApi";
+import {
+  createProjectApi,
+  editProjectApi,
+  deleteProjectApi,
+  getProjectByIdApi,
+} from "../api/projectsApi";
 
-
-const useProjectRepo  = () => {
+const useProjectRepo = () => {
   const projects = useProjectStore((state) => state.projects);
   const selectedProject = useProjectStore((state) => state.selectedProject);
   const setProjects = useProjectStore((state) => state.setProjects);
@@ -59,9 +63,9 @@ const useProjectRepo  = () => {
     if (!project.data) {
       loadStateData({
         nodes: [],
-        edges: []
-      })
-      return
+        edges: [],
+      });
+      return;
     }
     const data = JSON.parse(project.data) as IEditorDataSnapshot;
 
@@ -73,9 +77,9 @@ const useProjectRepo  = () => {
     if (!diagramData) {
       loadDiagramData({
         nodes: [],
-        edges: []
-      })
-      return
+        edges: [],
+      });
+      return;
     }
 
     // Load the data to the state
@@ -90,24 +94,23 @@ const useProjectRepo  = () => {
   };
 
   const selectProject = async (projectId: string | undefined) => {
-
-    if (!projectId) return
+    if (!projectId) return;
 
     // Save the previous current project to cache
     if (selectedProject && selectedProject.id !== undefined) {
       saveProjectCache(selectedProject.id);
     }
-    
+
     // Fetch the new selected project
-    const res = await getProjectByIdApi(projectId)
-    const selected = res.data.project
+    const res = await getProjectByIdApi(projectId);
+    const selected = res.data.project;
 
     const cache = getCache().find((item) => item.id === projectId);
     if (cache) {
-      console.log("Loading cache money")
+      console.log("Loading cache money");
       loadCache(cache.stateData);
     } else {
-      console.log("Loading projector")
+      console.log("Loading projector");
       loadProject(selected);
     }
 
@@ -127,26 +130,17 @@ const useProjectRepo  = () => {
     icon: IProject["icon"],
     userId: string
   ) => {
-    const response = await createProjectApi(
-      name,
-      icon,
-      userId
-    );
+    const response = await createProjectApi(name, icon, userId);
 
     // Add to state
     if (response.success) {
       addState(response.data.createdProject);
     }
 
-    return response
+    return response;
   };
 
-  const editProject = async (
-    id: string,
-    name: string,
-    icon: string,
-  ) => {
-
+  const editProject = async (id: string, name: string, icon: string) => {
     if (name == "" && icon == "") {
       console.warn("Incomplete data.");
       return;
@@ -165,19 +159,18 @@ const useProjectRepo  = () => {
       editState(id, updatedData);
     }
 
-    return response
+    return response;
   };
 
   const deleteProject = async (projectId: string) => {
-
     const response = await deleteProjectApi(projectId);
 
     // Delete from state
-    if(response.success) {
+    if (response.success) {
       deleteState(projectId);
     }
 
-    return response
+    return response;
   };
 
   const duplicateProject = async (id: string) => {
@@ -189,24 +182,7 @@ const useProjectRepo  = () => {
       );
     }
 
-    const timestamp = Date.now();
-    const duplicatedProject = {
-      ...project,
-      id: undefined,
-      name: project.name + " (copy)",
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      members: project.members.map((member) => ({ userId: member.id, role: member.role })),
-    };
-
-    // Save to db
-    const newId = await db.projects.add(duplicatedProject);
-
-    // Save to state
-    addState({
-      ...duplicatedProject,
-      id: newId,
-    });
+    // Implement the duplication of project in the backend
   };
 
   return {
