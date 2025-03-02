@@ -14,6 +14,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "overrides": {
+    "picomatch": "^4.0.2",
+    "chokidar": "^3.6.0"
+  },
   "dependencies": {
     "@mantine/carousel": "^7.10.0",
     "@mantine/charts": "^7.10.0",
