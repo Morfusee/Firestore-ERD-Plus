@@ -8,6 +8,7 @@ import {
 } from "../../types/APITypes";
 import axiosInstance from "../../utils/axiosInstance";
 import axios from "axios";
+import { useFetch } from "@mantine/hooks";
 
 export const getProjectMembersApi = async (projectId: string) => {
   const response = await axiosInstance
@@ -31,10 +32,9 @@ export const addProjectMemberApi = async (
       throw new Error("Invalid input parameters");
     }
 
-    const response = await axiosInstance.post<APIResponse<CreatedProjectMember>>(
-      `/projects/${projectId}/members`,
-       { email, role }
-      );
+    const response = await axiosInstance.post<
+      APIResponse<CreatedProjectMember>
+    >(`/projects/${projectId}/members`, { email, role });
     console.log("addProjectMemberApi: Response:", response.data);
 
     return response.data;
