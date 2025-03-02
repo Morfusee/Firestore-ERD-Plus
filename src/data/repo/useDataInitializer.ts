@@ -9,11 +9,13 @@ import { getProjectsApi } from "../api/projectsApi";
 import { useIsFirstRender } from "@mantine/hooks";
 import useUserRepo from "./useUserRepo";
 import useChangelogRepo from "./useChangelogRepo";
+import { useSettingsRepo } from "./useSettingsRepo";
 
 export const useDataInitializer = () => {
   const { user } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
+  const { fetchUserSettings } = useSettingsRepo();
 
   // Router
   const params = useParams();
@@ -27,7 +29,7 @@ export const useDataInitializer = () => {
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    Promise.all([loadProjects(), loadEmojis()]).then(() => {
+    Promise.all([loadProjects(), loadEmojis(), loadUserSettings()]).then(() => {
       setIsLoaded(true);
     });
   }, []);
@@ -74,6 +76,12 @@ export const useDataInitializer = () => {
     return fetchEmojis().then((data) => {
       setEmojisDB(data);
     });
+  };
+
+  const loadUserSettings = async () => {
+    console.log("Loading user settings from server");
+    if (!user) return;
+    await fetchUserSettings(user.id);
   };
 
   return {
