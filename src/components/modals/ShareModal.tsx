@@ -56,6 +56,19 @@ function ShareModal({ context, id }: ContextModalProps) {
     return currentMember?.role || "Viewer";
   }, [localMembers, user?.id]);
 
+  // Get members for the current project
+  const members = useMemo(() => {
+    return localMembers
+      .filter((member) => member !== undefined && member !== null)
+      .map((member) => ({
+        id: member.id || "",
+        profileUrl: member.profileUrl || "",
+        name: member.displayName || "",
+        email: member.email || "",
+        role: member.role || "Viewer",
+      }));
+  }, [localMembers]);
+
   // Update local members whenever project members changes or the seleted projected changes
   useEffect(() => {
     if (selectedProject?.id && projectMembers[selectedProject.id]) {
@@ -81,13 +94,10 @@ function ShareModal({ context, id }: ContextModalProps) {
       size: "md",
       centered: false,
     });
-  }, [selectedProject?.id]); // Only run when project ID changes
-
-  // Fetch members when the modal opens and selectedProject changes
-  useEffect(() => {
-    if (!selectedProject?.id) return;
 
     const loadMembers = async () => {
+      if (!selectedProject?.id) return;
+
       try {
         setInitialLoading(true);
         await fetchProjectMembers(selectedProject.id);
@@ -167,13 +177,13 @@ function ShareModal({ context, id }: ContextModalProps) {
       // Batch API Calls Instead of Looping
       await Promise.all([
         ...addedMembers.map((member) =>
-          addProjectMember(selectedProject.id, member.email, member.role)
+          addProjectMember(selectedProject.id!, member.email, member.role)
         ),
         ...removedMembers.map((member) =>
-          removeProjectMember(selectedProject.id, member.id)
+          removeProjectMember(selectedProject.id!, member.id)
         ),
         ...roleUpdatedMembers.map((member) =>
-          updateMemberRole(selectedProject.id, member.id, member.role)
+          updateMemberRole(selectedProject.id!, member.id, member.role)
         ),
       ]);
 
@@ -195,19 +205,6 @@ function ShareModal({ context, id }: ContextModalProps) {
       setInitialLoading(false);
     }
   };
-
-  // Get members for the current project
-  const members = useMemo(() => {
-    return localMembers
-      .filter((member) => member !== undefined && member !== null)
-      .map((member) => ({
-        id: member.id || "",
-        profileUrl: member.profileUrl || "",
-        name: member.displayName || "",
-        email: member.email || "",
-        role: member.role || "Viewer",
-      }));
-  }, [localMembers]);
 
   return (
     <Box className="w-full h-full">
