@@ -1,0 +1,95 @@
+services: 
+  reverse-proxy:
+    image: traefik:latest
+    command:
+    - "--log.level=DEBUG" # Set log level to DEBUG for more details
+    - "--accesslog=true" # Enable access logs
+    - "--providers.docker"
+    - "--providers.docker.exposedbydefault=false"
+    - "--entryPoints.websecure.address=:443"
+    - "--certificatesresolvers.tlsresolver.acme.tlschallenge=true"
+    - "--certificatesresolvers.tlsresolver.acme.email=admin@mcube.uk"
+    - "--certificatesresolvers.tlsresolver.acme.storage=/letsencrypt/acme.json"
+    - "--entrypoints.web.address=:80"
+    - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+    - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - letsencrypt:/letsencrypt
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - server-network
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: FERD
+      INIT_MONGO_USERNAME: ${MONGO_USERNAME}
+      INIT_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      INIT_MONGO_DATABASE: FERD
+    volumes:
+    - ./mongodb-data:/data/db
+    - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+    - server-network
+  
+  server:
+    image: ghcr.io/morfusee/ferd-server:latest
+    restart: always
+    depends_on:
+    - mongo
+    networks:
+    - server-network
+    environment:
+      SESSION_KEY: ${SESSION_KEY}
+      SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      CLIENT_URL: ${CLIENT_URL}
+      BASE_URL: ${BASE_URL}
+      MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
+      IS_DOCKERIZED: true
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.server.rule=Host(`wta.api.mcube.uk`)"
+    - "traefik.http.routers.server.entrypoints=websecure"
+    - "traefik.http.routers.server.tls.certresolver=tlsresolver"
+    - "com.centurylinklabs.watchtower.enable=true"
+    - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,PATCH,DELETE,OPTIONS"
+    - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+    - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://ferd.mcube.uk"
+    - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
+    - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
+    - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+    - "traefik.http.routers.server.middlewares=cors"
+
+  watchtower:
+    image: containrrr/watchtower
+    command:
+    - "--label-enable"
+    - "--interval"
+    - "30"
+    - "--rolling-restart"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+  #   networks: # This should be set to enable http://server:3000 as a URL
+  #   - server-network
+
+networks:
+  server-network:
+    driver: bridge
+
+volumes:
+  letsencrypt:
