@@ -2,28 +2,23 @@ services:
   reverse-proxy:
     image: traefik:latest
     command:
-    - "--log.level=DEBUG"
-    - "--log.filePath=/logs/traefik.log"  # Store logs here
-    - "--accesslog=true"
-    - "--accesslog.filePath=/logs/access.log"
-    - "--providers.docker"
-    - "--providers.docker.exposedbydefault=false"
-    - "--entryPoints.websecure.address=:443"
-    - "--certificatesresolvers.tlsresolver.acme.tlschallenge=true"
-    - "--certificatesresolvers.tlsresolver.acme.email=admin@mcube.uk"
-    - "--certificatesresolvers.tlsresolver.acme.storage=/letsencrypt/acme.json"
-    - "--entrypoints.web.address=:80"
-    - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-    - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--configFile=/etc/traefik/traefik.yml"
     security_opt:
     - no-new-privileges:true
     ports:
     - "80:80"
     - "443:443"
     volumes:
-    - letsencrypt:/letsencrypt
-    - ./traefik-logs:/logs
+    - ./letsencrypt:/letsencrypt:rw
     - /var/run/docker.sock:/var/run/docker.sock
+    - ./traefik-config/static.yml:/etc/traefik/traefik.yml
+    - ./traefik-config/dynamic.yml:/etc/traefik/dynamic/dynamic.yml
+    - ./traefik-logs:/logs
+    environment:
+      - BASE_URL_FQDN=${BASE_URL_FQDN}
+      - CLIENT_URL=${CLIENT_URL}
     restart: always
     networks:
     - server-network
@@ -60,30 +55,6 @@ services:
     - "traefik.http.routers.server.rule=Host(`${BASE_URL_FQDN}`)"
     - "traefik.http.routers.server.entrypoints=websecure"
     - "traefik.http.routers.server.tls.certresolver=tlsresolver"
-    
-    # CORS Middleware
-    - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,PATCH,DELETE"
-    - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
-    - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=${CLIENT_URL}"
-    - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
-    - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
-    - "traefik.http.middlewares.cors.headers.addvaryheader=true"
-    - "traefik.http.routers.server.middlewares=cors,security,block-sensitive"
-
-    # Security Headers
-    - "traefik.http.middlewares.security.headers.browserXssFilter=true"
-    - "traefik.http.middlewares.security.headers.contentTypeNosniff=true"
-    - "traefik.http.middlewares.security.headers.forceSTSHeader=true"
-    - "traefik.http.middlewares.security.headers.stsSeconds=31536000"
-    - "traefik.http.middlewares.security.headers.stsIncludeSubdomains=true"
-    - "traefik.http.middlewares.security.headers.stsPreload=true"
-    - "traefik.http.middlewares.security.headers.frameDeny=true"
-
-    # Block paths to sensitive data
-    - "traefik.http.routers.api.middlewares=block-sensitive"
-    - "traefik.http.middlewares.block-sensitive.redirectregex.regex=^.*(\\.env|\\.git|docker-compose\\.yml|\\.htaccess|\\.htpasswd|config\\.json).*$"
-    - "traefik.http.middlewares.block-sensitive.redirectregex.replacement=/403"
-    - "traefik.http.middlewares.block-sensitive.redirectregex.permanent=true"
 
     # Auto update image
     - "com.centurylinklabs.watchtower.enable=true"
@@ -119,6 +90,3 @@ services:
 networks:
   server-network:
     driver: bridge
-
-volumes:
-  letsencrypt:
