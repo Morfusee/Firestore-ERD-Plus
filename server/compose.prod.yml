@@ -11,11 +11,11 @@ services:
     - "80:80"
     - "443:443"
     volumes:
-    - ./letsencrypt:/letsencrypt:rw
     - /var/run/docker.sock:/var/run/docker.sock
-    - ./traefik-config/static.yml:/etc/traefik/traefik.yml
+    - ./letsencrypt:/letsencrypt:rw # letsencrypt folder
+    - ./traefik-config/static.yml:/etc/traefik/traefik.yml # traefik-config folder
     - ./traefik-config/dynamic.yml:/etc/traefik/dynamic/dynamic.yml
-    - ./traefik-logs:/logs
+    - ./traefik-logs:/logs # traefik-logs folder
     environment:
       - BASE_URL_FQDN=${BASE_URL_FQDN}
       - CLIENT_URL=${CLIENT_URL}
@@ -90,3 +90,8 @@ services:
 networks:
   server-network:
     driver: bridge
+
+# When reusing this compose file, please create the following folders:
+# - letsencrypt
+# - traefik-config
+# - traefik-logs
