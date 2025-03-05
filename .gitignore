@@ -30,6 +30,7 @@ server/mongodb-data
 server/.env
 server/config/firebasePrivateKey.json
 server/traefik-logs
+server/letsencrypt
 
 # Markdown Documentation
 documentation/.obsidian
