@@ -29,6 +29,7 @@ dist-ssr
 server/mongodb-data
 server/.env
 server/config/firebasePrivateKey.json
+server/traefik-logs
 
 # Markdown Documentation
 documentation/.obsidian
