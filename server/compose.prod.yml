@@ -3,7 +3,9 @@ services:
     image: traefik:latest
     command:
     - "--log.level=DEBUG"
+    - "--log.filePath=/logs/traefik.log"  # Store logs here
     - "--accesslog=true"
+    - "--accesslog.filePath=/logs/access.log"
     - "--providers.docker"
     - "--providers.docker.exposedbydefault=false"
     - "--entryPoints.websecure.address=:443"
@@ -13,12 +15,16 @@ services:
     - "--entrypoints.web.address=:80"
     - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
     - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    security_opt:
+    - no-new-privileges:true
     ports:
     - "80:80"
     - "443:443"
     volumes:
     - letsencrypt:/letsencrypt
+    - ./traefik-logs:/logs
     - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
     networks:
     - server-network
 
@@ -62,7 +68,7 @@ services:
     - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
     - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
     - "traefik.http.middlewares.cors.headers.addvaryheader=true"
-    - "traefik.http.routers.server.middlewares=cors,security"
+    - "traefik.http.routers.server.middlewares=cors,security,block-sensitive"
 
     # Security Headers
     - "traefik.http.middlewares.security.headers.browserXssFilter=true"
@@ -72,6 +78,12 @@ services:
     - "traefik.http.middlewares.security.headers.stsIncludeSubdomains=true"
     - "traefik.http.middlewares.security.headers.stsPreload=true"
     - "traefik.http.middlewares.security.headers.frameDeny=true"
+
+    # Block paths to sensitive data
+    - "traefik.http.routers.api.middlewares=block-sensitive"
+    - "traefik.http.middlewares.block-sensitive.redirectregex.regex=^.*(\\.env|\\.git|docker-compose\\.yml|\\.htaccess|\\.htpasswd|config\\.json).*$"
+    - "traefik.http.middlewares.block-sensitive.redirectregex.replacement=/403"
+    - "traefik.http.middlewares.block-sensitive.redirectregex.permanent=true"
 
     # Auto update image
     - "com.centurylinklabs.watchtower.enable=true"
@@ -93,7 +105,8 @@ services:
     - "--rolling-restart"
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-
+    restart: always
+    
   # cloudflared:
   #   image: cloudflare/cloudflared:latest
   #   restart: unless-stopped
