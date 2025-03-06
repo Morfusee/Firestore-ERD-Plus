@@ -11,6 +11,23 @@ tls:
         - CurveP384
 
 http:
+  routers:
+      server:
+        rule: "Host(`{{env "BASE_URL_FQDN"}}`)"
+        entryPoints:
+          - websecure
+        middlewares:
+          # - cors
+          - security
+          - block-sensitive
+        tls:
+          certResolver: tlsresolver
+        service: server
+  services:
+    server:
+      loadBalancer:
+        servers:
+          - url: "http://server:3000"
   middlewares:
     cors:
       headers:
@@ -23,7 +40,7 @@ http:
           - Content-Type
           - Authorization
         accessControlAllowOriginList:
-          - "${CLIENT_URL}"
+          - "{{env "CLIENT_URL"}}"
         accessControlAllowCredentials: true
         accessControlMaxAge: 100
         addVaryHeader: true
@@ -41,19 +58,3 @@ http:
         regex: "^.*(\\.env|\\.git|docker-compose\\.yml|\\.htaccess|\\.htpasswd|config\\.json).*$"
         replacement: "/403"
         permanent: true
-
-  routers:
-    server:
-      rule: "Host(`${BASE_URL_FQDN}`)"
-      entryPoints:
-        - websecure
-      middlewares:
-        - cors
-        - security
-        - block-sensitive
-      tls:
-        certResolver: tlsresolver
-
-    api:
-      middlewares:
-        - block-sensitive
