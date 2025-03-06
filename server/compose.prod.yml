@@ -2,9 +2,7 @@ services:
   reverse-proxy:
     image: traefik:latest
     command:
-      - "--providers.file.directory=/etc/traefik/dynamic"
-      - "--providers.file.watch=true"
-      - "--configFile=/etc/traefik/traefik.yml"
+      - "--configFile=/etc/traefik/config/static.yml"
     security_opt:
     - no-new-privileges:true
     ports:
@@ -13,12 +11,11 @@ services:
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ./letsencrypt:/letsencrypt:rw # letsencrypt folder
-    - ./traefik-config/static.yml:/etc/traefik/traefik.yml # traefik-config folder
-    - ./traefik-config/dynamic.yml:/etc/traefik/dynamic/dynamic.yml
-    - ./traefik-logs:/logs # traefik-logs folder
+    - ./traefik/config:/etc/traefik/config:ro # traefik-config folder
+    - ./traefik/logs:/logs # traefik-logs folder
     environment:
-      - BASE_URL_FQDN=${BASE_URL_FQDN}
-      - CLIENT_URL=${CLIENT_URL}
+      BASE_URL_FQDN: ${BASE_URL_FQDN}
+      CLIENT_URL: ${CLIENT_URL}
     restart: always
     networks:
     - server-network
@@ -51,10 +48,43 @@ services:
       MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
       IS_DOCKERIZED: true
     labels:
+    # Since you have two replicas, you can't put all of these inside dynamic.yml :(
+    # Enable Traefik for this service
     - "traefik.enable=true"
+
+    # Router Configuration
     - "traefik.http.routers.server.rule=Host(`${BASE_URL_FQDN}`)"
     - "traefik.http.routers.server.entrypoints=websecure"
+    - "traefik.http.routers.server.middlewares=cors,security,block-sensitive"
     - "traefik.http.routers.server.tls.certresolver=tlsresolver"
+
+    # TLS Configuration
+    - "traefik.tls.options.default.minVersion=VersionTLS12"
+    - "traefik.tls.options.default.sniStrict=true"
+    - "traefik.tls.options.default.cipherSuites=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    - "traefik.tls.options.default.curvePreferences=CurveP521,CurveP384"
+
+    # Middleware: CORS Headers
+    - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,PATCH,DELETE"
+    - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+    - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=${CLIENT_URL}"
+    - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
+    - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
+    - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+
+    # Middleware: Security Headers
+    - "traefik.http.middlewares.security.headers.browserXssFilter=true"
+    - "traefik.http.middlewares.security.headers.contentTypeNosniff=true"
+    - "traefik.http.middlewares.security.headers.forceSTSHeader=true"
+    - "traefik.http.middlewares.security.headers.stsSeconds=31536000"
+    - "traefik.http.middlewares.security.headers.stsIncludeSubdomains=true"
+    - "traefik.http.middlewares.security.headers.stsPreload=true"
+    - "traefik.http.middlewares.security.headers.frameDeny=true"
+
+    # Middleware: Block Sensitive Files
+    - "traefik.http.middlewares.block-sensitive.redirectregex.regex=^.*(\\.env|\\.git|docker-compose\\.yml|\\.htaccess|\\.htpasswd|config\\.json).*$"
+    - "traefik.http.middlewares.block-sensitive.redirectregex.replacement=https://www.youtube.com/watch?v=xvFZjo5PgG0"
+    - "traefik.http.middlewares.block-sensitive.redirectregex.permanent=true"
 
     # Auto update image
     - "com.centurylinklabs.watchtower.enable=true"
