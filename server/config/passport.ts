@@ -2,6 +2,7 @@ import User from "@root/models/userModel";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import dotenv from "dotenv";
+import generateUniqueUsername from "@root/utils/usernameGenerator";
 
 dotenv.config();
 
@@ -24,9 +25,16 @@ passport.use(
         });
 
         if (!user) {
+          // Pass the uniqueness check as a parameter
+          const isUsernameUnique = async (username: string): Promise<boolean> =>
+            !(await User.exists({ username }));
+
+          // Generate a unique username
+          const username = await generateUniqueUsername(isUsernameUnique);
+
           // Create new user
           user = new User({
-            username: profile.displayName,
+            username: username,
             displayName: profile.displayName,
             email: profile.emails ? profile.emails[0].value : null, // Handle missing email
           });

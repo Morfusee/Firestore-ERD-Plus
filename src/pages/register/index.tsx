@@ -45,6 +45,10 @@ function Register() {
           return "Username must be between 8 and 20 characters";
         }
 
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          return "Username can only contain letters, numbers, and underscores";
+        }
+
         return null;
       },
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
@@ -88,14 +92,17 @@ function Register() {
     const response = await registerUser(username, email, password);
 
     // Prevent the early redirecting of the user if the registering fails
-    if (response.success) navigate("/");
-    // Show an error message if the register fails
-    else
+    if (response.success) {
+      navigate("/");
+    } else {
+      // Show an error message if the register fails
+
       form.setErrors({
         username: " ",
         email: " ",
         password: getErrorMessage(response.error, response.message),
       });
+    }
 
     setIsRegistering(false);
   };

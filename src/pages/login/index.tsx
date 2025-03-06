@@ -31,6 +31,7 @@ function Login() {
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
+      username: "",
       email: "",
       password: "",
     },
@@ -47,13 +48,15 @@ function Login() {
     const response = await loginUser(email, password);
 
     // Prevent the early redirecting of the user if the login fails
-    if (response.success) navigate("/");
-    // Show an error message if the login fails
-    else
+    if (response.success) {
+      navigate("/");
+    } else {
+      // Show an error message if the login fails
       form.setErrors({
         email: " ",
         password: getErrorMessage(response.error, response.message),
       });
+    }
 
     setIsLoggingIn(false);
   };
