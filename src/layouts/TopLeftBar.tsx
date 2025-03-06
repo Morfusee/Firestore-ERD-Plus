@@ -6,12 +6,12 @@ import {
   Menu,
   Paper,
   Text,
-  Transition
+  Transition,
 } from "@mantine/core";
 import {
   useDisclosure,
   useLocalStorage,
-  useViewportSize
+  useViewportSize,
 } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -25,12 +25,9 @@ import {
   IconPlus,
   IconSettings,
   IconTrash,
-  IconX
+  IconX,
 } from "@tabler/icons-react";
-import {
-  useNavigate,
-  useParams
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { StatusIcon } from "../components/icons/StatusIcon";
 import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
 import useChangelogRepo from "../data/repo/useChangelogRepo";
@@ -460,12 +457,12 @@ function DrawerItemMenu({
         >
           Edit
         </Menu.Item>
-        <Menu.Item
+        {/* <Menu.Item
           leftSection={<IconCopy size={"1rem"} />}
           onClick={handleDuplicate}
         >
           Duplicate
-        </Menu.Item>
+        </Menu.Item> */}
         <Menu.Item
           color="red"
           leftSection={<IconTrash size={"1rem"} />}
