@@ -15,26 +15,27 @@ export const getProjectMembersApi = async (projectId: string) => {
     .get<APIResponse<FetchedProjectMembers>>(`/projects/${projectId}/members`)
     .then((res) => res.data);
 
+    console.log("getProjectMembersApi: Response:", response);
   return response;
 };
 
 export const addProjectMemberApi = async (
   projectId: string,
-  email: string,
+  username: string,
   role: string
 ): Promise<APIResponse<CreatedProjectMember>> => {
   console.log("addProjectMemberApi: Project ID:", projectId);
-  console.log("addProjectMemberApi: Email:", email);
+  console.log("addProjectMemberApi: Email:", username);
   console.log("addProjectMemberApi: Role:", role);
 
   try {
-    if (!projectId || !email || !role) {
+    if (!projectId || !username || !role) {
       throw new Error("Invalid input parameters");
     }
 
     const response = await axiosInstance.post<
       APIResponse<CreatedProjectMember>
-    >(`/projects/${projectId}/members`, { email, role });
+    >(`/projects/${projectId}/members`, { username, role });
     console.log("addProjectMemberApi: Response:", response.data);
 
     return response.data;
