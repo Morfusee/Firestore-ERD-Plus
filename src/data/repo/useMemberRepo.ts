@@ -53,14 +53,14 @@ const useMemberRepo = () => {
 
   const addProjectMember = async (
     projectId: string,
-    email: string,
+    username: string,
     role: string
   ) => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await addProjectMemberApi(projectId, email, role);
+      const response = await addProjectMemberApi(projectId, username, role);
 
       if (response.success) {
         const currentMembers = getProjectMembers(projectId);

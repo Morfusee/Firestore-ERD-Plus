@@ -28,7 +28,6 @@ router.post(
   [
     validateToken,
     validateProjectId,
-    validateMemberEmail,
     validateRoleOptional,
     validate,
   ],

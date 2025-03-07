@@ -4,17 +4,23 @@ import {
   Box,
   Button,
   Center,
+  Combobox,
   CopyButton,
   Divider,
   Group,
+  Input,
+  InputBase,
   Loader,
   Menu,
+  rem,
+  ScrollArea,
   Select,
   Stack,
   Text,
   TextInput,
   Title,
   Tooltip,
+  useCombobox,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import {
@@ -29,9 +35,12 @@ import { IProjectMembers } from "../../types/ProjectTypes";
 import useMemberRepo from "../../data/repo/useMemberRepo";
 import { showNotification } from "@mantine/notifications";
 import useUserRepo from "../../data/repo/useUserRepo";
+import { IUser } from "../../store/useUserStore";
+import { FetchedUsers } from "../../types/APITypes";
+import { useDebouncedCallback } from "@mantine/hooks";
 
 function ShareModal({ context, id }: ContextModalProps) {
-  const { user } = useUserRepo();
+  const { user, getUserByUsername } = useUserRepo();
   const { selectedProject } = useProjectRepo();
   const {
     projectMembers,
@@ -41,15 +50,18 @@ function ShareModal({ context, id }: ContextModalProps) {
     removeProjectMember,
   } = useMemberRepo();
 
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState("Viewer");
-
+  // UI States
   const [initialLoading, setInitialLoading] = useState(true);
-  const [isAddingMember, setIsAddingMember] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
 
+  // Data States
+  const [matchingUsers, setMatchingUsers] = useState<
+    FetchedUsers["users"] | undefined
+  >([]);
   // useState to keep track project members locally.
   const [localMembers, setLocalMembers] = useState<IProjectMembers[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const currentUserRole = useMemo(() => {
     const currentMember = localMembers.find((member) => member.id === user?.id);
@@ -62,12 +74,17 @@ function ShareModal({ context, id }: ContextModalProps) {
       .filter((member) => member !== undefined && member !== null)
       .map((member) => ({
         id: member.id || "",
-        profileUrl: member.profileUrl || "",
+        profilePicture: member.profilePicture || "",
         name: member.displayName || "",
-        email: member.email || "",
+        username: member.username || "",
         role: member.role || "Viewer",
       }));
   }, [localMembers]);
+
+  const memoizedMatchingUsers = useMemo(
+    () => matchingUsers || [],
+    [matchingUsers]
+  );
 
   // Update local members whenever project members changes or the seleted projected changes
   useEffect(() => {
@@ -116,8 +133,10 @@ function ShareModal({ context, id }: ContextModalProps) {
     loadMembers();
   }, [selectedProject?.id]);
 
-  const handleAddMember = async () => {
-    if (!selectedProject?.id || !newMemberEmail) {
+  const handleAddMember = async (
+    newMember: Omit<IUser, "email"> | undefined
+  ) => {
+    if (!selectedProject?.id || !newMember) {
       showNotification({
         color: "red",
         title: "Error",
@@ -125,20 +144,17 @@ function ShareModal({ context, id }: ContextModalProps) {
       });
       return;
     }
-    const displayName = newMemberEmail.split("@")[0];
 
-    const newMember: IProjectMembers = {
+    const newMemberData: IProjectMembers = {
       id: `temp-${Date.now()}`, // Use temp Id
-      username: newMemberEmail,
-      profileUrl: "",
-      email: newMemberEmail,
-      role: newMemberRole,
-      displayName: displayName,
+      username: newMember.username,
+      profilePicture: newMember.profilePicture || "",
+      role: "Viewer",
+      displayName: newMember.displayName || "",
     };
 
-    setLocalMembers((prev) => [...prev, newMember]);
-    setNewMemberEmail("");
-    setShowAddMember(false);
+    setLocalMembers((prev) => [...prev, newMemberData]);
+    setSearchTerm("");
   };
 
   const handleUpdateRole = (memberId: string, newRole: string) => {
@@ -166,7 +182,7 @@ function ShareModal({ context, id }: ContextModalProps) {
       );
 
       const removedMembers = currentMembers.filter(
-        (member) => !localMembers.some((m) => m.email === member.email)
+        (member) => !localMembers.some((m) => m.username === member.username)
       );
 
       const roleUpdatedMembers = localMembers.filter((member) => {
@@ -177,7 +193,7 @@ function ShareModal({ context, id }: ContextModalProps) {
       // Batch API Calls Instead of Looping
       await Promise.all([
         ...addedMembers.map((member) =>
-          addProjectMember(selectedProject.id!, member.email, member.role)
+          addProjectMember(selectedProject.id!, member.username, member.role)
         ),
         ...removedMembers.map((member) =>
           removeProjectMember(selectedProject.id!, member.id)
@@ -206,6 +222,72 @@ function ShareModal({ context, id }: ContextModalProps) {
     }
   };
 
+  const combobox = useCombobox({
+    onDropdownClose: () => combobox.resetSelectedOption(),
+  });
+
+  const debouncedFetchUsers = useDebouncedCallback(
+    async (username: IUser["username"]) => {
+      try {
+        // Search for users
+        const fetchedUsers = await getUserByUsername(
+          username,
+          localMembers.map((member) => member.username)
+        );
+
+        // Set the fetched users to the state
+        setMatchingUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        // Set searching state to false
+        setIsSearching(false);
+      }
+    },
+    250
+  );
+
+  const handleOpenSearch = () => {
+    // Don't search if there's already matching users
+    if (memoizedMatchingUsers.length > 0) return;
+
+    // Set searching state to true
+    setIsSearching(true);
+    combobox.openDropdown();
+
+    // Fetch users with empty string to get all users
+    debouncedFetchUsers("");
+  };
+
+  const handleSearchInput = async (username: IUser["username"]) => {
+    // Set searching state to true
+    setIsSearching(true);
+    setSearchTerm(username);
+
+    // Fetch users with the username
+    debouncedFetchUsers(username);
+  };
+
+  const handleUserSelection = (username: string) => {
+    setSearchTerm(username);
+
+    // Fetch users with the username
+    debouncedFetchUsers(username);
+
+    // Find the selected user from the matching users
+    const selectedUser = memoizedMatchingUsers.find(
+      (user) => user.username === username
+    );
+
+    // Add the selected user to the members list
+    if (selectedUser) {
+      handleAddMember(selectedUser);
+    }
+
+    // Close the dropdown
+    combobox.closeDropdown();
+  };
+
   return (
     <Box className="w-full h-full">
       <Group>
@@ -213,7 +295,7 @@ function ShareModal({ context, id }: ContextModalProps) {
           className="flex-1"
           label="Shareable Link"
           rightSection={
-            <CopyButton value="http://localhost.com">
+            <CopyButton value={import.meta.env.VITE_SERVER_URL || ""}>
               {({ copied, copy }) => (
                 <ActionIcon variant="light" onClick={copy}>
                   <IconCopy size={16} />
@@ -222,7 +304,7 @@ function ShareModal({ context, id }: ContextModalProps) {
             </CopyButton>
           }
           readOnly
-          value="http://localhost.com"
+          value={import.meta.env.VITE_SERVER_URL || ""}
         />
       </Group>
 
@@ -230,70 +312,71 @@ function ShareModal({ context, id }: ContextModalProps) {
 
       <Group justify="space-between">
         <Title order={5}>Members</Title>
-        {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
-          <ActionIcon
-            radius="lg"
-            variant="subtle"
-            onClick={() => setShowAddMember(true)}
-          >
-            <Tooltip label="Add new member">
-              <IconPlus size={16} />
-            </Tooltip>
-          </ActionIcon>
-        )}
       </Group>
 
-      {showAddMember && (
+      {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
         <Group mt="sm">
-          <TextInput
-            className="flex-1"
-            placeholder="Enter email address"
-            value={newMemberEmail}
-            onChange={(e) => setNewMemberEmail(e.currentTarget.value)}
-          />
-          <Select
-            value={newMemberRole}
-            onChange={(value) => setNewMemberRole(value || "Viewer")}
-            data={[
-              { value: "Viewer", label: "Viewer" },
-              { value: "Editor", label: "Editor" },
-              { value: "Admin", label: "Admin" },
-            ]}
-          />
-          <Button
-            onClick={handleAddMember}
-            loading={isAddingMember}
-            variant="filled"
+          <Combobox
+            store={combobox}
+            withinPortal={true}
+            onOptionSubmit={(value) => handleUserSelection(value)}
           >
-            Add
-          </Button>
+            <Combobox.Target>
+              <InputBase
+                rightSection={<Combobox.Chevron />}
+                value={searchTerm}
+                onChange={(event) => {
+                  combobox.openDropdown();
+                  combobox.updateSelectedOptionIndex();
+                  handleSearchInput(event.currentTarget.value);
+                }}
+                onClick={handleOpenSearch}
+                onFocus={() => combobox.openDropdown()}
+                onBlur={() => {
+                  combobox.closeDropdown();
+                  handleSearchInput(searchTerm || "");
+                }}
+                placeholder="Add members by username"
+                rightSectionPointerEvents="none"
+                w={"100%"}
+              />
+            </Combobox.Target>
+            <Combobox.Dropdown>
+              <CustomDropdown
+                isSearching={isSearching}
+                memoizedMatchingUsers={memoizedMatchingUsers}
+              />
+            </Combobox.Dropdown>
+          </Combobox>
         </Group>
       )}
 
-      <Stack my="sm">
-        {initialLoading ? (
-          <Center>
-            <Loader size="sm" />
-          </Center>
-        ) : members.length > 0 ? (
-          members.map((member) =>
-            member ? (
-              <MemberItem
-                key={member.id}
-                {...member}
-                isCurrentUser={member.id === user?.id}
-                onRoleChange={(newRole: string) =>
-                  handleUpdateRole(member.id, newRole)
-                }
-                onRemove={() => handleRemoveMember(member.id)}
-                currentUserRole={currentUserRole}
-              />
-            ) : null
-          )
-        ) : (
-          <Text>No members found.</Text>
-        )}
-      </Stack>
+      <ScrollArea.Autosize my="sm" mah={rem(300)} offsetScrollbars={true}>
+        <Stack gap={5}>
+          {initialLoading ? (
+            <Center>
+              <Loader size="sm" />
+            </Center>
+          ) : members.length > 0 ? (
+            members.map((member) =>
+              member ? (
+                <MemberItem
+                  key={member.id}
+                  {...member}
+                  isCurrentUser={member.id === user?.id}
+                  onRoleChange={(newRole: string) =>
+                    handleUpdateRole(member.id, newRole)
+                  }
+                  onRemove={() => handleRemoveMember(member.id)}
+                  currentUserRole={currentUserRole}
+                />
+              ) : null
+            )
+          ) : (
+            <Text>No members found.</Text>
+          )}
+        </Stack>
+      </ScrollArea.Autosize>
 
       <Title order={5} mb="xs">
         General Access
@@ -307,7 +390,7 @@ function ShareModal({ context, id }: ContextModalProps) {
 
       {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
         <Button
-          variant="outline"
+          variant="filled"
           fullWidth={true}
           mt={10}
           loading={initialLoading}
@@ -320,11 +403,65 @@ function ShareModal({ context, id }: ContextModalProps) {
   );
 }
 
+function CustomSelectOption({ user }: { user: Omit<IUser, "email"> }) {
+  return (
+    <Group>
+      <Avatar src={user.profilePicture} size={32} />
+      <Stack gap={0}>
+        <Text>{user.username}</Text>
+        <Text size="xs" c="dimmed">
+          {user.displayName}
+        </Text>
+      </Stack>
+    </Group>
+  );
+}
+
+function CustomDropdown({
+  isSearching,
+  memoizedMatchingUsers,
+}: {
+  isSearching: boolean;
+  memoizedMatchingUsers: FetchedUsers["users"];
+}) {
+  if (isSearching) {
+    return (
+      <Stack p={rem(10)}>
+        <Center>
+          <Loader size="sm" />
+        </Center>
+      </Stack>
+    );
+  }
+
+  if (memoizedMatchingUsers.length > 0) {
+    return (
+      <Combobox.Options>
+        {memoizedMatchingUsers.map((option) => (
+          <Combobox.Option key={option.id} value={option.username}>
+            <CustomSelectOption user={option} />
+          </Combobox.Option>
+        ))}
+      </Combobox.Options>
+    );
+  }
+
+  return (
+    <Stack p={rem(10)}>
+      <Center>
+        <Text size="sm" c="dimmed">
+          No users found
+        </Text>
+      </Center>
+    </Stack>
+  );
+}
+
 interface MemberItemProps {
   id: string;
-  profileUrl: string;
+  profilePicture: string;
   name: string;
-  email: string;
+  username: string;
   role: string;
   onRoleChange: (newRole: string) => void;
   onRemove: () => void;
@@ -334,17 +471,18 @@ interface MemberItemProps {
 
 function MemberItem({
   id,
-  profileUrl,
+  profilePicture,
   name,
-  email,
+  username,
   role,
   onRoleChange,
   onRemove,
   isCurrentUser,
   currentUserRole,
 }: MemberItemProps) {
-  const truncatedEmail = email.length > 25 ? `${email.slice(0, 22)}...` : email;
-
+  const truncatedEmail =
+    username.length > 25 ? `${username.slice(0, 22)}...` : username;
+  
   return (
     <Group
       className="rounded-md transition-color hover:bg-neutral-500 hover:hover:bg-opacity-20"
@@ -353,7 +491,7 @@ function MemberItem({
       justify="space-between"
     >
       <Group gap="sm">
-        <Avatar size={42} src={profileUrl} />
+        <Avatar size={42} src={profilePicture} />
 
         <Stack gap={0}>
           <Text fw={500}>

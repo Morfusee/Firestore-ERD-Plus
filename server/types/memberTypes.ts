@@ -26,7 +26,7 @@ export interface MemberParams extends ProjectParams {
 export interface MemberBody {
   userId: string;
   role?: MemberRole;
-  email: string;
+  username: string;
 }
 
 export interface MemberRoleBody {
