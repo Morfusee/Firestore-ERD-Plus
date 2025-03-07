@@ -10,6 +10,7 @@ import {
   uploadProfilePicture,
   deleteUser,
   getOwnedProjectsByUserId,
+  getUserByUsername,
 } from "../controllers/userController";
 
 import {
@@ -26,14 +27,17 @@ import { compressImage } from "../middleware/compressImageMiddleware";
 const router = express.Router();
 
 // Route for all users
-router.get("", [validateToken, validate], getAllUsers);
+// router.get("", [validateToken, validate], getAllUsers);
 
-// Route for getting users by email
-router.get(
-  "/search",
-  [validateToken, ...validateEmailQuery, validate],
-  getUserByEmail
-);
+// // Route for getting users by email
+// router.get(
+//   "/search",
+//   [validateToken, ...validateEmailQuery, validate],
+//   getUserByEmail
+// );
+
+// Route for getting users by username
+router.get("/search", [validateToken, validate], getUserByUsername);
 
 // Route for a specific user by ID
 router.get("/:id", [validateToken, validate], getUserById);
