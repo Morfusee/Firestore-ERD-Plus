@@ -26,16 +26,6 @@ import { compressImage } from "../middleware/compressImageMiddleware";
 
 const router = express.Router();
 
-// Route for all users
-// router.get("", [validateToken, validate], getAllUsers);
-
-// // Route for getting users by email
-// router.get(
-//   "/search",
-//   [validateToken, ...validateEmailQuery, validate],
-//   getUserByEmail
-// );
-
 // Route for getting users by username
 router.get("/search", [validateToken, validate], getUserByUsername);
 
