@@ -2,23 +2,25 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - "main"
   workflow_dispatch: # Allows manual triggering of the workflow
-    inputs: 
+    inputs:
       tag:
-        description: 'Tag for the Docker image'
+        description: "Tag for the Docker image"
         required: false
-        default: 'latest'
+        default: "latest"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Build and Push the Image
-      run: |
-        docker login --username Morfusee --password ${{ secrets.GH_PAT }} ghcr.io
-        docker build ./server --file ./server/Dockerfile --tag ghcr.io/morfusee/ferd-server:latest
-        docker push ghcr.io/morfusee/ferd-server:latest
+      - uses: actions/checkout@v4
+      - name: Build and Push the Image
+        run: |
+          docker login --username Morfusee --password ${{ secrets.GH_PAT }} ghcr.io
+          docker build ./server --file ./server/Dockerfile --tag ghcr.io/morfusee/ferd-server:latest
+          docker push ghcr.io/morfusee/ferd-server:latest
