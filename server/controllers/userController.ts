@@ -152,12 +152,21 @@ export const getUserByUsername = async (
   next: NextFunction
 ) => {
   try {
-    const { username, limit } = req.query;
+    const { username, limit, excludedUsers } = req.body;
 
-    const limitNumber = Number(limit) || 10; // Default to 10 if no limit is provided
+    // Ensure excludedUsers is an array, defaulting to an empty array if not provided
+    const optionalExcludedUsers = Array.isArray(excludedUsers)
+      ? excludedUsers
+      : [];
+
+    const limitNumber = Number(limit) || 5;
 
     const users = await User.find({
-      username: { $regex: username, $options: "i" },
+      username: {
+        $regex: username,
+        $options: "i",
+        $nin: optionalExcludedUsers,
+      },
     }).limit(limitNumber);
 
     next(
