@@ -30,19 +30,19 @@ export const getMembersByProjectId = async (
       .select("members")
       .populate({
         path: "members.userId",
-        select: "username email displayName",
+        select: "username profilePicture displayName",
       })
       .lean()
       .exec();
+
     if (!members) throw new NotFoundError("Member list not found");
 
     const cleanedMembers = members.members.map(({ userId, role }: any) => {
       if (typeof userId === "object" && userId !== null) {
         return {
           id: userId._id,
-          profileUrl: userId.profilePicture || "",
+          profilePicture: userId.profilePicture || "",
           username: userId.username,
-          email: userId.email,
           displayName: userId.displayName,
           role,
         };
@@ -67,7 +67,7 @@ export const addMember = async (
   next: NextFunction
 ) => {
   const { projectId } = req.params;
-  const { email, role } = req.body;
+  const { username, role } = req.body;
 
   try {
     console.log("addMember: Request body:", req.body);
@@ -84,7 +84,7 @@ export const addMember = async (
     console.log("addMember: Project found:", project);
 
     // Check if member exists by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ username });
     if (!user) throw new NotFoundError("User not found");
 
     console.log("addMember: User found:", user);
@@ -110,6 +110,7 @@ export const addMember = async (
 
     // Add member to project
     await project.updateOne({ $push: { members: memberData } });
+
     // Add project to user
     await user.updateOne({ $push: { sharedProjects: project.id } });
 
