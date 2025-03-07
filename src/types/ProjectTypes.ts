@@ -10,9 +10,8 @@ export interface IProject {
 
 export interface IProjectMembers {
   id: string;
-  profileUrl: string;
+  profilePicture: string;
   username: string;
-  email: string;
   displayName: string;
   role: string;
 }
