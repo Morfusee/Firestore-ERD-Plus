@@ -136,7 +136,7 @@ function ActionButtons({
 
             <Stack gap={2} justify="center">
               <Title order={2} ta="center">
-                {user?.displayName}
+                {user?.username}
               </Title>
               <Text ta="center">{user?.email}</Text>
             </Stack>
