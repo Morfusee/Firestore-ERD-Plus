@@ -1,24 +1,37 @@
 services: 
+
+  # To prevent mounting docker.sock, which is a security risk
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    environment:
+      CONTAINERS: 1
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - socket-proxy-network
+
   reverse-proxy:
     image: traefik:latest
     command:
-      - "--configFile=/etc/traefik/config/static.yml"
+    - "--configFile=/etc/traefik/config/static.yml"
     security_opt:
     - no-new-privileges:true
     ports:
     - "80:80"
     - "443:443"
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
     - ./letsencrypt:/letsencrypt:rw # letsencrypt folder
-    - ./traefik/config:/etc/traefik/config:ro # traefik-config folder
-    - ./traefik/logs:/logs # traefik-logs folder
+    - ./traefik/config:/etc/traefik/config:ro # traefik folder
+    - ./traefik/logs:/logs # traefik folder
     environment:
       BASE_URL_FQDN: ${BASE_URL_FQDN}
       CLIENT_URL: ${CLIENT_URL}
     restart: always
     networks:
     - server-network
+    - socket-proxy-network
+    depends_on:
+    - socket-proxy
 
   mongo:
     image: mongo:latest
@@ -104,6 +117,8 @@ services:
     - "--interval"
     - "30"
     - "--rolling-restart"
+    environment:
+      WATCHTOWER_CLEANUP: true
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     restart: always
@@ -120,8 +135,9 @@ services:
 networks:
   server-network:
     driver: bridge
+  socket-proxy-network:
+    driver: bridge
 
 # When reusing this compose file, please create the following folders:
 # - letsencrypt
-# - traefik-config
-# - traefik-logs
+# - traefik
