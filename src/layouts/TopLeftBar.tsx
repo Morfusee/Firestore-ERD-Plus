@@ -41,6 +41,7 @@ import { useEditorStore } from "../store/useEditorStore";
 import { IProject } from "../types/ProjectTypes";
 import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
 import { determineTitle } from "../utils/successHelpers";
+import CustomNotification from "../components/ui/CustomNotification";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -209,10 +210,8 @@ function DrawerHeader() {
     }
 
     // Show notification
-    notifications.show({
-      icon: <StatusIcon status={response.success ? "success" : "error"} />,
-      withBorder: true,
-      autoClose: 5000,
+    CustomNotification({
+      status: response.success ? "success" : "error",
       title: determineTitle(
         "Project Created",
         "Failed to Create Project",
@@ -381,16 +380,14 @@ function DrawerItemMenu({
     }
 
     // Show notification
-    notifications.show({
-      icon: <StatusIcon status={res?.success ? "success" : "error"} />,
-      withBorder: true,
-      autoClose: 5000,
+    CustomNotification({
+      status: res?.success ? "success" : "error",
       title: determineTitle(
         "Project Edited",
         "Failed to Edit Project",
         res?.success || false
       ),
-      message: res?.message,
+      message: res?.message || "",
     });
 
     return res;
@@ -419,10 +416,8 @@ function DrawerItemMenu({
     }
 
     // Show notification after deleting
-    notifications.show({
-      icon: <StatusIcon status={res.success ? "success" : "error"} />,
-      withBorder: true,
-      autoClose: 5000,
+    CustomNotification({
+      status: res.success ? "success" : "error",
       message: res.message,
     });
   };
