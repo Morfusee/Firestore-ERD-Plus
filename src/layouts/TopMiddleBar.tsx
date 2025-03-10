@@ -22,9 +22,14 @@ import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
 import useIsTruncated from "../hooks/useIsTruncated";
 import { ReactNode } from "react";
 import { modals } from "@mantine/modals";
+import useCodeGenRepo from "../data/repo/useCodeGenRepo";
+import { useEditorStore } from "../store/useEditorStore";
+import CustomNotification from "../components/ui/CustomNotification";
 
 function TopMiddleBar() {
   const { selectedProject } = useProjectStore();
+  const dataSnap = useEditorStore((state) => state.getDataSnapshot);
+  const { hasInvalidFields } = useCodeGenRepo(dataSnap());
   const isButtonDisabled = !selectedProject;
   const { isTruncated, textRef } = useIsTruncated<HTMLParagraphElement>(
     selectedProject?.name!
@@ -47,6 +52,20 @@ function TopMiddleBar() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleDynamicAction = (modal: string) => {
+    if (hasInvalidFields(dataSnap().nodes)) {
+      return CustomNotification({
+        status: "error",
+        message: "Some fields are missing names",
+      });
+    }
+
+    modals.openContextModal({
+      modal: modal,
+      innerProps: {},
+    });
   };
 
   return (
@@ -81,34 +100,24 @@ function TopMiddleBar() {
 
           <Divider orientation="vertical" />
           <Flex className="gap-1" direction="row" wrap="wrap">
-            <TooltipIconButton 
+            <TooltipIconButton
               icon={<IconTool className="p-0.5" />}
               label="Initial Setup"
               disabled={isButtonDisabled}
             />
-            <TooltipIconButton 
+            <TooltipIconButton
               icon={<IconCode className="p-0.5" />}
               label="Code Generation"
               disabled={isButtonDisabled}
-              onClick={() =>
-                modals.openContextModal({
-                  modal: "codeGen",
-                  innerProps: {},
-                })
-              }
+              onClick={() => handleDynamicAction("codeGen")}
             />
-            <TooltipIconButton 
+            <TooltipIconButton
               icon={<IconDownload className="p-0.5" />}
               label="Download Project"
               disabled={isButtonDisabled}
-              onClick={() =>
-                modals.openContextModal({
-                  modal: "download",
-                  innerProps: {},
-                })
-              }
+              onClick={() => handleDynamicAction("download")}
             />
-            <TooltipIconButton 
+            <TooltipIconButton
               icon={<IconShare className="p-0.5" />}
               label="Share Project"
               disabled={isButtonDisabled}
@@ -126,20 +135,18 @@ function TopMiddleBar() {
   );
 }
 
-
 function TooltipIconButton({
   icon,
   label,
   disabled,
-  onClick
-} : {
-  icon: ReactNode
-  label: string
-  disabled: boolean
-  onClick?: () => void
+  onClick,
+}: {
+  icon: ReactNode;
+  label: string;
+  disabled: boolean;
+  onClick?: () => void;
 }) {
-
-  return(
+  return (
     <Tooltip label={label}>
       <ActionIcon
         variant="subtle"
@@ -150,8 +157,8 @@ function TooltipIconButton({
       >
         {icon}
       </ActionIcon>
-    </Tooltip> 
-  )
+    </Tooltip>
+  );
 }
 
 export default TopMiddleBar;
