@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import useIsDarkMode from "./useIsDarkMode";
 import {
   ActionIcon,
   Button,
@@ -9,24 +7,25 @@ import {
   Paper,
   ScrollArea,
   SegmentedControl,
-  TabsList,
   TabsTab,
   ThemeIcon,
-  useMantineTheme,
+  useMantineTheme
 } from "@mantine/core";
+import { useEffect } from "react";
 import "../css/variants.css";
-import { Notifications } from "@mantine/notifications";
+import { useThemeStore } from "../store/globalStore";
+import useIsDarkMode from "./useIsDarkMode";
 
 function useTheme() {
   const isDarkMode = useIsDarkMode();
   const mantineTheme = useMantineTheme();
-  const [theme, setTheme] = useState(themeCurator(isDarkMode, mantineTheme));
-
+  const { theme: globalTheme, setTheme: setGlobalTheme } = useThemeStore();
+  
   useEffect(() => {
-    setTheme(themeCurator(isDarkMode, mantineTheme));
+    setGlobalTheme(themeCurator(isDarkMode, mantineTheme));
   }, [isDarkMode]);
 
-  return theme;
+  return globalTheme;
 }
 
 function themeCurator(isDarkMode: boolean, mantineTheme: MantineTheme) {

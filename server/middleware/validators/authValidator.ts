@@ -23,11 +23,6 @@ export const validateToken = async (
   next: NextFunction
 ) => {
   try {
-    // Check if middleware is disabled via environment variable
-    if (process.env.DISABLE_AUTH_MIDDLEWARE === "true") {
-      return next();
-    }
-
     // If a token is present, verify it
     const userIdToken = req.cookies?.access_token;
     if (userIdToken) {
@@ -46,7 +41,7 @@ export const validateToken = async (
   } catch (error) {
     // Clear the cookie if the connect.sid is invalid
     res.clearCookie("connect.sid");
-    
+
     // If the token is invalid, return a 409 Conflict error
     next(error);
   }

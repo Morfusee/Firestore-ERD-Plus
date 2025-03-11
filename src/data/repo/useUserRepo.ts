@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
-import { useUserStore } from "../../store/useUserStore";
+import { IUser, useUserStore } from "../../store/useUserStore";
 import { APIResponse, CreatedUser, FetchedUser } from "../../types/APITypes";
 import {
   authenticateUserApi,
@@ -11,6 +11,7 @@ import {
 } from "../api/authApi";
 import {
   getUserApi,
+  getUserByUsernameApi,
   updateUserApi,
   uploadProfilePictureApi,
 } from "../api/userApi";
@@ -59,6 +60,23 @@ const useUserRepo = () => {
 
       // Set the current user to the user response from api
       setCurrentUser(getUserResponse.data.user);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getUserByUsername = async (
+    username: IUser["username"],
+    excludedUsers: IUser["username"][] = []
+  ) => {
+    try {
+      // Get user from api base on username
+      const getUserByUsernameResponse = await getUserByUsernameApi(
+        username,
+        excludedUsers
+      );
+
+      return getUserByUsernameResponse.data.users;
     } catch (err) {
       console.log(err);
     }
@@ -182,6 +200,7 @@ const useUserRepo = () => {
   return {
     user,
     getUser,
+    getUserByUsername,
     loginUser,
     registerUser,
     changeUserDisplayname,

@@ -1,7 +1,31 @@
 services: 
+  reverse-proxy:
+    image: traefik:latest
+    command:
+      # - "--providers.file.directory=/etc/traefik/dynamic"
+      # - "--providers.file.watch=true"
+      - "--configFile=/etc/traefik/config/static.yml"
+    security_opt:
+    - no-new-privileges:true
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./letsencrypt:/letsencrypt:rw # letsencrypt folder
+    # - ./traefik-config/static.yml:/etc/traefik/traefik.yml 
+    # - ./traefik-config/dynamic.yml:/etc/traefik/dynamic/dynamic.yml
+    - ./traefik-config:/etc/traefik/config:ro # traefik-config folder
+    - ./traefik-logs:/logs # traefik-logs folder
+    environment:
+      BASE_URL_FQDN: ${BASE_URL_FQDN}
+      CLIENT_URL: ${CLIENT_URL}
+    restart: always
+    networks:
+    - server-network
+
   mongo:
     image: mongo:latest
-    restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
@@ -12,18 +36,12 @@ services:
     volumes:
     - ./mongodb-data:/data/db
     - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: always
     networks:
     - server-network
   
   server:
     image: ghcr.io/morfusee/ferd-server:latest
-    restart: always
-    depends_on:
-    - mongo
-    networks:
-    - server-network
-    ports: 
-    - "127.0.0.1:3000:3000"
     environment:
       SESSION_KEY: ${SESSION_KEY}
       SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
@@ -34,7 +52,21 @@ services:
       MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
       IS_DOCKERIZED: true
     labels:
+    - "traefik.enable=true"
+    # - "traefik.http.routers.server.rule=Host(`${BASE_URL_FQDN}`)"
+    # - "traefik.http.routers.server.entrypoints=websecure"
+    # - "traefik.http.routers.server.tls.certresolver=tlsresolver"
+
+    # Auto update image
     - "com.centurylinklabs.watchtower.enable=true"
+    restart: always
+    networks:
+    - server-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    depends_on:
+    - mongo
 
   watchtower:
     image: containrrr/watchtower
@@ -45,7 +77,8 @@ services:
     - "--rolling-restart"
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-
+    restart: always
+    
   # cloudflared:
   #   image: cloudflare/cloudflared:latest
   #   restart: unless-stopped
@@ -58,3 +91,8 @@ services:
 networks:
   server-network:
     driver: bridge
+
+# When reusing this compose file, please create the following folders:
+# - letsencrypt
+# - traefik-config
+# - traefik-logs

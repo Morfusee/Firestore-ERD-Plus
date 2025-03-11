@@ -12,7 +12,11 @@ export const getAllUsers = async (
   next: NextFunction
 ) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-email");
+
+    if (!users) {
+      throw new NotFoundError("No users found.");
+    }
 
     next(
       new SuccessResponse("Users fetched successfully.", {
@@ -55,7 +59,7 @@ export const getOwnedProjectsByUserId = async (
   try {
     const id = req.params.id;
 
-    const user = await User.findById(id)
+    const user = await User.findById(id);
     if (!user) throw new NotFoundError("User not found.");
 
     const ownedProjectsByUser = await User.findOne({
@@ -63,7 +67,7 @@ export const getOwnedProjectsByUserId = async (
     })
       .populate({
         path: "ownedProjects",
-        select: "-data -members"
+        select: "-data -members",
       }) // Populate all the found ids with data
       .then((user) => user?.ownedProjects); // Get the ownedProjects field only
 
@@ -123,9 +127,9 @@ export const updateUser = async (
       Object.keys(req.body).length === 0 ||
       Object.values(req.body).some((value) => value === "")
     ) {
-
-      throw new ValidationError("Request body is empty or contains empty value.")
-
+      throw new ValidationError(
+        "Request body is empty or contains empty value."
+      );
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
@@ -142,6 +146,38 @@ export const updateUser = async (
   }
 };
 
+export const getUserByUsername = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { username, limit, excludedUsers } = req.body;
+
+    // Ensure excludedUsers is an array, defaulting to an empty array if not provided
+    const optionalExcludedUsers = Array.isArray(excludedUsers)
+      ? excludedUsers
+      : [];
+
+    const limitNumber = Number(limit) || 5;
+
+    const users = await User.find({
+      username: {
+        $regex: username,
+        $options: "i",
+        $nin: optionalExcludedUsers,
+      },
+    }).limit(limitNumber);
+
+    next(
+      new SuccessResponse("Users fetched successfully.", {
+        users,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getUserByEmail = async (
   req: Request,
@@ -152,7 +188,6 @@ export const getUserByEmail = async (
     const { email, limit } = req.query;
 
     const limitNumber = Number(limit) || 10; // Default to 10 if no limit is provided
-
 
     const users = await User.find({
       email: { $regex: email, $options: "i" },
@@ -193,7 +228,6 @@ export const deleteUser = async (
   }
 };
 
-
 export const uploadProfilePicture = async (
   req: Request,
   res: Response,
@@ -214,7 +248,7 @@ export const uploadProfilePicture = async (
     // Delete existing profile picture from Firebase if it exists
     if (user.profilePicture) {
       try {
-        const fileName = user.profilePicture.split('/').pop()?.split('?')[0];
+        const fileName = user.profilePicture.split("/").pop()?.split("?")[0];
         if (fileName) {
           await bucket.file(`profile-pictures/${fileName}`).delete();
         }
@@ -226,7 +260,9 @@ export const uploadProfilePicture = async (
 
     // Create a unique filename
     const timestamp = Date.now();
-    const fileName = `${user._id}-${timestamp}.${req.file.originalname.split('.').pop()}`;
+    const fileName = `${user._id}-${timestamp}.${req.file.originalname
+      .split(".")
+      .pop()}`;
     const filePath = `profile-pictures/${fileName}`;
 
     // Create a new blob in the bucket and upload the file data
@@ -238,12 +274,12 @@ export const uploadProfilePicture = async (
     });
 
     // Handle errors during upload
-    blobStream.on('error', (error: { message: any; }) => {
+    blobStream.on("error", (error: { message: any }) => {
       throw new Error(`Unable to upload image, ${error.message}`);
     });
 
     // Handle successful upload
-    blobStream.on('finish', async () => {
+    blobStream.on("finish", async () => {
       // Make the file public
       await blob.makePublic();
 

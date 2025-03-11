@@ -1,44 +1,43 @@
-import { Schema } from "mongoose"
-
+import { Schema } from "mongoose";
 
 // Types
-type MemberRole = 'owner' | 'admin' | 'editor' | 'viewer'
+type MemberRole = "owner" | "admin" | "editor" | "viewer";
 
 // Model
 export interface MemberModel {
-  projectId: Schema.Types.ObjectId
-  members: MemberUser[]
+  projectId: Schema.Types.ObjectId;
+  members: MemberUser[];
 }
 
 export interface MemberUser {
-  userId: Schema.Types.ObjectId
-  role: MemberRole
+  userId: Schema.Types.ObjectId;
+  role: MemberRole;
 }
 
 // Params and Request
 export interface ProjectParams {
-  projectId: string
+  projectId: string;
 }
 
 export interface MemberParams extends ProjectParams {
-  userId: string
+  userId: string;
 }
 
-
 export interface MemberBody {
-  userId: string,
-  role?: MemberRole
+  userId: string;
+  role?: MemberRole;
+  username: string;
 }
 
 export interface MemberRoleBody {
-  role: MemberRole
+  role: MemberRole;
 }
 
 // Response
 export interface MembersResponse {
-  id: string
-  username: string
-  email: string
-  displayName: string
-  role: MemberRole
+  id: string;
+  username: string;
+  email: string;
+  displayName: string;
+  role: MemberRole;
 }

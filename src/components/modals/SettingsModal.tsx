@@ -1,39 +1,31 @@
 import {
-  Modal,
+  Divider,
   Flex,
-  Button,
-  Text,
-  Tabs,
-  SegmentedControl,
-  rem,
-  ThemeIcon,
-  useMantineColorScheme,
   MantineColorScheme,
   NumberInput,
-  Divider,
+  SegmentedControl,
+  Tabs,
+  Text,
+  rem,
+  useMantineColorScheme
 } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
-import { useEffect } from "react";
-import useIsDarkMode from "../../hooks/useIsDarkMode";
-import {
-  IconPhoto,
-  IconMessageCircle,
-  IconSettings,
-  IconEye,
-  IconAdjustmentsAlt,
-  IconBuilding,
-} from "@tabler/icons-react";
-import { usePartialUserSettingsStore } from "../../store/globalStore";
+import { IconBuilding, IconEye } from "@tabler/icons-react";
 import { BackgroundVariant } from "@xyflow/react";
+import { useEffect } from "react";
+import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
+import { IUserSettings } from "../../store/useSettingsStore";
+import { useUserStore } from "../../store/useUserStore";
 
-function SettingsModal({ context, id, innerProps }: ContextModalProps) {
-  const isDarkMode = useIsDarkMode();
+function SettingsModal({ context, id }: ContextModalProps) {
+  const { currentUser } = useUserStore();
   const {
-    canvasBackground,
-    setCanvasBackground,
-    autoSaveInterval,
-    setAutoSaveInterval,
-  } = usePartialUserSettingsStore();
+    settings,
+    getSettings,
+    fetchUserSettings,
+    updateUserSettings,
+    updateSettings,
+  } = useSettingsRepo();
   const { setColorScheme } = useMantineColorScheme({
     keepTransitions: true,
   });
@@ -48,10 +40,37 @@ function SettingsModal({ context, id, innerProps }: ContextModalProps) {
       ),
       size: "lg",
       centered: true,
+      onClose: () => handleSave(),
     });
+
+    if (currentUser?.id) {
+      fetchUserSettings(currentUser.id);
+    }
   }, []);
 
-  const isSelected = false;
+  const handleSave = async () => {
+    if (!currentUser?.id || !settings) return;
+
+    await updateUserSettings(currentUser.id, getSettings()!);
+    closeModal(id);
+  };
+
+  const handleThemeChange = (value: string) => {
+    // Update theme immediately
+    const theme = value as IUserSettings["theme"];
+    updateSettings("theme", theme);
+    setColorScheme(theme.toLowerCase() as MantineColorScheme);
+  };
+
+  const handleCanvasChange = (value: string) => {
+    // Update canvas background immediately
+    updateSettings("canvasBackground", value as BackgroundVariant);
+  };
+
+  const handleAutoSaveChange = (value: string | number) => {
+    // Update auto save interval immediately
+    updateSettings("autoSaveInterval", Number(value));
+  };
 
   return (
     <>
@@ -99,8 +118,8 @@ function SettingsModal({ context, id, innerProps }: ContextModalProps) {
                 placeholder="Interval in seconds"
                 allowNegative={false}
                 allowDecimal={false}
-                defaultValue={autoSaveInterval}
-                onChange={(e) => setAutoSaveInterval(Number(e))}
+                value={settings?.autoSaveInterval ?? 0}
+                onChange={handleAutoSaveChange}
               />
             </Flex>
           </Flex>
@@ -127,10 +146,8 @@ function SettingsModal({ context, id, innerProps }: ContextModalProps) {
               <SegmentedControl
                 size="xs"
                 data={["Light", "Dark"]}
-                defaultValue={isDarkMode ? "Dark" : "Light"}
-                onChange={(e) =>
-                  setColorScheme(e.toLowerCase() as MantineColorScheme)
-                }
+                value={settings?.theme ?? "Light"}
+                onChange={handleThemeChange}
               />
             </Flex>
             <Flex direction={"column"} gap={"xs"}>
@@ -143,17 +160,19 @@ function SettingsModal({ context, id, innerProps }: ContextModalProps) {
               <SegmentedControl
                 size="xs"
                 data={["Dots", "Lines", "Cross"]}
-                defaultValue={
-                  canvasBackground[0].toUpperCase() + canvasBackground.slice(1)
-                }
-                onChange={(e) =>
-                  setCanvasBackground(e.toLowerCase() as BackgroundVariant)
-                }
+                value={settings?.canvasBackground}
+                onChange={handleCanvasChange}
               />
             </Flex>
           </Flex>
         </Tabs.Panel>
       </Tabs>
+
+      {/* <Flex justify="flex-end" mt="md">
+        <Button onClick={handleSave} variant="filled">
+          Save
+        </Button>
+      </Flex> */}
     </>
   );
 }

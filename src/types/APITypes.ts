@@ -65,6 +65,11 @@ export interface FetchedUser {
   user: IUser;
 }
 
+export interface FetchedUsers {
+  // Omit email from the response
+  users: Omit<IUser, "email">[];
+}
+
 export interface UpdatedUser {
   updatedUser: IUser;
 }

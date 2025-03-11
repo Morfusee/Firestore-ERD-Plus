@@ -8,33 +8,34 @@ import {
 } from "../../types/APITypes";
 import axiosInstance from "../../utils/axiosInstance";
 import axios from "axios";
+import { useFetch } from "@mantine/hooks";
 
 export const getProjectMembersApi = async (projectId: string) => {
   const response = await axiosInstance
     .get<APIResponse<FetchedProjectMembers>>(`/projects/${projectId}/members`)
     .then((res) => res.data);
 
+    console.log("getProjectMembersApi: Response:", response);
   return response;
 };
 
 export const addProjectMemberApi = async (
   projectId: string,
-  email: string,
+  username: string,
   role: string
 ): Promise<APIResponse<CreatedProjectMember>> => {
   console.log("addProjectMemberApi: Project ID:", projectId);
-  console.log("addProjectMemberApi: Email:", email);
+  console.log("addProjectMemberApi: Email:", username);
   console.log("addProjectMemberApi: Role:", role);
 
   try {
-    if (!projectId || !email || !role) {
+    if (!projectId || !username || !role) {
       throw new Error("Invalid input parameters");
     }
 
-    const response = await axiosInstance.post<APIResponse<CreatedProjectMember>>(
-      `/projects/${projectId}/members`,
-      { email, role }
-    );
+    const response = await axiosInstance.post<
+      APIResponse<CreatedProjectMember>
+    >(`/projects/${projectId}/members`, { username, role });
     console.log("addProjectMemberApi: Response:", response.data);
 
     return response.data;
@@ -77,7 +78,7 @@ export const updateProjectMemberRoleApi = async (
 ) => {
   const response = await axiosInstance
     .patch<APIResponse<UpdatedProjectMember>>(
-      `/projects/${projectId}/members/${memberId}/role`,
+      `/projects/${projectId}/members/${memberId}`,
       {
         role,
       }
