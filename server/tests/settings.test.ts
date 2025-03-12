@@ -75,20 +75,6 @@ describe("Settings Tests", () => {
   });
 
   it("should return 400 when updating invalid fields", async () => {
-    .send({
-      username: "testuser",
-      email: "test@email.com",
-      displayName: "Test User"
-    })
-
-    const res = await request(app)
-      .patch(`/users/${user.body.data.createdUser.id}/settings`)
-      .send({
-        theme: "Blue"
-      })
-
-    expect(res.status).toBe(400)
-    expect(res.body.status).toBe(400)
     const res = await request(app).patch(`/users/${testUserId}/settings`).send({
       theme: "Blue",
     });
