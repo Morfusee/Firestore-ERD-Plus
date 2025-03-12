@@ -15,7 +15,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import TextSelect from "../../../components/ui/TextSelect";
-import { ChangeEvent, memo, useState } from "react";
+import { ChangeEvent, memo, useEffect, useState } from "react";
 import { IconCopyPlus, IconPlus, IconTrash } from "@tabler/icons-react";
 import useIsDarkMode from "../../../hooks/useIsDarkMode";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
@@ -26,6 +26,7 @@ import CustomNotification from "../../../components/ui/CustomNotification";
 export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
   const theme = useMantineTheme();
   const isDarkMode = useIsDarkMode();
+  const { showContextMenu } = useContextMenu();
   const tableOptions = ["collection", "subcollection", "document"];
 
   const idOptions = ["auto-gen", "string", "number"];
@@ -47,11 +48,13 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
     : theme.colors.gray[2];
 
   const {
-    editNodeData,
-    addNodeDataField,
-    editNodeDataField,
+    deleteNode,
+    editNodeData, 
+    addNodeDataField, 
+    editNodeDataField, 
     deleteNodeDataField,
   } = useEditorRepo();
+
 
   return (
     <>
@@ -65,7 +68,24 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
         minWidth={250}
         minHeight={250}
       />
-      <Card className="min-w-[250px] min-h-[250px] w-full h-full">
+      <Card 
+        className="min-w-[250px] min-h-[250px] w-full h-full"
+        onContextMenu={showContextMenu([
+          // {
+          //   key: 'duplicateTable',
+          //   title: 'Duplicate Table',
+          //   icon: <IconCopyPlus size={16}/>,
+          //   onClick: () => {}
+          // },
+          {
+            key: 'deleteTable',
+            title: 'Delete Table',
+            color: 'red',
+            icon: <IconTrash size={16} />,
+            onClick: () => deleteNode(id)
+          },
+        ])}
+      >
         <Card.Section
           className="px-4 py-2"
           styles={{
@@ -97,15 +117,22 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
                   type="field"
                   field={field}
                   fieldOptions={fieldOptions}
-                  onFieldNameChange={(val) =>
-                    editNodeDataField(id, index, { name: val })
-                  }
-                  onFieldTypeChange={(val) =>
-                    editNodeDataField(id, index, { type: val })
-                  }
-                  onFieldDuplicate={() => {}}
-                  onFieldDelete={() => deleteNodeDataField(id, index)}
+                  onFieldNameChange={(val) => editNodeDataField(id, index, { name: val })}
+                  onFieldTypeChange={(val) => editNodeDataField(id, index, { type: val })}
+                  // onFieldDuplicate={() => {}}
+                  // onFieldDelete={() => deleteNodeDataField(id, index)}
                   placeholder="field name"
+                  onContextMenu={
+                    showContextMenu([
+                      {
+                        key: 'deleteField',
+                        title: 'Delete Field',
+                        color: 'red',
+                        icon: <IconTrash size={16} />,
+                        onClick: () => deleteNodeDataField(id, index)
+                      },
+                    ])
+                  }
                 />
               ))}
             </Stack>
@@ -157,20 +184,21 @@ function TableNodeField({
   field,
   fieldOptions,
   placeholder,
+  activeHover = false,
   onFieldNameChange,
   onFieldTypeChange,
-  onFieldDuplicate,
-  onFieldDelete,
+  onContextMenu
 }: {
   type: "title" | "field";
   field: TableField | { name: TableField["name"]; type: TableType };
   fieldOptions: string[];
-  placeholder?: string;
-  onFieldNameChange: (val: string) => void;
-  onFieldTypeChange: (val: string) => void;
-  onFieldDuplicate?: () => void;
-  onFieldDelete?: () => void;
+  placeholder?: string,
+  activeHover?: boolean,
+  onFieldNameChange: (val: string) => void
+  onFieldTypeChange: (val: string) => void
+  onContextMenu?: React.MouseEventHandler<HTMLDivElement> | undefined
 }) {
+
   const { showContextMenu } = useContextMenu();
 
   const [fieldName, setFieldName] = useState(field.name);
@@ -199,17 +227,6 @@ function TableNodeField({
     onFieldTypeChange(val);
   };
 
-  const handleFieldDuplicate = () => {
-    if (onFieldDuplicate) {
-      onFieldDuplicate();
-    }
-  };
-
-  const handleFieldDelete = () => {
-    if (onFieldDelete) {
-      onFieldDelete();
-    }
-  };
 
   return (
     <Flex
@@ -220,25 +237,7 @@ function TableNodeField({
         (!fieldName.trim() && "text-red-500 ") +
         (type === "field" && "hover:bg-neutral-500 hover:bg-opacity-20")
       }
-      onContextMenu={
-        type === "field"
-          ? showContextMenu([
-              {
-                key: "duplicate",
-                title: "Duplicate",
-                icon: <IconCopyPlus size={16} />,
-                onClick: () => handleFieldDuplicate(),
-              },
-              {
-                key: "delete",
-                title: "Delete",
-                color: "red",
-                icon: <IconTrash size={16} />,
-                onClick: () => handleFieldDelete(),
-              },
-            ])
-          : () => {}
-      }
+      onContextMenu={onContextMenu}
     >
       <TextInput
         styles={{

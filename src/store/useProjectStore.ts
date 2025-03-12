@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { IProject } from "../types/ProjectTypes";
+import { IProject, IProjectAccess } from "../types/ProjectTypes";
 import { IEditorStateSnapshot } from "../types/EditorStoreTypes";
 import { devtools } from "zustand/middleware";
 
@@ -21,6 +21,7 @@ interface IProjectActions {
   clearSelectedProject: () => void;
   addProject: (project: IProject) => void;
   editProject: (id: string, change: Partial<IProject>) => void;
+  editSelectedProjectAccess: (access: IProjectAccess) => void;
   deleteProject: (id: string) => void;
   saveCache: (cache: IProjectCache) => void;
   getCache: () => IProjectCache[];
@@ -59,6 +60,21 @@ export const useProjectStore = create<IProjectState & IProjectActions>()(
             }
           }),
         })),
+      editSelectedProjectAccess: (access) =>
+        set((state) => {
+          if (state.selectedProject) {
+            return {
+              selectedProject: {
+                ...state.selectedProject,
+                generalAccess: access
+              }
+            }
+          } else {
+            return {
+              selectedProject: null
+            }
+          }
+        }),
       deleteProject: (id) =>
         set((state) => ({
           projects: state.projects.filter((project) => project.id !== id),

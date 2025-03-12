@@ -3,6 +3,7 @@ import NotFoundError from "@root/errors/NotFoundError";
 import Project from "@root/models/projectModel";
 import User from "@root/models/userModel";
 import {
+  GeneralAccessBody,
   MemberBody,
   MemberParams,
   MemberRoleBody,
@@ -127,6 +128,43 @@ export const addMember = async (
   }
 };
 
+export const getMemberRoleById = async (
+  req: Request<MemberParams, {}, {}>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { projectId, userId } = req.params;
+
+  try {
+    // Check if ObjectId in url params are valid
+
+    // Check if project exists
+    const project = await Project.findById(projectId).select("-data -members");
+    if (!project) throw new NotFoundError("Project not found");
+
+    // Check if member exists
+    const user = await User.findById(userId);
+    if (!user) throw new NotFoundError("User not found");
+
+    // Check if member is already in the member list
+    const member = await Project.findOne(
+      { _id: projectId },
+      { members: { $elemMatch: { userId: user.id } } }
+    );
+    if (!member) throw new NotFoundError("Member not found");
+    if (member?.members.length == 0)
+      throw new ConflictError("The user is not a member of the project");
+
+    next(
+      new SuccessResponse("Member role has been updated successfully.", {
+        role: member.members[0].role,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const editMemberRole = async (
   req: Request<MemberParams, {}, MemberRoleBody>,
   res: Response,
@@ -173,6 +211,45 @@ export const editMemberRole = async (
     next(
       new SuccessResponse("Member role has been updated successfully.", {
         updatedMember: { userId: user.id, role: role },
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editGeneralAccess = async (
+  req: Request<ProjectParams, {}, GeneralAccessBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { projectId } = req.params;
+  const { accessType, role } = req.body;
+
+  try {
+    // Check if ObjectId in url params are valid
+    // Check if the body only has role field
+    // Check if the role is valid
+
+    // Check if project exists
+    const project = await Project.findById(projectId).select("-data -members");
+    if (!project) throw new NotFoundError("Project not found");
+
+
+    // Check if the role of the one editing is either an owner or admin
+    // TODO when auth is implemented
+
+    // Edit general access
+    await project.updateOne(
+      { $set: { "generalAccess.accessType": accessType, "generalAccess.role": role } }
+    );
+
+    next(
+      new SuccessResponse("General Access has been updated successfully.", {
+        updatedAccess: { 
+          accessType: accessType,
+          role: role,
+        },
       })
     );
   } catch (error) {

@@ -36,7 +36,9 @@ export const useDataInitializer = () => {
 
   useEffect(() => {
     if (id) {
-      selectProject(id);
+      if(user){
+        selectProject(id, user.id);
+      }
       loadChangelogs(id);
     }
   }, [id, isLoaded]);

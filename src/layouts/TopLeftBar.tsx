@@ -41,6 +41,8 @@ import { useEditorStore } from "../store/useEditorStore";
 import { IProject } from "../types/ProjectTypes";
 import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
 import { determineTitle } from "../utils/successHelpers";
+import useMemberRepo from "../data/repo/useMemberRepo";
+import { useMemberStore } from "../store/useMemberStore";
 import CustomNotification from "../components/ui/CustomNotification";
 
 function TopLeftBar() {
@@ -78,7 +80,9 @@ function ActionButtons({
 
   const { onSave, onUndo, canUndo, canRedo, onRedo } = useHistoryRepo();
   const { saveChangelog } = useChangelogRepo();
-  const { hasPendingChanges } = useEditorStore();
+  const { hasPendingChanges, } = useEditorStore();
+  const { selectedProject } = useProjectRepo()
+  const { currentProjectAccess } = useMemberStore()
 
   const handleSave = async () => {
     const res = await onSave();
@@ -87,6 +91,11 @@ function ActionButtons({
       const changelog = res.data.changelog;
       await saveChangelog(changelog);
     }
+  };
+
+  const validateRole = () => {
+    if(!selectedProject) return false;
+    return selectedProject.generalAccess.role != "Viewer" || currentProjectAccess != "Viewer"
   };
 
   return (
@@ -126,6 +135,7 @@ function ActionButtons({
         size="lg"
         radius="xl"
         onClick={() => handleSave()}
+        disabled={!validateRole()}
       >
         {hasPendingChanges ? <Loader size={"sm"} /> : <IconDeviceFloppy />}
       </ActionIcon>
@@ -201,7 +211,7 @@ function DrawerHeader() {
     // Only attempt to add the project if the success status is true
     if (response.success) {
       // Select the project on creation in STATE
-      selectProject(response.data.createdProject.id);
+      selectProject(response.data.createdProject.id, user.id);
 
       loadChangelogs(response.data.createdProject.id);
 
@@ -250,6 +260,7 @@ function DrawerHeader() {
 
 function DrawerItems({ project }: { project: IProject }) {
   const navigate = useNavigate();
+  const { user } = useUserRepo();
   const { selectedProject } = useProjectRepo();
   const { id: projectId, name: projectName, icon: projectIconHex } = project;
   const isDarkMode = useIsDarkMode();
@@ -303,7 +314,7 @@ function DrawerItems({ project }: { project: IProject }) {
           }}
           onClick={() => {
             navigate(`/${project.id}`, { replace: true });
-            selectProject(project.id);
+            selectProject(project.id, user?.id);
             loadChangelogs(project.id);
           }}
           rightSection={
@@ -351,6 +362,7 @@ function DrawerItemMenu({
   const params = useParams();
 
   // State
+  const { user } = useUserRepo()
   const {
     selectProject,
     duplicateProject,
@@ -376,7 +388,7 @@ function DrawerItemMenu({
       // If the user is currently editing the selected project,
       // just reselect the project to update the values.
       if (params.projectId == res.data.updatedProject.id)
-        selectProject(params.projectId);
+        selectProject(params.projectId, user?.id);
     }
 
     // Show notification

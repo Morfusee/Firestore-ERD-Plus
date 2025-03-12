@@ -1,11 +1,13 @@
 import { useMemberStore } from "../../store/useMemberStore";
-import { IProjectMembers } from "../../types/ProjectTypes";
+import { useProjectStore } from "../../store/useProjectStore";
+import { AccessType, IProjectMembers } from "../../types/ProjectTypes";
 import {
   getProjectMembersApi,
   addProjectMemberApi,
   updateProjectMemberApi,
   updateProjectMemberRoleApi,
   removeProjectMemberApi,
+  updateProjectGeneralAccessApi,
 } from "../api/membersApi";
 
 const useMemberRepo = () => {
@@ -16,6 +18,8 @@ const useMemberRepo = () => {
   );
   const setLoading = useMemberStore((state) => state.setLoading);
   const setError = useMemberStore((state) => state.setError);
+
+  const editAccess = useProjectStore((state) => state.editSelectedProjectAccess);
 
   const getProjectMembers = (projectId: string): IProjectMembers[] => {
     return projectMembers[projectId] || [];
@@ -179,6 +183,25 @@ const useMemberRepo = () => {
     clearProjectMembers(projectId);
   };
 
+  const updateProjectGeneralAccess = async (projectId: string, accessType: AccessType, role: string) => {
+    try {
+
+      const response = await updateProjectGeneralAccessApi(projectId, accessType, role)
+
+      if (response.success) {
+        editAccess({
+          accessType,
+          role
+        })
+      }
+
+      return response
+
+    } catch (e) {
+
+    }
+  }
+
   return {
     projectMembers,
     getProjectMembers,
@@ -189,6 +212,7 @@ const useMemberRepo = () => {
     updateMemberRole,
     removeProjectMember,
     clearMembers,
+    updateProjectGeneralAccess,
   };
 };
 
