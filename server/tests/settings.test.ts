@@ -43,7 +43,7 @@ describe("Settings Tests", () => {
     expect(res.body.status).toBe(200)
     expect(res.body.message).toBe("Settings fetched successfully.")
     expect(res.body.data.settings).toHaveProperty("id")
-    expect(res.body.data.settings.theme).toBe("Light")
+    expect(res.body.data.settings.theme).toBe("System")
   })
 
   it("should return 404 for not found user", async () => {
