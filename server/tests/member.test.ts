@@ -204,4 +204,21 @@ describe("Members Tests", () => {
     expect(res.body.status).toBe(409);
     expect(res.body.message).toBe("Cannot remove owner from the project");
   });
+
+  // Edit general access
+  it("should update a project's general access", async () => {
+
+    const res = await request(app)
+      .patch(`/projects/${projectId}/access`)
+      .send({ accessType: 'link' })
+
+    expect(res.status).toBe(200)
+    expect(res.body.status).toBe(200)
+    expect(res.body.message).toBe("General Access has been updated successfully.")
+    expect(res.body.data.updatedAccess.accessType).toBe("link")
+
+    const updatedProject = await Project.findById(projectId)
+    expect(updatedProject?.generalAccess?.accessType).toBe("link")
+  })
+
 });

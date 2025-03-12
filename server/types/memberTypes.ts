@@ -3,6 +3,8 @@ import { Schema } from "mongoose";
 // Types
 type MemberRole = "owner" | "admin" | "editor" | "viewer";
 
+type AccessRole = "viewer" | "editor"
+
 // Model
 export interface MemberModel {
   projectId: Schema.Types.ObjectId;
@@ -33,6 +35,11 @@ export interface MemberRoleBody {
   role: MemberRole;
 }
 
+export interface GeneralAccessBody {
+  accessType: string;
+  role: AccessRole;
+}
+
 // Response
 export interface MembersResponse {
   id: string;
@@ -40,4 +47,9 @@ export interface MembersResponse {
   email: string;
   displayName: string;
   role: MemberRole;
+}
+
+export interface GeneralAccessResponse {
+  accessType: string;
+  role: AccessRole;
 }

@@ -8,8 +8,9 @@ import {
   NodeDataBase,
 } from "../../types/EditorStoreTypes";
 import { EditorNode, TableField } from "../../types/EditorTypes";
+import { singletonHook } from "react-singleton-hook"
 
-const useEditorRepo = () => {
+const useEditorRepoImpl = () => {
   const theme = useMantineTheme();
 
   const addNodeState = useEditorStore((state) => state.addNode);
@@ -89,6 +90,7 @@ const useEditorRepo = () => {
     onChange();
     // Add a node to state
     addNodeState(data);
+    console.log("Added node " + data)
   };
 
   /**
@@ -103,6 +105,7 @@ const useEditorRepo = () => {
     onChange();
     // Update node position in state
     moveNodeState(id, position);
+    console.log(`Moved to ${position}`)
   };
 
   const deleteNode = (id: string) => {
@@ -232,5 +235,19 @@ const useEditorRepo = () => {
     deleteEdge,
   };
 };
+
+
+const useEditorRepo = singletonHook({
+  addNode: () => {},
+  moveNode: () => {},
+  deleteNode: () => {},
+  editNodeData: () => {},
+  addNodeDataField: () => {},
+  editNodeDataField: () => {},
+  deleteNodeDataField: () => {},
+  addEdge: () => {},
+  changeEdge: () => {},
+  deleteEdge: () => {},
+}, useEditorRepoImpl, { unmountIfNoConsumers: false });
 
 export default useEditorRepo;

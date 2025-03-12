@@ -43,3 +43,17 @@ export const validateMemberEmail =
     .isEmail()
     .withMessage('Please provide a valid email address')
     .normalizeEmail()
+
+export const validateAccessType = 
+  body('accessType')
+    .optional()
+    .trim()
+    .isIn(['Restricted', 'Link'])
+    .withMessage('Invalid access type')
+
+export const validateAccessRole = 
+  body('role')
+    .optional()
+    .trim()
+    .isIn(['Editor', 'Viewer'])
+    .withMessage('Invalid role')

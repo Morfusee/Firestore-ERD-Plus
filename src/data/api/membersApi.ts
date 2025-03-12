@@ -5,6 +5,7 @@ import {
   CreatedProjectMember,
   UpdatedProjectMember,
   DeletedProjectMember,
+  FetchedMemberRole,
 } from "../../types/APITypes";
 import axiosInstance from "../../utils/axiosInstance";
 import axios from "axios";
@@ -13,6 +14,15 @@ import { useFetch } from "@mantine/hooks";
 export const getProjectMembersApi = async (projectId: string) => {
   const response = await axiosInstance
     .get<APIResponse<FetchedProjectMembers>>(`/projects/${projectId}/members`)
+    .then((res) => res.data);
+
+    console.log("getProjectMembersApi: Response:", response);
+  return response;
+};
+
+export const getMemberRoleApi = async (projectId: string, memberId: string) => {
+  const response = await axiosInstance
+    .get<APIResponse<FetchedMemberRole>>(`/projects/${projectId}/members/${memberId}`)
     .then((res) => res.data);
 
     console.log("getProjectMembersApi: Response:", response);
@@ -95,6 +105,25 @@ export const removeProjectMemberApi = async (
   const response = await axiosInstance
     .delete<APIResponse<DeletedProjectMember>>(
       `/projects/${projectId}/members/${memberId}`
+    )
+    .then((res) => res.data);
+
+  return response;
+};
+
+
+export const updateProjectGeneralAccessApi = async (
+  projectId: string,
+  accessType: string,
+  role: string
+) => {
+  const response = await axiosInstance
+    .patch<APIResponse<UpdatedProjectMember>>(
+      `/projects/${projectId}/access/`,
+      {
+        accessType,
+        role,
+      }
     )
     .then((res) => res.data);
 
