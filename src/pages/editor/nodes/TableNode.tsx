@@ -1,9 +1,3 @@
-import { Handle, NodeProps, NodeResizer, Position } from "@xyflow/react";
-import type {
-  TableType,
-  TableField,
-  TableNode,
-} from "../../../types/EditorTypes";
 import {
   Button,
   Card,
@@ -14,14 +8,20 @@ import {
   TextInput,
   useMantineTheme,
 } from "@mantine/core";
-import TextSelect from "../../../components/ui/TextSelect";
-import { ChangeEvent, memo, useEffect, useState } from "react";
-import { IconCopyPlus, IconPlus, IconTrash } from "@tabler/icons-react";
-import useIsDarkMode from "../../../hooks/useIsDarkMode";
-import useEditorRepo from "../../../data/repo/useEditorRepo";
-import { useDidUpdate, useThrottledCallback } from "@mantine/hooks";
+import { useDidUpdate } from "@mantine/hooks";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { Handle, NodeProps, NodeResizer, Position } from "@xyflow/react";
 import { useContextMenu } from "mantine-contextmenu";
-import CustomNotification from "../../../components/ui/CustomNotification";
+import { ChangeEvent, memo, useCallback, useEffect, useState } from "react";
+import TextSelect from "../../../components/ui/TextSelect";
+import useEditorRepo from "../../../data/repo/useEditorRepo";
+import useIsDarkMode from "../../../hooks/useIsDarkMode";
+import type {
+  TableField,
+  TableNode,
+  TableType,
+} from "../../../types/EditorTypes";
+import _ from "lodash";
 
 export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
   const theme = useMantineTheme();
@@ -49,12 +49,11 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
 
   const {
     deleteNode,
-    editNodeData, 
-    addNodeDataField, 
-    editNodeDataField, 
+    editNodeData,
+    addNodeDataField,
+    editNodeDataField,
     deleteNodeDataField,
   } = useEditorRepo();
-
 
   return (
     <>
@@ -68,7 +67,7 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
         minWidth={250}
         minHeight={250}
       />
-      <Card 
+      <Card
         className="min-w-[250px] min-h-[250px] w-full h-full"
         onContextMenu={showContextMenu([
           // {
@@ -78,11 +77,11 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
           //   onClick: () => {}
           // },
           {
-            key: 'deleteTable',
-            title: 'Delete Table',
-            color: 'red',
+            key: "deleteTable",
+            title: "Delete Table",
+            color: "red",
             icon: <IconTrash size={16} />,
-            onClick: () => deleteNode(id)
+            onClick: () => deleteNode(id),
           },
         ])}
       >
@@ -117,22 +116,22 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
                   type="field"
                   field={field}
                   fieldOptions={fieldOptions}
-                  onFieldNameChange={(val) => editNodeDataField(id, index, { name: val })}
-                  onFieldTypeChange={(val) => editNodeDataField(id, index, { type: val })}
-                  // onFieldDuplicate={() => {}}
-                  // onFieldDelete={() => deleteNodeDataField(id, index)}
-                  placeholder="field name"
-                  onContextMenu={
-                    showContextMenu([
-                      {
-                        key: 'deleteField',
-                        title: 'Delete Field',
-                        color: 'red',
-                        icon: <IconTrash size={16} />,
-                        onClick: () => deleteNodeDataField(id, index)
-                      },
-                    ])
+                  onFieldNameChange={(val) =>
+                    editNodeDataField(id, index, { name: val })
                   }
+                  onFieldTypeChange={(val) =>
+                    editNodeDataField(id, index, { type: val })
+                  }
+                  placeholder="field name"
+                  onContextMenu={showContextMenu([
+                    {
+                      key: "deleteField",
+                      title: "Delete Field",
+                      color: "red",
+                      icon: <IconTrash size={16} />,
+                      onClick: () => deleteNodeDataField(id, index),
+                    },
+                  ])}
                 />
               ))}
             </Stack>
@@ -187,20 +186,17 @@ function TableNodeField({
   activeHover = false,
   onFieldNameChange,
   onFieldTypeChange,
-  onContextMenu
+  onContextMenu,
 }: {
   type: "title" | "field";
   field: TableField | { name: TableField["name"]; type: TableType };
   fieldOptions: string[];
-  placeholder?: string,
-  activeHover?: boolean,
-  onFieldNameChange: (val: string) => void
-  onFieldTypeChange: (val: string) => void
-  onContextMenu?: React.MouseEventHandler<HTMLDivElement> | undefined
+  placeholder?: string;
+  activeHover?: boolean;
+  onFieldNameChange: (val: string) => void;
+  onFieldTypeChange: (val: string) => void;
+  onContextMenu?: React.MouseEventHandler<HTMLDivElement> | undefined;
 }) {
-
-  const { showContextMenu } = useContextMenu();
-
   const [fieldName, setFieldName] = useState(field.name);
   const [fieldType, setFieldType] = useState<string>(field.type);
 
@@ -213,20 +209,47 @@ function TableNodeField({
     }
   }, [field]);
 
-  const debouncedFieldName = useThrottledCallback((val: string) => {
-    onFieldNameChange(val);
-  }, 1000);
+  /**
+   * Memoized throttler for setting field name
+   *
+   * NOTES:
+   * Don't provide a dependency if not necessary,
+   * this causes the throttler to run on each change.
+   */
+  const throttledFieldName = useCallback(
+    _.throttle(
+      (val: string) => {
+        onFieldNameChange(val);
+      },
+      1000,
+      { leading: true, trailing: true }
+    ),
+    []
+  );
 
+  /**
+   * Cleanup throttle on unmount
+   * 
+   * FIX:
+   * Fixes the problem of pending/throttled changes to
+   * transfer over to the next project.
+   */
+  useEffect(() => {
+    return () => throttledFieldName.cancel();
+  }, [throttledFieldName]);
+
+  // Handle field name change
   const handleFieldNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFieldName(e.target.value);
-    debouncedFieldName(e.target.value);
+    const value = e.target.value;
+    setFieldName(value);
+    throttledFieldName(value);
   };
 
+  // Handle field type change
   const handleFieldTypeChange = (val: string) => {
     setFieldType(val);
     onFieldTypeChange(val);
   };
-
 
   return (
     <Flex
