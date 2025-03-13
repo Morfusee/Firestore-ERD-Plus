@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
-import { useProjectStore } from "../../store/useProjectStore";
-import { db } from "../db/db";
+import { useParams } from "react-router-dom";
 import { useEmojiStore } from "../../store/globalStore";
-import useEmojiRepo from "./useEmojiRepo";
-import useProjectRepo from "./useProjectRepo";
-import { useNavigate, useParams } from "react-router-dom";
 import { getProjectsApi } from "../api/projectsApi";
-import { useIsFirstRender } from "@mantine/hooks";
-import useUserRepo from "./useUserRepo";
+import { db } from "../db/db";
 import useChangelogRepo from "./useChangelogRepo";
+import useEmojiRepo from "./useEmojiRepo";
+import useHistoryRepo from "./useHistoryRepo";
+import useProjectRepo from "./useProjectRepo";
 import { useSettingsRepo } from "./useSettingsRepo";
+import useUserRepo from "./useUserRepo";
 
 export const useDataInitializer = () => {
   const { user } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
   const { fetchUserSettings } = useSettingsRepo();
+  const { resetHistory } = useHistoryRepo();
 
   // Router
   const params = useParams();
@@ -35,11 +35,10 @@ export const useDataInitializer = () => {
   }, []);
 
   useEffect(() => {
-    if (id) {
-      if(user){
-        selectProject(id, user.id);
-      }
+    if (id && user) {
+      selectProject(id, user.id);
       loadChangelogs(id);
+      resetHistory();
     }
   }, [id, isLoaded]);
 

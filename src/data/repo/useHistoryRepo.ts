@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
-import { db } from "../db/db";
-import { saveProjectApi } from "../api/projectsApi";
 import { useUserStore } from "../../store/useUserStore";
+import { saveProjectApi } from "../api/projectsApi";
 
 const useHistoryRepo = () => {
   const user = useUserStore((state) => state.currentUser);
@@ -27,9 +26,12 @@ const useHistoryRepo = () => {
   const setCanSave = useEditorStore((state) => state.setCanSave);
 
   const pushRedo = useEditorStore((state) => state.pushRedo);
-  const popRedo = useEditorStore((state) => state.popRedo)
+  const popRedo = useEditorStore((state) => state.popRedo);
   const pushUndo = useEditorStore((state) => state.pushUndo);
-  const popUndo = useEditorStore((state) => state.popUndo)
+  const popUndo = useEditorStore((state) => state.popUndo);
+
+  const clearUndo = useEditorStore((state) => state.clearUndo);
+  const clearRedo = useEditorStore((state) => state.clearRedo);
 
   useEffect(() => {
     setCanSave(editCounter != 0);
@@ -38,13 +40,12 @@ const useHistoryRepo = () => {
   const getDataSnap = useEditorStore((state) => state.getDataSnapshot);
   const loadDataSnapshot = useEditorStore((state) => state.loadDataSnapshot);
 
-
   const onUndo = () => {
     // Check if the user can undo
     if (!canUndo) return;
 
     // Pop the undo and get the returned history
-    const history = popUndo()
+    const history = popUndo();
 
     // Push the current step to the redo stack
     // since it is not being tracked by the undo stack
@@ -52,7 +53,6 @@ const useHistoryRepo = () => {
 
     // Load the snapshot of the first item
     loadDataSnapshot(history);
-
 
     // Update the canUndo state
     setCanUndo(getUndoStack().length !== 0);
@@ -69,7 +69,7 @@ const useHistoryRepo = () => {
     if (!canRedo) return;
 
     // Shift the redo stack
-    const history = popRedo()
+    const history = popRedo();
 
     // Push the current step to the redo stack
     // since it is not being tracked by the redo stack
@@ -77,7 +77,6 @@ const useHistoryRepo = () => {
 
     // Load the snapshot of the first item
     loadDataSnapshot(history);
-
 
     // Update the canRedo state
     setCanRedo(getRedoStack().length !== 0);
@@ -98,22 +97,25 @@ const useHistoryRepo = () => {
     const json = JSON.stringify(snapshot);
 
     // Save to server
-    const res = await saveProjectApi(
-      selectedProject.id,
-      json,
-      [user.id]
-    )
+    const res = await saveProjectApi(selectedProject.id, json, [user.id]);
 
-    if (!res.success) return
+    if (!res.success) return;
 
     // Save to state
     editProjectState(selectedProject.id, {
       data: json,
-      updatedAt: res.data.project.updatedAt
+      updatedAt: res.data.project.updatedAt,
     });
     resetCounter();
 
-    return res
+    return res;
+  };
+
+  const resetHistory = () => {
+    clearUndo();
+    clearRedo();
+    setCanUndo(false);
+    setCanRedo(false);
   };
 
   return {
@@ -124,6 +126,7 @@ const useHistoryRepo = () => {
     canSave,
     onSave,
     currentStep,
+    resetHistory,
   };
 };
 
