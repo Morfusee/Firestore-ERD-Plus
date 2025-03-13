@@ -31,7 +31,7 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import useProjectRepo from "../../data/repo/useProjectRepo";
-import { IProjectMembers } from "../../types/ProjectTypes";
+import { AccessType, IProjectMembers } from "../../types/ProjectTypes";
 import useMemberRepo from "../../data/repo/useMemberRepo";
 import { showNotification } from "@mantine/notifications";
 import useUserRepo from "../../data/repo/useUserRepo";
@@ -48,6 +48,7 @@ function ShareModal({ context, id }: ContextModalProps) {
     addProjectMember,
     updateMemberRole,
     removeProjectMember,
+    updateProjectGeneralAccess,
   } = useMemberRepo();
 
   // UI States
@@ -295,7 +296,7 @@ function ShareModal({ context, id }: ContextModalProps) {
           className="flex-1"
           label="Shareable Link"
           rightSection={
-            <CopyButton value={import.meta.env.VITE_SERVER_URL || ""}>
+            <CopyButton value={`${window.location.origin}/${selectedProject?.id}` || ""}>
               {({ copied, copy }) => (
                 <ActionIcon variant="light" onClick={copy}>
                   <IconCopy size={16} />
@@ -304,7 +305,7 @@ function ShareModal({ context, id }: ContextModalProps) {
             </CopyButton>
           }
           readOnly
-          value={import.meta.env.VITE_SERVER_URL || ""}
+          value={`${window.location.origin}/${selectedProject?.id}` || ""}
         />
       </Group>
 
@@ -383,9 +384,27 @@ function ShareModal({ context, id }: ContextModalProps) {
       </Title>
 
       <GeneralItem
-        accessType="restricted"
-        role="Viewer"
+        accessType={selectedProject?.generalAccess.accessType || "Restricted"}
+        role={selectedProject?.generalAccess.role || "Viewer"}
         currentUserRole={currentUserRole}
+        onAccessTypeChange={(type) => {
+          if (selectedProject && selectedProject.id && type) {
+            updateProjectGeneralAccess(
+              selectedProject.id, 
+              type as AccessType, 
+              selectedProject.generalAccess.role
+            )
+          }
+        }}
+        onAccessRoleChange={(role) => {
+          if (selectedProject && selectedProject.id && role) {
+            updateProjectGeneralAccess(
+              selectedProject.id, 
+              selectedProject.generalAccess.accessType, 
+              role
+            )
+          }
+        }}
       />
 
       {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
@@ -549,21 +568,25 @@ function MemberItem({
   );
 }
 
-type AccessType = "restricted" | "anyone";
+
 
 interface GeneralItemProps {
   accessType: AccessType;
   role: string;
   currentUserRole: string;
+  onAccessTypeChange: (accessType: string | null) => void;
+  onAccessRoleChange: (accessRole: string | null) => void
 }
 
-function GeneralItem({ accessType, role, currentUserRole }: GeneralItemProps) {
+function GeneralItem({ 
+  accessType, role, currentUserRole, onAccessTypeChange, onAccessRoleChange 
+}: GeneralItemProps) {
   const typeDisplay: Record<AccessType, { title: string; subtext: string }> = {
-    restricted: {
+    Restricted: {
       title: "Restricted",
       subtext: "",
     },
-    anyone: {
+    Link: {
       title: "Anyone with a link",
       subtext: "",
     },
@@ -585,11 +608,15 @@ function GeneralItem({ accessType, role, currentUserRole }: GeneralItemProps) {
           <Select
             variant="unstyled"
             size="md"
-            value={typeDisplay[accessType].title}
-            data={["Restricted", "Anyone with a link"]}
+            value={accessType}
+            data={[
+              {label: "Restricted", value: "Restricted"}, 
+              {label: "Anyone with a link", value: "Link"}
+            ]}
             disabled={
               !(currentUserRole === "Admin" || currentUserRole === "Owner")
             } // Disable if not Admin or Owner
+            onChange={(accessType) => onAccessTypeChange(accessType)}
           />
           <Text c="dimmed" size="sm">
             {typeDisplay[accessType].subtext}
@@ -603,8 +630,9 @@ function GeneralItem({ accessType, role, currentUserRole }: GeneralItemProps) {
         comboboxProps={{ width: 110, position: "bottom-end" }}
         size="md"
         value={role}
-        data={["Viewer", "Editor", "Admin"]}
+        data={["Viewer", "Editor"]}
         disabled={!(currentUserRole === "Admin" || currentUserRole === "Owner")} // Disable if not Admin or Owner
+        onChange={(accessRole) => onAccessRoleChange(accessRole)}
       />
     </Group>
   );

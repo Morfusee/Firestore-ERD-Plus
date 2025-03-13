@@ -14,7 +14,7 @@ const memberSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["Owner", "Editor", "Viewer"],
+      enum: ["Owner", "Editor", "Viewer", "Admin"],
       default: "Viewer",
       required: true,
     },
@@ -34,6 +34,20 @@ const projectSchema = new mongoose.Schema(
       type: [memberSchema],
       required: true,
     },
+    generalAccess: {
+      accessType: {
+        type: String,
+        enum: ["Restricted", "Link"],
+        default: "Restricted",
+        required: true,
+      },
+      role: {
+        type: String,
+        enum: ["Editor", "Viewer"],
+        default: "Viewer",
+        required: true,
+      },
+    }
   },
   {
     timestamps: true,

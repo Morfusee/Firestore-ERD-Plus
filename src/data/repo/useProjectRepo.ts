@@ -9,6 +9,8 @@ import {
   deleteProjectApi,
   getProjectByIdApi,
 } from "../api/projectsApi";
+import { useMemberStore } from "../../store/useMemberStore";
+import { getMemberRoleApi } from "../api/membersApi";
 
 const useProjectRepo = () => {
   const projects = useProjectStore((state) => state.projects);
@@ -38,6 +40,8 @@ const useProjectRepo = () => {
   const clearUndo = useEditorStore((state) => state.clearUndo);
   const setCanUndo = useEditorStore((state) => state.setCanUndo);
   const setCanRedo = useEditorStore((state) => state.setCanRedo);
+
+  const setAccess = useMemberStore((state) => state.setCurrentProjectAccess)
 
   const getProjectsList = () => {
     return projects;
@@ -93,7 +97,7 @@ const useProjectRepo = () => {
     setCanRedo(false);
   };
 
-  const selectProject = async (projectId: string | undefined) => {
+  const selectProject = async (projectId: string | undefined, userId: string | undefined) => {
     if (!projectId) return;
 
     // Save the previous current project to cache
@@ -115,6 +119,12 @@ const useProjectRepo = () => {
     }
 
     setSelectedProject(selected);
+
+    if (!userId) return;
+
+    const memberRes = await getMemberRoleApi(projectId, userId);
+
+    setAccess(memberRes.data.role)
   };
 
   const clearProject = () => {

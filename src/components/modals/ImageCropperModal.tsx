@@ -17,6 +17,7 @@ import { notifications } from "@mantine/notifications";
 import { StatusIcon } from "../icons/StatusIcon";
 import { determineTitle } from "../../utils/successHelpers";
 import { APIResponse, FetchedUser } from "../../types/APITypes";
+import CustomNotification from "../ui/CustomNotification";
 
 function ImageCropperModal({
   context,
@@ -79,10 +80,8 @@ function ImageCropperModal({
 
   const showNotification = (response: APIResponse<FetchedUser>) => {
     // Show notification
-    notifications.show({
-      icon: <StatusIcon status={response.success ? "success" : "error"} />,
-      withBorder: true,
-      autoClose: 5000,
+    CustomNotification({
+      status: response.success ? "success" : "error",
       title: determineTitle(
         "Profile picture updated",
         "Failed to update profile picture",

@@ -15,15 +15,16 @@ interface IUserState {
 }
 
 interface IUserActions {
+  getCurrentUser: () => IUser | null
   setCurrentUser: (user: IUser | null) => void;
   setProfileImage: (image: string) => void;
 }
 
 export const useUserStore = create<IUserState & IUserActions>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       currentUser: null,
-
+      getCurrentUser: () => get().currentUser,
       setCurrentUser: (user) => set(() => ({ currentUser: user })),
       setProfileImage: (image) =>
         set((state) => ({

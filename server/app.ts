@@ -94,11 +94,11 @@ if (process.env.NODE_ENV !== "test") {
       },
     })
   );
-}
 
-// Initialize passport
-app.use(passport.initialize());
-app.use(passport.session());
+  // Initialize passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+}
 
 // Use project routes
 app.use(

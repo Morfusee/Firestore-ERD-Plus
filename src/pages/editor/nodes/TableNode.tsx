@@ -15,16 +15,18 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import TextSelect from "../../../components/ui/TextSelect";
-import { ChangeEvent, memo, useState } from "react";
+import { ChangeEvent, memo, useEffect, useState } from "react";
 import { IconCopyPlus, IconPlus, IconTrash } from "@tabler/icons-react";
 import useIsDarkMode from "../../../hooks/useIsDarkMode";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
 import { useDidUpdate, useThrottledCallback } from "@mantine/hooks";
-import { useContextMenu } from 'mantine-contextmenu';
+import { useContextMenu } from "mantine-contextmenu";
+import CustomNotification from "../../../components/ui/CustomNotification";
 
 export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
   const theme = useMantineTheme();
   const isDarkMode = useIsDarkMode();
+  const { showContextMenu } = useContextMenu();
   const tableOptions = ["collection", "subcollection", "document"];
 
   const idOptions = ["auto-gen", "string", "number"];
@@ -45,7 +47,14 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
     ? theme.colors.dark[7]
     : theme.colors.gray[2];
 
-  const { editNodeData, addNodeDataField, editNodeDataField, deleteNodeDataField } = useEditorRepo();
+  const {
+    deleteNode,
+    editNodeData, 
+    addNodeDataField, 
+    editNodeDataField, 
+    deleteNodeDataField,
+  } = useEditorRepo();
+
 
   return (
     <>
@@ -59,7 +68,24 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
         minWidth={250}
         minHeight={250}
       />
-      <Card className="min-w-[250px] min-h-[250px] w-full h-full">
+      <Card 
+        className="min-w-[250px] min-h-[250px] w-full h-full"
+        onContextMenu={showContextMenu([
+          // {
+          //   key: 'duplicateTable',
+          //   title: 'Duplicate Table',
+          //   icon: <IconCopyPlus size={16}/>,
+          //   onClick: () => {}
+          // },
+          {
+            key: 'deleteTable',
+            title: 'Delete Table',
+            color: 'red',
+            icon: <IconTrash size={16} />,
+            onClick: () => deleteNode(id)
+          },
+        ])}
+      >
         <Card.Section
           className="px-4 py-2"
           styles={{
@@ -83,10 +109,7 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
             <Stack gap={2}>
               <Flex justify="space-between" className="px-2 py-2 rounded-md ">
                 <Text>id</Text>
-                <TextSelect 
-                  value={"auto-gen"} 
-                  options={idOptions} 
-                />
+                <TextSelect value={"auto-gen"} options={idOptions} />
               </Flex>
               {data.fields.map((field, index) => (
                 <TableNodeField
@@ -96,9 +119,20 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
                   fieldOptions={fieldOptions}
                   onFieldNameChange={(val) => editNodeDataField(id, index, { name: val })}
                   onFieldTypeChange={(val) => editNodeDataField(id, index, { type: val })}
-                  onFieldDuplicate={() => {}}
-                  onFieldDelete={() => deleteNodeDataField(id, index)}
+                  // onFieldDuplicate={() => {}}
+                  // onFieldDelete={() => deleteNodeDataField(id, index)}
                   placeholder="field name"
+                  onContextMenu={
+                    showContextMenu([
+                      {
+                        key: 'deleteField',
+                        title: 'Delete Field',
+                        color: 'red',
+                        icon: <IconTrash size={16} />,
+                        onClick: () => deleteNodeDataField(id, index)
+                      },
+                    ])
+                  }
                 />
               ))}
             </Stack>
@@ -106,7 +140,10 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
               className="flex justify-center"
               variant="default"
               rightSection={<IconPlus size={18} />}
-              onClick={() => {console.log("The id added", id); addNodeDataField(id)}}
+              onClick={() => {
+                console.log("The id added", id);
+                addNodeDataField(id);
+              }}
             >
               Add Field
             </Button>
@@ -147,90 +184,60 @@ function TableNodeField({
   field,
   fieldOptions,
   placeholder,
+  activeHover = false,
   onFieldNameChange,
   onFieldTypeChange,
-  onFieldDuplicate,
-  onFieldDelete,
+  onContextMenu
 }: {
-  type: 'title' | 'field'
+  type: "title" | "field";
   field: TableField | { name: TableField["name"]; type: TableType };
   fieldOptions: string[];
-  placeholder?: string
+  placeholder?: string,
+  activeHover?: boolean,
   onFieldNameChange: (val: string) => void
   onFieldTypeChange: (val: string) => void
-  onFieldDuplicate?: () => void
-  onFieldDelete?: () => void
+  onContextMenu?: React.MouseEventHandler<HTMLDivElement> | undefined
 }) {
 
   const { showContextMenu } = useContextMenu();
 
-  const [fieldName, setFieldName] = useState(field.name)
-  const [fieldType, setFieldType] = useState<string>(field.type)
+  const [fieldName, setFieldName] = useState(field.name);
+  const [fieldType, setFieldType] = useState<string>(field.type);
 
   useDidUpdate(() => {
     if (field.name !== fieldName) {
-      setFieldName(field.name || "")
+      setFieldName(field.name || "");
     }
     if (field.type !== fieldType) {
-      setFieldType(field.type || "")
+      setFieldType(field.type || "");
     }
-  }, [field])
-  
+  }, [field]);
 
-  const debouncedFieldName = useThrottledCallback(
-    (val: string) => {
-      onFieldNameChange(val)
-    },
-    1000
-  )
+  const debouncedFieldName = useThrottledCallback((val: string) => {
+    onFieldNameChange(val);
+  }, 1000);
 
   const handleFieldNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFieldName(e.target.value)
-    debouncedFieldName(e.target.value)
-  }
+    setFieldName(e.target.value);
+    debouncedFieldName(e.target.value);
+  };
 
   const handleFieldTypeChange = (val: string) => {
-    setFieldType(val)
-    onFieldTypeChange(val)
-  }
+    setFieldType(val);
+    onFieldTypeChange(val);
+  };
 
-  const handleFieldDuplicate = () => {
-    if(onFieldDuplicate) {
-      onFieldDuplicate()
-    }
-  }
-
-  const handleFieldDelete = () => {
-    if(onFieldDelete) {
-      onFieldDelete()
-    }
-  }
 
   return (
     <Flex
       justify="space-between"
       gap={"xs"}
       className={
-        "px-2 py-1 rounded-md transition-colors " 
-        + (type === 'field' && 'hover:bg-neutral-500 hover:bg-opacity-20')
-        // + (!isOfNodeType(field.type) &&
-        //   (isDarkMode ? "hover:bg-neutral-700" : "hover:bg-neutral-300"))
+        "px-2 py-1 rounded-md transition-colors " +
+        (!fieldName.trim() && "text-red-500 ") +
+        (type === "field" && "hover:bg-neutral-500 hover:bg-opacity-20")
       }
-      onContextMenu={type === 'field' ? showContextMenu([
-        {
-          key: 'duplicate',
-          title: 'Duplicate',
-          icon: <IconCopyPlus size={16}/>,
-          onClick: () => handleFieldDuplicate()
-        },
-        {
-          key: 'delete',
-          title: 'Delete',
-          color: 'red',
-          icon: <IconTrash size={16} />,
-          onClick: () => handleFieldDelete()
-        },
-      ]) : () => {}}
+      onContextMenu={onContextMenu}
     >
       <TextInput
         styles={{
@@ -245,7 +252,11 @@ function TableNodeField({
         onChange={handleFieldNameChange}
         className="w-1/2"
       />
-      <TextSelect value={fieldType} options={fieldOptions} onChange={handleFieldTypeChange} />
+      <TextSelect
+        value={fieldType}
+        options={fieldOptions}
+        onChange={handleFieldTypeChange}
+      />
     </Flex>
   );
 }

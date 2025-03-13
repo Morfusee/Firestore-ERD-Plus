@@ -18,12 +18,14 @@ import Register from "./pages/register";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { useThemeStore } from "./store/globalStore";
 import { AppRoutes } from "./routes/AppRoutes";
+import { SingletonHooksContainer } from "react-singleton-hook";
 
 function App() {
   const { theme } = useThemeStore();
   return (
     <ReactFlowProvider>
       <MantineProvider theme={theme} defaultColorScheme="light">
+        <SingletonHooksContainer />
         <ContextMenuProvider>
           <ModalsProvider modals={customModals}>
             <Notifications />
