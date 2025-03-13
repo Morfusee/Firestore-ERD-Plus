@@ -1,11 +1,12 @@
 import { Flex, Paper, rem, Textarea, Text } from "@mantine/core";
 import { NodeProps, NodeResizer } from "@xyflow/react";
-import { memo, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { NoteNode } from "../../../types/EditorTypes";
 import { IconNote } from "@tabler/icons-react";
 import useIsDarkMode from "../../../hooks/useIsDarkMode";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
 import { useThrottledCallback, useDidUpdate } from "@mantine/hooks";
+import _ from "lodash";
 
 export default memo(({ id, data }: NodeProps<NoteNode>) => {
   const isDarkMode = useIsDarkMode();
@@ -14,24 +15,38 @@ export default memo(({ id, data }: NodeProps<NoteNode>) => {
 
   useDidUpdate(() => {
     if (data.note !== note) {
-      setNote(data.note || "")
+      setNote(data.note || "");
     }
-  }, [data.note])
+  }, [data.note]);
 
-  const debouncedHandleTextAreaChange = useThrottledCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (id === undefined) return;
-      console.log("Changing text")
-      editNodeData(id, { note: e.target.value });
-    },
-    1000
+  // Throttled function with useCallback for stability
+  const throttledHandleTextAreaChange = useCallback(
+    _.throttle(
+      (value: string) => {
+        editNodeData(id, { note: value });
+      },
+      1000,
+      { leading: true, trailing: true }
+    ),
+    [id, editNodeData]
   );
 
-  const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNote(e.target.value);
-    debouncedHandleTextAreaChange(e);
-  };
+  /**
+   * Cleanup function to cancel throttle on unmount
+   * 
+   * FIX:
+   * Fixes the problem of pending/throttled changes to
+   * transfer over to the next project.
+   */
+  useEffect(() => {
+    return () => throttledHandleTextAreaChange.cancel();
+  }, [throttledHandleTextAreaChange]);
 
+  const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setNote(value);
+    throttledHandleTextAreaChange(value);
+  };
   return (
     <>
       <NodeResizer
