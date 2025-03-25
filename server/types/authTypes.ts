@@ -1,6 +1,11 @@
 import { Request } from "express";
 import { Session } from "express-session";
 
+
+export interface ValidatedRoleRequest extends Request {
+  userId?: string
+}
+
 export interface AuthRequest<P = {}, B = {}> extends Request<P, {}, B> {
   session: CustomSession;
   user?: any;

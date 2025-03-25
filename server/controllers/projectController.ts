@@ -8,6 +8,7 @@ import User from "@root/models/userModel.ts";
 import SuccessResponse from "@root/success/SuccessResponse.ts";
 import CreatedResponse from "@root/success/CreatedResponse.ts";
 import Changelog from "@root/models/changelogModel.ts";
+import { ValidatedRoleRequest } from "@root/types/authTypes.ts";
 
 /**
  * Get projects based on query parameters.
@@ -80,20 +81,28 @@ export const getAllProjects = async (
 
 // Get a project by ID
 export const getProjectById = async (
-  req: Request,
+  req: ValidatedRoleRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.userId
+
     // Find the project by ID
-    const project = await Project.findById(req.params.id).select('-members');
+    const project = await Project.findById(req.params.projectId);
 
     // Check if the project exists
     if (!project) throw new NotFoundError("Project not found.");
 
+    const member = project.members.find((user) => user.userId.toString() === userId)
+    const userRole = member ? member.role : null
+
+    const { members, ...projectData} = project.toJSON()
+
     next(
       new SuccessResponse("Successfully fetched the project.", {
-        project,
+        project: projectData,
+        userRole
       })
     );
   } catch (err: any) {
@@ -109,14 +118,14 @@ export const editProject = async (
 ) => {
   try {
     // Find the project by ID
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findById(req.params.projectId);
 
     // Check if the project exists
     if (!project) throw new NotFoundError("Project not found.");
 
     // Update the project
     const updatedProject = await Project.findByIdAndUpdate(
-      req.params.id,
+      req.params.projectId,
       req.body,
       { new: true }
     ).select('-data -members');
@@ -184,7 +193,7 @@ export const saveProject = async (
 ) => {
   try {
     // Find the project by ID
-    const project = await Project.findById(req.params.id).select('-members');
+    const project = await Project.findById(req.params.projectId).select('-members');
     const { data, members = [] } = req.body;
 
     // Check if the project exists
@@ -238,7 +247,7 @@ export const deleteProject = async (
   next: NextFunction
 ) => {
   try {
-    const project = await Project.findByIdAndDelete(req.params.id);
+    const project = await Project.findByIdAndDelete(req.params.projectId);
 
     if (!project) throw new NotFoundError("Project not found.");
 

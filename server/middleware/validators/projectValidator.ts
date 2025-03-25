@@ -10,7 +10,7 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-export const validateProjectId = param("id")
+export const validateProjectId = param("projectId")
   .trim()
   .isMongoId()
   .withMessage("The project ID must be a valid MongoDB ID.");

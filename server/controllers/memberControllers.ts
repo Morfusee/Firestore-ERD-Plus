@@ -156,7 +156,7 @@ export const getMemberRoleById = async (
       throw new ConflictError("The user is not a member of the project");
 
     next(
-      new SuccessResponse("Member role has been updated successfully.", {
+      new SuccessResponse("Member role has been fetched successfully.", {
         role: member.members[0].role,
       })
     );

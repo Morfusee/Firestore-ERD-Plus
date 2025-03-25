@@ -29,8 +29,8 @@ import useProjectRepo from "../../data/repo/useProjectRepo";
 
 function Editor() {
   const { moveNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
-  const { selectedProject } = useProjectRepo()
-  const { currentProjectAccess } = useMemberStore()
+  const { validateRole } = useProjectRepo()
+  //const { currentProjectAccess } = useMemberStore()
   
   const nodeTypes: NodeTypes = useMemo(
     () => ({
@@ -92,12 +92,6 @@ function Editor() {
     });
     console.log(position);
   }, [useEditorRepo()]);
-
-
-  const validateRole = () => {
-    if(!selectedProject) return false;
-    return selectedProject.generalAccess.role != "Viewer" || currentProjectAccess != "Viewer"
-  };
 
 
   return (

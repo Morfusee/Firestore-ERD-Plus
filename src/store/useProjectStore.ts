@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { IProject, IProjectAccess } from "../types/ProjectTypes";
+import { IProject, IProjectAccess, MemberRole } from "../types/ProjectTypes";
 import { IEditorStateSnapshot } from "../types/EditorStoreTypes";
 import { devtools } from "zustand/middleware";
 
@@ -11,6 +11,7 @@ interface IProjectCache {
 interface IProjectState {
   projects: IProject[];
   selectedProject: IProject | null;
+  selectedProjectRole: MemberRole | null
   projectStateCache: IProjectCache[];
 }
 
@@ -18,7 +19,9 @@ interface IProjectActions {
   setProjects: (projects: IProject[]) => void;
   getProjects: () => IProject[];
   setSelectedProject: (project: IProject) => void;
+  setSelectedProjectRole: (role: MemberRole) => void;
   clearSelectedProject: () => void;
+  clearSelectedProjectRole: () => void;
   addProject: (project: IProject) => void;
   editProject: (id: string, change: Partial<IProject>) => void;
   editSelectedProjectAccess: (access: IProjectAccess) => void;
@@ -33,6 +36,7 @@ export const useProjectStore = create<IProjectState & IProjectActions>()(
     (set, get) => ({
       projects: [],
       selectedProject: null,
+      selectedProjectRole: null,
       projectStateCache: [],
 
       setProjects: (projects) => set(() => ({ projects: projects })),
@@ -42,6 +46,9 @@ export const useProjectStore = create<IProjectState & IProjectActions>()(
       setSelectedProject: (project) =>
         set(() => ({ selectedProject: project })),
       clearSelectedProject: () => set(() => ({ selectedProject: null })),
+      setSelectedProjectRole: (role) =>
+        set(() => ({ selectedProjectRole: role })),
+      clearSelectedProjectRole: () => set(() => ({ selectedProjectRole: null })),
 
       addProject: (project) =>
         set((state) => ({

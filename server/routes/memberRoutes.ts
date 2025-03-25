@@ -24,6 +24,7 @@ const router = Router();
 router.get(
   "/:projectId/members",
   [validateToken, validateProjectId, validate],
+  checkRole(["Viewer", "Editor", "Admin", "Owner"]),
   getMembersByProjectId
 );
 router.post(
@@ -34,7 +35,7 @@ router.post(
     validateRoleOptional,
     validate,
   ],
-  // checkRole(["Editor", "Admin", "Owner"]),
+  checkRole(["Editor", "Admin", "Owner"]),
   addMember
 );
 router.patch(
@@ -46,7 +47,7 @@ router.patch(
     validateRoleRequired,
     validate,
   ],
-  // checkRole(["Admin", "Owner"]),
+  checkRole(["Admin", "Owner"]),
   editMemberRole
 );
 router.get(
@@ -57,12 +58,13 @@ router.get(
     validateUserId,
     validate,
   ],
+  checkRole(["Viewer", "Editor", "Admin", "Owner"]),
   getMemberRoleById
 );
 router.delete(
   "/:projectId/members/:userId",
   [validateToken, validateProjectId, validateUserId, validate],
-  // checkRole(["Admin", "Owner"]),
+  checkRole(["Admin", "Owner"]),
   removeMember
 );
 router.patch(
@@ -74,7 +76,7 @@ router.patch(
     validateAccessRole,
     validate
   ],
-  // checkRole(["Admin", "Owner"]),
+  checkRole(["Admin", "Owner"]),
   editGeneralAccess
 )
 

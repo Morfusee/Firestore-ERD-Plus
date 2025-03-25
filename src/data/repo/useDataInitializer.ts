@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEmojiStore } from "../../store/globalStore";
 import { getProjectsApi } from "../api/projectsApi";
 import { db } from "../db/db";
@@ -9,6 +9,8 @@ import useHistoryRepo from "./useHistoryRepo";
 import useProjectRepo from "./useProjectRepo";
 import { useSettingsRepo } from "./useSettingsRepo";
 import useUserRepo from "./useUserRepo";
+import CustomNotification from "../../components/ui/CustomNotification";
+import { AxiosError } from "axios";
 
 export const useDataInitializer = () => {
   const { user } = useUserRepo();
@@ -16,6 +18,7 @@ export const useDataInitializer = () => {
   const { loadChangelogs } = useChangelogRepo();
   const { fetchUserSettings } = useSettingsRepo();
   const { resetHistory } = useHistoryRepo();
+  const navigate = useNavigate();
 
   // Router
   const params = useParams();
@@ -35,19 +38,34 @@ export const useDataInitializer = () => {
   }, []);
 
   useEffect(() => {
-    if (id && user) {
-      selectProject(id, user.id);
-      loadChangelogs(id);
-      resetHistory();
+    const loadSelectedProject = async () => {
+      try {
+        if (id && user && isLoaded) {
+          const res = await selectProject(id);
+          resetHistory();
+          if (res) {
+            loadChangelogs(id);
+          }
+    
+        }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          CustomNotification({
+            status: "error",
+            title: "Failed to Load Project",
+            message: err.response?.data.message,
+          });
+        }
+        navigate("/", { replace: true })
+      }
     }
+
+    loadSelectedProject()
   }, [id, isLoaded]);
 
   const loadProjects = async () => {
     console.log("Loading projects from local storage");
 
-    // Dexie fetching of projects
-    // NOTE: Not needed anymore
-    // const projectList = await db.projects.toArray();
     if (!user) return;
 
     const getProjectList = await getProjectsApi(user?.id);
