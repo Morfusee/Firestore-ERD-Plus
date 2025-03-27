@@ -218,7 +218,7 @@ function DrawerHeader() {
 function HistoryTimeline() {
   const { changelogs, activeChangelog, selectChangelog } = useChangelogRepo();
 
-  const { selectedProject, loadProjectData } = useProjectRepo();
+  const { selectedProject, loadProjectData, validateRole } = useProjectRepo();
 
   const handleSelectLog = async (changelog: IChangelog) => {
     if (!selectedProject) return;
@@ -256,6 +256,7 @@ function HistoryTimeline() {
               }
               memberChanges={item.members || []}
               onClick={() => handleSelectLog(item)}
+              disabled={!validateRole()}
             />
           </Timeline.Item>
         ))}
@@ -268,6 +269,7 @@ interface HistoryItemProps {
   dateTime: Date;
   currentVersion: boolean;
   memberChanges: IMember[];
+  disabled?: boolean
   onClick: () => void;
 }
 
@@ -275,6 +277,7 @@ function HistoryItem({
   dateTime,
   currentVersion,
   memberChanges,
+  disabled,
   onClick,
 }: HistoryItemProps) {
   const dateFormat = new Intl.DateTimeFormat("en-US", {
@@ -290,10 +293,11 @@ function HistoryItem({
 
   return (
     <UnstyledButton
-      className="w-full flex flex-col items-end px-2 py-1 rounded-md transition-colors hover:bg-neutral-500 hover:bg-opacity-20"
+      className="w-full flex flex-col items-end px-2 py-1 rounded-md transition-colors disabled:cursor-default enabled:hover:bg-neutral-500 enabled:hover:bg-opacity-20"
       pr="xs"
       py={3}
       onClick={onClick}
+      disabled={disabled}
     >
       <Stack gap={0} align="end">
         <Text c="dimmed" size="sm">

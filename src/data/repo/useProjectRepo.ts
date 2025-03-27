@@ -15,13 +15,20 @@ import { getMemberRoleApi } from "../api/membersApi";
 const useProjectRepo = () => {
   const projects = useProjectStore((state) => state.projects);
   const selectedProject = useProjectStore((state) => state.selectedProject);
+  const selectedProjectRole = useProjectStore((state) => state.selectedProjectRole);
   const setProjects = useProjectStore((state) => state.setProjects);
-  const getProjects = useProjectStore((state) => state.getProjects);
+  
   const setSelectedProject = useProjectStore(
     (state) => state.setSelectedProject
   );
   const clearSelectedProject = useProjectStore(
     (state) => state.clearSelectedProject
+  );
+  const setSelectedProjectRole = useProjectStore(
+    (state) => state.setSelectedProjectRole
+  );
+  const clearSelectedProjectRole = useProjectStore(
+    (state) => state.clearSelectedProjectRole
   );
   const clearStateSnap = useEditorStore((state) => state.clearStateSnapshot);
 
@@ -41,7 +48,6 @@ const useProjectRepo = () => {
   const setCanUndo = useEditorStore((state) => state.setCanUndo);
   const setCanRedo = useEditorStore((state) => state.setCanRedo);
 
-  const setAccess = useMemberStore((state) => state.setCurrentProjectAccess)
 
   const getProjectsList = () => {
     return projects;
@@ -97,7 +103,7 @@ const useProjectRepo = () => {
     setCanRedo(false);
   };
 
-  const selectProject = async (projectId: string | undefined, userId: string | undefined) => {
+  const selectProject = async (projectId: string | undefined) => {
     if (!projectId) return;
 
     // Save the previous current project to cache
@@ -107,7 +113,9 @@ const useProjectRepo = () => {
 
     // Fetch the new selected project
     const res = await getProjectByIdApi(projectId);
+    console.log(res)
     const selected = res.data.project;
+    const role = res.data.userRole
 
     const cache = getCache().find((item) => item.id === projectId);
     if (cache) {
@@ -119,17 +127,15 @@ const useProjectRepo = () => {
     }
 
     setSelectedProject(selected);
+    setSelectedProjectRole(role);
 
-    if (!userId) return;
-
-    const memberRes = await getMemberRoleApi(projectId, userId);
-
-    setAccess(memberRes.data.role)
+    return res
   };
 
   const clearProject = () => {
     // Set selected project to none
     clearSelectedProject();
+    clearSelectedProjectRole();
     clearStateSnap();
 
     // Delete cleared project from cache
@@ -195,12 +201,18 @@ const useProjectRepo = () => {
     // Implement the duplication of project in the backend
   };
 
+  const validateRole = () => {
+    if(!selectedProject) return false;
+    return selectedProject.generalAccess.role != "Viewer" || (selectedProjectRole != null && selectedProjectRole != "Viewer")
+  };
+
   return {
     projects,
     getProjectsList,
     setProjectList,
     getProjectById,
     selectedProject,
+    selectedProjectRole,
     selectProject,
     clearProject,
     addProject,
@@ -208,6 +220,7 @@ const useProjectRepo = () => {
     deleteProject,
     duplicateProject,
     loadProjectData,
+    validateRole
   };
 };
 

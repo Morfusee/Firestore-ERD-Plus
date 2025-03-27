@@ -23,6 +23,9 @@ const useUserRepo = () => {
   const clearSelectedProject = useProjectStore(
     (state) => state.clearSelectedProject
   );
+  const clearSelectedProjectRole = useProjectStore(
+    (state) => state.clearSelectedProjectRole
+  );
   const clearStateSnapshot = useEditorStore(
     (state) => state.clearStateSnapshot
   );
@@ -144,6 +147,7 @@ const useUserRepo = () => {
 
       // Clear the selected project
       clearSelectedProject();
+      clearSelectedProjectRole();
 
       // Clear the editor state snapshot
       clearStateSnapshot();

@@ -25,6 +25,7 @@ export interface UpdatedProject {
 
 export interface FetchedProject {
   project: IProject;
+  userRole: MemberRole;
 }
 
 export interface FetchedProjects {

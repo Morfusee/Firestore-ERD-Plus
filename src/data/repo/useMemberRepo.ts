@@ -37,7 +37,7 @@ const useMemberRepo = () => {
     try {
       setLoading(true);
       setError(null);
-
+      console.log("Get member")
       const response = await getProjectMembersApi(projectId);
 
       if (response.success) {

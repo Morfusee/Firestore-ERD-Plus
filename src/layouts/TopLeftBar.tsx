@@ -44,6 +44,7 @@ import { determineTitle } from "../utils/successHelpers";
 import useMemberRepo from "../data/repo/useMemberRepo";
 import { useMemberStore } from "../store/useMemberStore";
 import CustomNotification from "../components/ui/CustomNotification";
+import { APIResponse, SavedProject } from "../types/APITypes";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -81,21 +82,37 @@ function ActionButtons({
   const { onSave, onUndo, canUndo, canRedo, onRedo } = useHistoryRepo();
   const { saveChangelog } = useChangelogRepo();
   const { hasPendingChanges, } = useEditorStore();
-  const { selectedProject } = useProjectRepo()
-  const { currentProjectAccess } = useMemberStore()
+  const { validateRole } = useProjectRepo()
 
   const handleSave = async () => {
-    const res = await onSave();
+    try {
+      const res = await onSave();
 
-    if (res?.success) {
-      const changelog = res.data.changelog;
-      await saveChangelog(changelog);
+      if (res?.success) {
+        const changelog = res.data.changelog;
+        saveChangelog(changelog);
+        showNotification(res);
+      }
+    } catch (err) {
+      showNotification({
+        success: false,
+        message: "An error has occured while saving the project",
+      } as APIResponse<SavedProject>);
     }
+
   };
 
-  const validateRole = () => {
-    if(!selectedProject) return false;
-    return selectedProject.generalAccess.role != "Viewer" || currentProjectAccess != "Viewer"
+  const showNotification = (response: APIResponse<SavedProject>) => {
+    // Show notification
+    CustomNotification({
+      status: response.success ? "success" : "error",
+      title: determineTitle(
+        "Saved project",
+        "Failed to save the project",
+        response.success
+      ),
+      message: response.message,
+    });
   };
 
   return (
@@ -211,7 +228,7 @@ function DrawerHeader() {
     // Only attempt to add the project if the success status is true
     if (response.success) {
       // Select the project on creation in STATE
-      selectProject(response.data.createdProject.id, user.id);
+      selectProject(response.data.createdProject.id);
 
       loadChangelogs(response.data.createdProject.id);
 
@@ -314,7 +331,7 @@ function DrawerItems({ project }: { project: IProject }) {
           }}
           onClick={() => {
             navigate(`/${project.id}`, { replace: true });
-            selectProject(project.id, user?.id);
+            selectProject(project.id);
             loadChangelogs(project.id);
           }}
           rightSection={
@@ -388,7 +405,7 @@ function DrawerItemMenu({
       // If the user is currently editing the selected project,
       // just reselect the project to update the values.
       if (params.projectId == res.data.updatedProject.id)
-        selectProject(params.projectId, user?.id);
+        selectProject(params.projectId);
     }
 
     // Show notification

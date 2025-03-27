@@ -23,6 +23,7 @@ import {
   validateOnlyDataField,
 } from "@root/middleware/validators/projectValidator";
 import { validateToken } from "@root/middleware/validators/authValidator";
+import { checkRole } from "@root/middleware/validators/memberRoleValidator";
 
 const router = express.Router();
 
@@ -44,7 +45,12 @@ router.get("", [validateToken, validateUserIdQuery, validate], getProjects);
  * - validateProjectId: Ensures the provided project ID is valid.
  * - validate: General validation middleware.
  */
-router.get("/:id", [validateToken, validateProjectId, validate], getProjectById);
+router.get(
+  "/:projectId", 
+  [validateToken, validateProjectId, validate], 
+  checkRole(["Viewer", "Editor", "Admin", "Owner"]), 
+  getProjectById
+);
 
 /**
  * PATCH /projects/:id
@@ -57,7 +63,7 @@ router.get("/:id", [validateToken, validateProjectId, validate], getProjectById)
  * - validate: General validation middleware.
  */
 router.patch(
-  "/:id",
+  "/:projectId",
   [
     validateToken,
     validateProjectId,
@@ -80,7 +86,7 @@ router.patch(
  *
  */
 router.patch(
-  "/:id/data",
+  "/:projectId/data",
   [
     validateToken,
     validateProjectId,
@@ -88,6 +94,7 @@ router.patch(
     validateOnlyDataField,
     validate,
   ],
+  checkRole(["Viewer", "Editor", "Admin", "Owner"]), 
   saveProject
 );
 
@@ -113,7 +120,7 @@ router.post(
  * - validate: General validation middleware.
  */
 router.delete(
-  "/:id",
+  "/:projectId",
   [validateToken, validateProjectId, validate],
   deleteProject
 );
