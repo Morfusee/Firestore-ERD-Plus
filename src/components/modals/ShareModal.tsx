@@ -60,6 +60,7 @@ function ShareModal({ context, id }: ContextModalProps) {
   // useState to keep track project members locally.
   const [localMembers, setLocalMembers] = useState<IProjectMembers[]>([]);
   const [localRemovedMembers, setLocalRemovedMembers] = useState<IProjectMembers[]>([]);
+  const [localUpdatedMembers, setLocalUpdatedMembers] = useState<IProjectMembers[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const currentUserRole = useMemo(() => {
@@ -157,6 +158,35 @@ function ShareModal({ context, id }: ContextModalProps) {
   };
 
   const handleUpdateRole = (memberId: string, newRole: string) => {
+    const updateMember = localMembers.find(member => member.id === memberId)
+    if (!updateMember) return
+
+    if (localUpdatedMembers.some(member => member.id === memberId)) {
+      if(selectedProject && selectedProject.id && 
+        newRole === projectMembers[selectedProject.id].find(origMem => origMem.id === memberId)?.role
+      ) {
+        setLocalUpdatedMembers(
+          localUpdatedMembers.filter((member) =>
+            member.id !== memberId
+          )
+        )
+      } else {
+        setLocalUpdatedMembers(
+          localUpdatedMembers.map((member) =>
+            member.id === memberId ? { ...member, role: newRole } : member
+          )
+        )
+      }
+    } else {
+      setLocalUpdatedMembers([
+        ...localUpdatedMembers,
+        {
+          ...updateMember,
+          role: newRole
+        }
+      ])
+    }
+
     setLocalMembers((prev) =>
       prev.map((member) =>
         member.id === memberId ? { ...member, role: newRole } : member
@@ -207,6 +237,7 @@ function ShareModal({ context, id }: ContextModalProps) {
 
       await fetchProjectMembers(selectedProject.id);
       setLocalRemovedMembers([])
+      setLocalUpdatedMembers([])
 
       showNotification({
         color: "green",
@@ -383,7 +414,11 @@ function ShareModal({ context, id }: ContextModalProps) {
       </ScrollArea.Autosize>
 
       {(currentUserRole === "Owner" || currentUserRole === "Admin")
-        && (members.some((member) => member.id.startsWith("temp-")) || localRemovedMembers.length > 0) && (
+        && (
+          members.some((member) => member.id.startsWith("temp-")) || 
+          localRemovedMembers.length > 0 ||
+          localUpdatedMembers.length > 0
+      ) && (
         <Button
           variant="filled"
           fullWidth={true}

@@ -67,6 +67,7 @@ function ActionButtons({
   const navigate = useNavigate();
 
   const { logoutUser } = useUserRepo();
+  const { validateRole } = useProjectRepo();
   const { selectedProject } = useProjectStore();
   const isButtonDisabled = !selectedProject;
 
@@ -102,7 +103,7 @@ function ActionButtons({
         size="lg"
         radius="xl"
         onClick={toggleDrawer}
-        disabled={isButtonDisabled}
+        disabled={isButtonDisabled || !validateRole()}
       />
       <Popover
         position="bottom-end"

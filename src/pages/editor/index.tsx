@@ -32,7 +32,6 @@ import "../../css/react-flow.css"
 function Editor() {
   const { moveNode, addNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
   const { validateRole } = useProjectRepo()
-  //const { currentProjectAccess } = useMemberStore()
   
   const nodeTypes: NodeTypes = useMemo(
     () => ({
