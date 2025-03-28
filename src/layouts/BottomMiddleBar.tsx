@@ -13,7 +13,7 @@ import useToolbarRepo from "../data/repo/useToolbarRepo";
 function BottomMiddleBar() {
   const isDarkMode = useIsDarkMode();
 
-  const { selectedProject } = useProjectRepo();
+  const { selectedProject, validateRole } = useProjectRepo();
   const isButtonDisabled = !selectedProject;
 
   const currentTool = useToolbarStore(state => state.currentTool)
@@ -43,7 +43,7 @@ function BottomMiddleBar() {
               variant="subtle"
               size="md"
               radius="sm"
-              disabled={isButtonDisabled}
+              disabled={isButtonDisabled || !validateRole()}
               active={currentTool == "table"}
               onClick={() => changeTool("table")}
             />
@@ -67,7 +67,7 @@ function BottomMiddleBar() {
               variant="subtle"
               size="md"
               radius="sm"
-              disabled={isButtonDisabled}
+              disabled={isButtonDisabled || !validateRole()}
               active={currentTool == "note"}
               onClick={() => changeTool("note")}
             />
