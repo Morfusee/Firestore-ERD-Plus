@@ -14,10 +14,8 @@ import {
   useViewportSize,
 } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
 import {
   IconArrowBackUp,
-  IconCopy,
   IconDeviceFloppy,
   IconDots,
   IconEdit,
@@ -28,7 +26,6 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { StatusIcon } from "../components/icons/StatusIcon";
 import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
 import useChangelogRepo from "../data/repo/useChangelogRepo";
 import useHistoryRepo from "../data/repo/useHistoryRepo";
@@ -41,10 +38,9 @@ import { useEditorStore } from "../store/useEditorStore";
 import { IProject } from "../types/ProjectTypes";
 import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
 import { determineTitle } from "../utils/successHelpers";
-import useMemberRepo from "../data/repo/useMemberRepo";
-import { useMemberStore } from "../store/useMemberStore";
 import CustomNotification from "../components/ui/CustomNotification";
 import { APIResponse, SavedProject } from "../types/APITypes";
+import TooltipIconButton from "../components/ui/TooltipIconButton";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -122,41 +118,47 @@ function ActionButtons({
       direction={width < 900 ? "column" : "row"}
       wrap="wrap"
     >
-      <ActionIcon variant="subtle" size="lg" radius="xl" onClick={toggleDrawer}>
-        {openedDrawer ? <IconX /> : <IconMenu2 />}
-      </ActionIcon>
-      <ActionIcon
+      <TooltipIconButton
+        label="Menu"
+        icon={openedDrawer ? <IconX /> : <IconMenu2 />}
+        variant="subtle" size="lg" radius="xl" onClick={toggleDrawer}
+      />
+      <TooltipIconButton
+        label="Undo"
+        icon={<IconArrowBackUp />}
         variant="subtle"
         size="lg"
         radius="xl"
         onClick={onUndo}
         disabled={!canUndo}
-      >
-        <IconArrowBackUp />
-      </ActionIcon>
-      <ActionIcon
+      />
+      <TooltipIconButton
+        label="Redo"
+        icon={
+          <IconArrowBackUp
+          style={{
+            transform: "scaleX(-1)",
+          }}
+        />
+        }
         variant="subtle"
         size="lg"
         radius="xl"
         onClick={onRedo}
         disabled={!canRedo}
-      >
-        <IconArrowBackUp
-          style={{
-            transform: "scaleX(-1)",
-          }}
-        />
-      </ActionIcon>
-      <ActionIcon
+      />
+      <TooltipIconButton
+        label="Save"
+        icon={hasPendingChanges ? <Loader size={"sm"} /> : <IconDeviceFloppy />}
         variant="subtle"
         size="lg"
         radius="xl"
         onClick={() => handleSave()}
         disabled={!validateRole()}
-      >
-        {hasPendingChanges ? <Loader size={"sm"} /> : <IconDeviceFloppy />}
-      </ActionIcon>
-      <ActionIcon
+      />
+      <TooltipIconButton
+        label="Settings"
+        icon={<IconSettings />}
         variant="subtle"
         size="lg"
         radius="xl"
@@ -166,9 +168,7 @@ function ActionButtons({
             innerProps: {},
           })
         }
-      >
-        <IconSettings />
-      </ActionIcon>
+      />
     </Flex>
   );
 }
