@@ -1,5 +1,4 @@
 import {
-  ActionIcon,
   Avatar,
   Box,
   Button,
@@ -29,11 +28,10 @@ import useUserRepo from "../data/repo/useUserRepo";
 import useChangelogRepo from "../data/repo/useChangelogRepo";
 import { IChangelog, IMember } from "../store/useChangelogStore";
 import useProjectRepo from "../data/repo/useProjectRepo";
-import useEditorRepo from "../data/repo/useEditorRepo";
-import { IProject } from "../types/ProjectTypes";
 import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
 import { useNavigate } from "react-router-dom";
 import ProfileAvatar from "../components/ui/ProfileAvatar";
+import TooltipIconButton from "../components/ui/TooltipIconButton";
 
 function TopRightBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -97,15 +95,15 @@ function ActionButtons({
       direction={width < 900 ? "column" : "row"}
       wrap="wrap"
     >
-      <ActionIcon
+      <TooltipIconButton
+        label="Version History"
+        icon={openedDrawer ? <IconHistoryToggle /> : <IconHistory />}
         variant="subtle"
         size="lg"
         radius="xl"
         onClick={toggleDrawer}
         disabled={isButtonDisabled}
-      >
-        {openedDrawer ? <IconHistoryToggle /> : <IconHistory />}
-      </ActionIcon>
+      />
       <Popover
         position="bottom-end"
         width={300}
