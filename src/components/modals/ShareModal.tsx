@@ -8,7 +8,6 @@ import {
   CopyButton,
   Divider,
   Group,
-  Input,
   InputBase,
   Loader,
   Menu,
@@ -19,7 +18,6 @@ import {
   Text,
   TextInput,
   Title,
-  Tooltip,
   useCombobox,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
@@ -27,7 +25,6 @@ import {
   IconCopy,
   IconDotsVertical,
   IconLock,
-  IconPlus,
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import useProjectRepo from "../../data/repo/useProjectRepo";
@@ -62,6 +59,7 @@ function ShareModal({ context, id }: ContextModalProps) {
   >([]);
   // useState to keep track project members locally.
   const [localMembers, setLocalMembers] = useState<IProjectMembers[]>([]);
+  const [localRemovedMembers, setLocalRemovedMembers] = useState<IProjectMembers[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const currentUserRole = useMemo(() => {
@@ -167,6 +165,9 @@ function ShareModal({ context, id }: ContextModalProps) {
   };
 
   const handleRemoveMember = (memberId: string) => {
+    const removedMember = localMembers.find(member => member.id === memberId)
+    if (!removedMember) return
+    setLocalRemovedMembers([...localMembers, removedMember])
     setLocalMembers((prev) => prev.filter((member) => member.id !== memberId));
   };
 
@@ -205,6 +206,7 @@ function ShareModal({ context, id }: ContextModalProps) {
       ]);
 
       await fetchProjectMembers(selectedProject.id);
+      setLocalRemovedMembers([])
 
       showNotification({
         color: "green",
@@ -352,7 +354,7 @@ function ShareModal({ context, id }: ContextModalProps) {
         </Group>
       )}
 
-      <ScrollArea.Autosize my="sm" mah={rem(300)} offsetScrollbars={true}>
+      <ScrollArea.Autosize mt="sm" mb="xs" mah={rem(300)} offsetScrollbars={true}>
         <Stack gap={5}>
           {initialLoading ? (
             <Center>
@@ -370,6 +372,7 @@ function ShareModal({ context, id }: ContextModalProps) {
                   }
                   onRemove={() => handleRemoveMember(member.id)}
                   currentUserRole={currentUserRole}
+                  dimmed={member.id.startsWith("temp-")}
                 />
               ) : null
             )
@@ -379,7 +382,20 @@ function ShareModal({ context, id }: ContextModalProps) {
         </Stack>
       </ScrollArea.Autosize>
 
-      <Title order={5} mb="xs">
+      {(currentUserRole === "Owner" || currentUserRole === "Admin")
+        && (members.some((member) => member.id.startsWith("temp-")) || localRemovedMembers.length > 0) && (
+        <Button
+          variant="filled"
+          fullWidth={true}
+          mt={10}
+          loading={initialLoading}
+          onClick={handleSave}
+        >
+          Save
+        </Button>
+      )}
+
+      <Title order={5} my="xs">
         General Access
       </Title>
 
@@ -406,18 +422,6 @@ function ShareModal({ context, id }: ContextModalProps) {
           }
         }}
       />
-
-      {(currentUserRole === "Owner" || currentUserRole === "Admin") && (
-        <Button
-          variant="filled"
-          fullWidth={true}
-          mt={10}
-          loading={initialLoading}
-          onClick={handleSave}
-        >
-          Save
-        </Button>
-      )}
     </Box>
   );
 }
@@ -486,6 +490,7 @@ interface MemberItemProps {
   onRemove: () => void;
   isCurrentUser: boolean;
   currentUserRole: string;
+  dimmed?: boolean
 }
 
 function MemberItem({
@@ -498,6 +503,7 @@ function MemberItem({
   onRemove,
   isCurrentUser,
   currentUserRole,
+  dimmed
 }: MemberItemProps) {
   const truncatedEmail =
     username.length > 25 ? `${username.slice(0, 22)}...` : username;
@@ -510,10 +516,10 @@ function MemberItem({
       justify="space-between"
     >
       <Group gap="sm">
-        <Avatar size={42} src={profilePicture} />
+        <Avatar size={42} src={profilePicture} opacity={dimmed ? 0.5 : 1}/>
 
         <Stack gap={0}>
-          <Text fw={500}>
+          <Text fw={500} opacity={dimmed ? 0.5 : 1}>
             {name}{" "}
             {isCurrentUser && (
               <Text component="span" c="green.5">
@@ -521,13 +527,13 @@ function MemberItem({
               </Text>
             )}
           </Text>
-          <Text c="dimmed" size="sm">
+          <Text c="dimmed" size="sm" opacity={dimmed ? 0.5 : 1}>
             {truncatedEmail}
           </Text>
         </Stack>
       </Group>
 
-      <Group>
+      <Group gap={0}>
         {role === "Owner" ? (
           <Text fw={500}>{role}</Text>
         ) : // Ensure only Admin and Owner can update member roles
@@ -540,6 +546,7 @@ function MemberItem({
             value={role}
             data={["Viewer", "Editor", "Admin"]}
             onChange={(value) => value && onRoleChange(value)}
+            opacity={dimmed ? 0.5 : 1}
           />
         ) : (
           <Text fw={500}>{role}</Text>
@@ -550,7 +557,7 @@ function MemberItem({
           role !== "Owner" && (
             <Menu>
               <Menu.Target>
-                <ActionIcon variant="subtle">
+                <ActionIcon variant="subtle" opacity={dimmed ? 0.5 : 1}>
                   <IconDotsVertical />
                 </ActionIcon>
               </Menu.Target>

@@ -23,12 +23,14 @@ import useEditorRepo from "../../data/repo/useEditorRepo";
 import { useEditorStore } from "../../store/useEditorStore";
 import NoteNode from "./nodes/NoteNode";
 import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
-import useMemberRepo from "../../data/repo/useMemberRepo";
-import { useMemberStore } from "../../store/useMemberStore";
 import useProjectRepo from "../../data/repo/useProjectRepo";
+import { useToolbarStore } from "../../store/useToolbarStore";
+import useToolbarRepo from "../../data/repo/useToolbarRepo";
+import "../../css/react-flow.css"
+
 
 function Editor() {
-  const { moveNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
+  const { moveNode, addNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
   const { validateRole } = useProjectRepo()
   //const { currentProjectAccess } = useMemberStore()
   
@@ -53,6 +55,9 @@ function Editor() {
 
   const nodes = useEditorStore((state) => state.nodes);
   const edges = useEditorStore((state) => state.edges);
+
+  const currentTool = useToolbarStore(state => state.currentTool)
+  const { resetTool } = useToolbarRepo()
 
   const onNodeDrag: OnNodeDrag<EditorNode> = useCallback(
     (_, node) => {
@@ -87,11 +92,19 @@ function Editor() {
 
   const onPaneClick = useCallback((event: React.MouseEvent) => {
     const position = screenToFlowPosition({
-      x: event.clientX,
-      y: event.clientY,
+      x: event.clientX + -50,
+      y: event.clientY + -50,
     });
-    console.log(position);
-  }, [useEditorRepo()]);
+
+    console.log(position)
+    if(currentTool == "table") {
+      addNode("table", position);
+    } else if (currentTool == "note") {
+      addNode("note", position);
+    }
+
+    resetTool();
+  }, [useEditorRepo(), currentTool]);
 
 
   return (
@@ -112,7 +125,7 @@ function Editor() {
         onPaneClick={onPaneClick}
         proOptions={proOptions}
         connectionMode={ConnectionMode.Loose}
-        className="-z-10"
+        className={`-z-10 ${currentTool !== "select" ? "cursor-cross": ""}`}
         nodesDraggable={validateRole()}
         nodesConnectable={validateRole()}
         nodesFocusable={validateRole()}

@@ -1,30 +1,25 @@
 import {
-  ActionIcon,
   Box,
   Divider,
   Flex,
-  HoverCard,
   Paper,
   rem,
   Text,
-  Tooltip,
 } from "@mantine/core";
 import {
   IconCode,
   IconDownload,
-  IconSchool,
   IconShare,
-  IconTool,
 } from "@tabler/icons-react";
 import { useProjectStore } from "../store/useProjectStore";
 import useProjectIcon from "../hooks/useProjectIcon";
 import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
 import useIsTruncated from "../hooks/useIsTruncated";
-import { ReactNode } from "react";
 import { modals } from "@mantine/modals";
 import useCodeGenRepo from "../data/repo/useCodeGenRepo";
 import { useEditorStore } from "../store/useEditorStore";
 import CustomNotification from "../components/ui/CustomNotification";
+import TooltipIconButton from "../components/ui/TooltipIconButton";
 
 function TopMiddleBar() {
   const { selectedProject } = useProjectStore();
@@ -72,7 +67,7 @@ function TopMiddleBar() {
     <Box
       className="p-3.5 absolute z-10 top-0 left-1/2 transform -translate-x-1/2"
       maw={rem(340)}
-      miw={rem(337)}
+      miw={rem(310)}
     >
       <Paper>
         <Flex
@@ -100,11 +95,11 @@ function TopMiddleBar() {
 
           <Divider orientation="vertical" />
           <Flex className="gap-1" direction="row" wrap="wrap">
-            <TooltipIconButton
+            {/* <TooltipIconButton
               icon={<IconTool className="p-0.5" />}
               label="Initial Setup"
               disabled={isButtonDisabled}
-            />
+            /> */}
             <TooltipIconButton
               icon={<IconCode className="p-0.5" />}
               label="Code Generation"
@@ -132,32 +127,6 @@ function TopMiddleBar() {
         </Flex>
       </Paper>
     </Box>
-  );
-}
-
-function TooltipIconButton({
-  icon,
-  label,
-  disabled,
-  onClick,
-}: {
-  icon: ReactNode;
-  label: string;
-  disabled: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <Tooltip label={label}>
-      <ActionIcon
-        variant="subtle"
-        size="md"
-        radius="sm"
-        disabled={disabled}
-        onClick={onClick}
-      >
-        {icon}
-      </ActionIcon>
-    </Tooltip>
   );
 }
 

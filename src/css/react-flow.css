@@ -1,0 +1,4 @@
+
+.react-flow.cursor-cross .react-flow__pane {
+	cursor: crosshair; /* add !important if necessary */
+}

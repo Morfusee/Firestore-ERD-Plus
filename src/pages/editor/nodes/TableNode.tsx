@@ -10,18 +10,20 @@ import {
 } from "@mantine/core";
 import { useDidUpdate } from "@mantine/hooks";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { Handle, NodeProps, NodeResizer, Position } from "@xyflow/react";
+import { Handle, NodeProps, NodeResizer, Position, useNodeConnections, useNodesData } from "@xyflow/react";
 import { useContextMenu } from "mantine-contextmenu";
 import { ChangeEvent, memo, useCallback, useEffect, useState } from "react";
 import TextSelect from "../../../components/ui/TextSelect";
 import useEditorRepo from "../../../data/repo/useEditorRepo";
 import useIsDarkMode from "../../../hooks/useIsDarkMode";
-import type {
-  TableField,
-  TableNode,
-  TableType,
+import {
+  EditorNode,
+  type TableField,
+  type TableNode,
+  type TableType,
 } from "../../../types/EditorTypes";
 import _ from "lodash";
+import { isTableNode } from "../../../data/repo/useCodeGenRepo";
 
 export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
   const theme = useMantineTheme();
@@ -54,6 +56,16 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
     editNodeDataField,
     deleteNodeDataField,
   } = useEditorRepo();
+
+  const relationshipConnections = useNodeConnections()
+  const relationshipData = useNodesData<EditorNode>(
+    relationshipConnections.filter(conn => conn.source != id).map(conn => conn.source)
+  )
+
+  const foreignIds = relationshipData
+    .filter(node => isTableNode(node))
+    .map(node => node.data.name)
+    
 
   return (
     <>
@@ -106,10 +118,25 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
         <Card.Section>
           <Stack className="px-3 py-2" gap="xs">
             <Stack gap={2}>
-              <Flex justify="space-between" className="px-2 py-2 rounded-md ">
-                <Text>id</Text>
-                <TextSelect value={"auto-gen"} options={idOptions} />
-              </Flex>
+              <TableNodeReadonlyField 
+                field={{
+                  name: "id",
+                  type: "auto-gen"
+                }}
+                options={idOptions}
+              />
+              {
+                foreignIds.length > 0 && 
+                  foreignIds.map(foreignId => (
+                    <TableNodeReadonlyField
+                      key={foreignId}
+                      field={{
+                        name: `${foreignId.charAt(0).toLowerCase() + foreignId.slice(1)}Id`,
+                        type: "string"
+                      }}
+                    />
+                  ))
+              }
               {data.fields.map((field, index) => (
                 <TableNodeField
                   key={index}
@@ -177,6 +204,28 @@ export default memo(({ id, data, isConnectable }: NodeProps<TableNode>) => {
     </>
   );
 });
+
+
+function TableNodeReadonlyField({
+  field,
+  options
+}: {
+  field: TableField | { name: TableField["name"]; type: TableType };
+  options?: string[]
+}) {
+
+  return(
+    <Flex justify="space-between" className="px-2 py-2 rounded-md ">
+      <Text>{field.name}</Text>
+      {
+        options ? 
+          <TextSelect value={field.type} options={options} /> :
+          <Text>{field.type}</Text>
+      }
+    </Flex>
+  )
+}
+
 
 function TableNodeField({
   type,
@@ -257,8 +306,8 @@ function TableNodeField({
       gap={"xs"}
       className={
         "px-2 py-1 rounded-md transition-colors " +
-        (!fieldName.trim() && "text-red-500 ") +
-        (type === "field" && "hover:bg-neutral-500 hover:bg-opacity-20")
+        ((!fieldName.trim()) ? "text-red-500 ": "") +
+        (type === "field" ? "hover:bg-neutral-500 hover:bg-opacity-20 " : "")
       }
       onContextMenu={onContextMenu}
     >
