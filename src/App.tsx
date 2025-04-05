@@ -46,7 +46,7 @@ function AppRouting() {
   // Invoke the global hotkeys
   useGlobalHotkeys();
 
-  // Show nothing if theme is empty
+  // Show nothing if the theme is empty
   if (Object.keys(theme).length === 0) {
     return null;
   }
