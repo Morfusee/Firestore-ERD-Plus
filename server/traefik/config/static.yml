@@ -19,6 +19,8 @@ entryPoints:
           scheme: https
   websecure:
     address: ":443"
+  server:
+    address: ":3000"
 
 providers:
   docker:
