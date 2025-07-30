@@ -19,6 +19,7 @@ services:
     ports:
     - "80:80"
     - "443:443"
+    - "3000:3000"
     volumes:
     - ./letsencrypt:/letsencrypt:rw # letsencrypt folder
     - ./traefik/config:/etc/traefik/config:ro # traefik folder
@@ -66,16 +67,17 @@ services:
     - "traefik.enable=true"
 
     # Router Configuration
-    - "traefik.http.routers.server.rule=Host(`${BASE_URL_FQDN}`)"
-    - "traefik.http.routers.server.entrypoints=websecure"
+    # - "traefik.http.routers.server.rule=Host(`${BASE_URL_FQDN}`)"
+    - "traefik.http.routers.server.rule=PathPrefix(`/`)"
+    - "traefik.http.routers.server.entrypoints=server"
     - "traefik.http.routers.server.middlewares=cors,security,block-sensitive"
-    - "traefik.http.routers.server.tls.certresolver=tlsresolver"
+    # - "traefik.http.routers.server.tls.certresolver=tlsresolver"
 
-    # TLS Configuration
-    - "traefik.tls.options.default.minVersion=VersionTLS12"
-    - "traefik.tls.options.default.sniStrict=true"
-    - "traefik.tls.options.default.cipherSuites=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-    - "traefik.tls.options.default.curvePreferences=CurveP521,CurveP384"
+    # # TLS Configuration
+    # - "traefik.tls.options.default.minVersion=VersionTLS12"
+    # - "traefik.tls.options.default.sniStrict=true"
+    # - "traefik.tls.options.default.cipherSuites=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    # - "traefik.tls.options.default.curvePreferences=CurveP521,CurveP384"
 
     # Middleware: CORS Headers
     - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,PATCH,DELETE"
@@ -99,14 +101,16 @@ services:
     - "traefik.http.middlewares.block-sensitive.redirectregex.replacement=https://www.youtube.com/watch?v=xvFZjo5PgG0"
     - "traefik.http.middlewares.block-sensitive.redirectregex.permanent=true"
 
+    - "traefik.http.services.server.loadbalancer.server.port=3000"
+
     # Auto update image
     - "com.centurylinklabs.watchtower.enable=true"
     restart: always
     networks:
     - server-network
-    deploy:
-      mode: replicated
-      replicas: 2
+    # deploy:
+    #   mode: replicated
+    #   replicas: 2
     depends_on:
     - mongo
 
