@@ -1,0 +1,114 @@
+services: 
+
+  # To prevent mounting docker.sock, which is a security risk
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    environment:
+      CONTAINERS: 1
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - socket-proxy-network
+
+  reverse-proxy:
+    image: traefik:latest
+    command:
+    - "--configFile=/etc/traefik/config/static.yml"
+    security_opt:
+    - no-new-privileges:true
+    ports:
+    - "80:80"
+    - "443:443"
+    - "3000:3000"
+    volumes:
+    - ./letsencrypt:/letsencrypt:rw # letsencrypt folder
+    - ./traefik/config:/etc/traefik/config:ro # traefik folder
+    - ./traefik/logs:/logs # traefik folder
+    environment:
+      BASE_URL_FQDN: ${BASE_URL_FQDN}
+      CLIENT_URL: ${CLIENT_URL}
+    restart: always
+    networks:
+    - server-network
+    - socket-proxy-network
+    depends_on:
+    - socket-proxy
+
+  mongo:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: FERD
+      INIT_MONGO_USERNAME: ${MONGO_USERNAME}
+      INIT_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      INIT_MONGO_DATABASE: FERD
+    volumes:
+    - ./mongodb-data:/data/db
+    - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: always
+    networks:
+    - server-network
+  
+  server:
+    image: ghcr.io/morfusee/ferd-server:latest
+    environment:
+      SESSION_KEY: ${SESSION_KEY}
+      SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      CLIENT_URL: ${CLIENT_URL}
+      BASE_URL: ${BASE_URL}
+      MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
+      IS_DOCKERIZED: true
+    labels:
+    # Since you have two replicas, you can't put all of these inside dynamic.yml :(
+    # Enable Traefik for this service
+    - "traefik.enable=true"
+
+    # Router Configuration
+    - "traefik.http.routers.server.rule=Host(`api.ferd.mcube.uk`)"
+    - "traefik.http.routers.server.entrypoints=web"
+
+    # Auto update image
+    - "com.centurylinklabs.watchtower.enable=true"
+    restart: always
+    networks:
+    - server-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    depends_on:
+    - mongo
+
+  watchtower:
+    image: containrrr/watchtower
+    command:
+    - "--label-enable"
+    - "--interval"
+    - "30"
+    - "--rolling-restart"
+    environment:
+      WATCHTOWER_CLEANUP: true
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+  #   networks: # This should be set to enable http://server:3000 as a URL
+  #   - server-network
+
+networks:
+  server-network:
+    driver: bridge
+  socket-proxy-network:
+    driver: bridge
+
+# When reusing this compose file, please create the following folders:
+# - letsencrypt
+# - traefik
