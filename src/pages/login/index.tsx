@@ -18,8 +18,8 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { GoogleButton } from "../../components/ui/SocialButtons";
 import useUserRepo from "../../data/repo/useUserRepo";
-import { getErrorMessage } from "../../utils/errorHelpers";
 import useAuth from "../../hooks/useAuth";
+import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -111,7 +111,16 @@ function Login() {
                   {...form.getInputProps("password")}
                 />
 
-                <Button className=" mt-2" variant="filled" type="submit">
+                <Group gap="xs" justify="flex-end">
+                  <Anchor
+                    size="sm"
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    Forgot password?
+                  </Anchor>
+                </Group>
+
+                <Button variant="filled" type="submit">
                   {isLoggingIn ? <Loader size={"sm"} /> : "Login"}
                 </Button>
               </Stack>
