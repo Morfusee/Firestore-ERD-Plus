@@ -1,10 +1,10 @@
-import SuccessResponse from "@root/success/SuccessResponse.ts";
-import User from "../models/userModel.ts";
-import { NextFunction, Request, Response } from "express";
+import { bucket } from "@root/config/firebase";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import ValidationError from "@root/errors/ValidationError.ts";
 import CreatedResponse from "@root/success/CreatedResponse.ts";
-import { bucket } from "@root/config/firebase";
+import SuccessResponse from "@root/success/SuccessResponse.ts";
+import { NextFunction, Request, Response } from "express";
+import User from "../models/userModel.ts";
 
 export const getAllUsers = async (
   req: Request,
@@ -229,7 +229,9 @@ export const deleteUser = async (
 };
 
 export const uploadProfilePicture = async (
-  req: Request,
+  req: Request & {
+    file?: { originalname: string; buffer: Buffer; mimetype: string };
+  },
   res: Response,
   next: NextFunction
 ) => {
