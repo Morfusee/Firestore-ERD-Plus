@@ -1,8 +1,10 @@
 import BadRequestError from "@root/errors/BadRequestError";
+import ConflictError from "@root/errors/ConflictError";
 import User from "@root/models/userModel";
 import CreatedResponse from "@root/success/CreatedResponse";
 import SuccessResponse from "@root/success/SuccessResponse";
 import { AuthRequest, AuthUser } from "@root/types/authTypes";
+import dotenv from "dotenv";
 import { NextFunction, Request, Response } from "express";
 import {
   createUserWithEmailAndPassword,
@@ -13,8 +15,6 @@ import {
   signOut,
 } from "../config/firebase";
 import passport from "../config/passport";
-import dotenv from "dotenv";
-import ConflictError from "@root/errors/ConflictError";
 
 dotenv.config();
 const auth = getAuth();
@@ -186,7 +186,9 @@ export const resetPassword = async (
     }
 
     // Send password reset email
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email, {
+      url: process.env.CLIENT_URL || "http://localhost:5173",
+    });
 
     next(new SuccessResponse("Password reset email sent successfully.", null));
   } catch (error) {
