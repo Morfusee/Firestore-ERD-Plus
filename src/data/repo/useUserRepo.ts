@@ -8,6 +8,7 @@ import {
   loginUserApi,
   logoutUserApi,
   registerUserApi,
+  resetPasswordApi,
 } from "../api/authApi";
 import {
   getUserApi,
@@ -159,6 +160,19 @@ const useUserRepo = () => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const res = await resetPasswordApi(email);
+      return res;
+    } catch (err: any) {
+      console.log(err);
+      if (axios.isAxiosError(err)) {
+        return err.response?.data;
+      }
+      return { success: false, message: err.message || "Error" } as any;
+    }
+  };
+
   // This is just for local state update
   const setProfileImage = (profilePic: string) => {
     setProfilePic(profilePic);
@@ -210,6 +224,7 @@ const useUserRepo = () => {
     changeUserDisplayname,
     authenticateUser,
     logoutUser,
+    resetPassword,
     setProfileImage,
     uploadProfileImage,
   };
