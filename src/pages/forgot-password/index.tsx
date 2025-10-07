@@ -6,25 +6,39 @@ import {
     Container,
     Group,
     Loader,
+    rem,
     Stack,
     Text,
     TextInput,
     Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
+
+type SubmissionDetails = {
+  successMessage: string | null;
+  errorMessage: string | null;
+  isSubmitting: boolean;
+};
 
 function ForgotPasswordPage() {
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
   const { resetPassword } = useUserRepo();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const defaultSubmissionDetails = {
+    successMessage: null,
+    errorMessage: null,
+    isSubmitting: false,
+  } satisfies SubmissionDetails;
+
+  const [submissionDetails, setSubmissionDetails] = useState<SubmissionDetails>(
+    defaultSubmissionDetails
+  );
 
   const form = useForm({
     initialValues: {
@@ -40,68 +54,105 @@ function ForgotPasswordPage() {
   if (isAuthenticated) return <Navigate to="/" replace />;
 
   const handleSubmit = async (values: typeof form.values) => {
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
+    setSubmissionDetails((prev) => ({
+      ...defaultSubmissionDetails,
+      isSubmitting: true,
+    }));
 
     try {
       const res = await resetPassword(values.email);
       if (res && res.success) {
-        setSuccessMessage(
-          "If an account exists for that email, a password reset link has been sent."
-        );
+        setSubmissionDetails((prev) => ({
+          ...prev,
+          errorMessage: null,
+          successMessage: "Password reset email sent successfully.",
+        }));
       } else {
-        setErrorMessage(res?.message || "Failed to send password reset email.");
+        setSubmissionDetails((prev) => ({
+          ...prev,
+          successMessage: null,
+          errorMessage: res?.message || "Failed to send password reset email.",
+        }));
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || "An unexpected error occurred.");
+      setSubmissionDetails((prev) => ({
+        ...prev,
+        successMessage: null,
+        errorMessage: err?.message || "An unexpected error occurred.",
+      }));
     } finally {
-      setIsSubmitting(false);
+      setSubmissionDetails((prev) => ({
+        ...prev,
+        isSubmitting: false,
+      }));
     }
   };
 
   return (
     <Container className="h-screen">
       <Center className="h-full">
-        <Card className=" w-full max-w-md">
+        <Card className="w-full max-w-md" p={"xl"}>
           <Center>
-            <Title order={3}>Reset your password</Title>
+            <Title order={3}>Forgot your password?</Title>
           </Center>
 
-          <Text size="sm" mt="sm" color="dimmed">
-            Enter the email associated with your account and we'll send a link to
-            reset your password.
+          <Text size="sm" mt="sm" c="dimmed" ta={"center"}>
+            Enter your email address and we'll send you instructions to reset
+            it.
           </Text>
 
           <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
             <Stack mt="md">
               <TextInput
                 variant="filled"
-                label="Email"
+                required
+                label="Email Address"
                 placeholder="your@email.com"
+                radius={"md"}
                 {...form.getInputProps("email")}
               />
 
-              {errorMessage && (
+              {submissionDetails.errorMessage && (
                 <Text c="red" size="sm">
-                  {errorMessage}
+                  {submissionDetails.errorMessage}
                 </Text>
               )}
 
-              {successMessage && (
-                <Text c="teal" size="sm">
-                  {successMessage}
+              {submissionDetails.successMessage && (
+                <Text c={"green.7"} size="sm">
+                  {submissionDetails.successMessage}
                 </Text>
               )}
 
-              <Button type="submit" variant="filled" className=" mt-2">
-                {isSubmitting ? <Loader size="sm" /> : "Send reset email"}
-              </Button>
+              <Stack gap={rem(7)}>
+                <Button
+                  type="submit"
+                  variant="filled"
+                  disabled={submissionDetails.isSubmitting}
+                >
+                  {submissionDetails.isSubmitting ? (
+                    <Loader size="sm" />
+                  ) : (
+                    "Send reset email"
+                  )}
+                </Button>
 
-              <Group gap="sm" style={{ justifyContent: "space-between" }}>
-                <Anchor size="sm" onClick={() => navigate("/login")}>Back to Login</Anchor>
-                <Anchor size="sm" onClick={() => navigate("/register")}>Create account</Anchor>
-              </Group>
+                <Text size="xs" ta={"center"} c={"dimmed"}>
+                  Check your spam folder if you don't see the email.
+                </Text>
+              </Stack>
+
+              <Anchor
+                size="sm"
+                ml={"auto"}
+                onClick={() => navigate("/login")}
+                style={{ cursor: "pointer", textAlign: "center" }}
+              >
+                <Group gap={rem(5)} justify="flex-end">
+                  <IconArrowLeft size={13} />
+                  Back to Login
+                </Group>
+              </Anchor>
             </Stack>
           </form>
         </Card>
