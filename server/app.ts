@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import session from "express-session";
+import helmet from "helmet";
 import mongoose from "mongoose";
 import passport from "passport";
 import "./config/passport.ts";
@@ -16,16 +17,17 @@ import memberRoutes from "./routes/memberRoutes.ts";
 import projectRoutes from "./routes/projectRoutes.ts";
 import settingsRoutes from "./routes/settingsRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
-import helmet from "helmet";
 
 dotenv.config();
 
 const app = express();
 
+const isDockerRunning = process.env.IS_DOCKERIZED;
+
 // Enable CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: isDockerRunning ? process.env.CLIENT_URL : "http://localhost:5173",
     methods: "GET,POST,DELETE,PATCH,OPTIONS",
     credentials: true,
   })
@@ -58,7 +60,6 @@ app.use(cookieParser());
 app.options("*", cors());
 
 if (process.env.NODE_ENV !== "test") {
-  const isDockerRunning = process.env.IS_DOCKERIZED;
   const mongoURI = isDockerRunning
     ? process.env.MONGO_DOCKER_URI
     : process.env.MONGO_ATLAS_URI;

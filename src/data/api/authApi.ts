@@ -67,3 +67,17 @@ export const logoutUserApi = async () => {
 
   return response;
 };
+
+export const resetPasswordApi = async (email: string) => {
+  const response = await axiosInstance
+    .post(`/auth/reset-password`, { email })
+    .then((res) => {
+      if (!res.data.success) {
+        throw new Error("Failed to send password reset email");
+      }
+
+      return res.data;
+    });
+
+  return response;
+};

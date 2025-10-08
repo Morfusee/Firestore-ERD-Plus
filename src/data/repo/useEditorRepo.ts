@@ -2,13 +2,13 @@ import { useMantineTheme } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { Connection, Edge, MarkerType, XYPosition } from "@xyflow/react";
 import { nanoid } from "nanoid";
+import { singletonHook } from "react-singleton-hook";
 import { useEditorStore } from "../../store/useEditorStore";
 import {
   IEditorDataSnapshot,
   NodeDataBase,
 } from "../../types/EditorStoreTypes";
 import { EditorNode, TableField } from "../../types/EditorTypes";
-import { singletonHook } from "react-singleton-hook"
 
 const useEditorRepoImpl = () => {
   const theme = useMantineTheme();
@@ -52,45 +52,48 @@ const useEditorRepoImpl = () => {
    */
   const addNode = (type: EditorNode["type"], position?: XYPosition) => {
     // Define initial node data
-    let data: EditorNode = {
-      id: nanoid(),
-      position: {
-        x: position?.x || 0,
-        y: position?.y || 0,
-      },
-      data: {},
-    };
 
+    let data: EditorNode;
     switch (type) {
       case "note": {
         data = {
-          ...data,
+          id: nanoid(),
+          position: {
+            x: position?.x || 0,
+            y: position?.y || 0,
+          },
+          type: "note",
           data: {
             note: "",
           },
-          type: type,
         };
         break;
       }
       case "table": {
         data = {
-          ...data,
+          id: nanoid(),
+          position: {
+            x: position?.x || 0,
+            y: position?.y || 0,
+          },
+          type: "table",
           data: {
             name: "",
             type: "collection",
             fields: [],
           },
-          type: type,
         };
         break;
       }
+      default:
+        throw new Error(`Unknown node type: ${type}`);
     }
 
     // Run onChange
     onChange();
     // Add a node to state
     addNodeState(data);
-    console.log("Added node " + data)
+    console.log("Added node " + data);
   };
 
   /**
@@ -105,7 +108,7 @@ const useEditorRepoImpl = () => {
     onChange();
     // Update node position in state
     moveNodeState(id, position);
-    console.log(`Moved to ${position}`)
+    console.log(`Moved to ${position}`);
   };
 
   const deleteNode = (id: string) => {
@@ -236,18 +239,21 @@ const useEditorRepoImpl = () => {
   };
 };
 
-
-const useEditorRepo = singletonHook({
-  addNode: () => {},
-  moveNode: () => {},
-  deleteNode: () => {},
-  editNodeData: () => {},
-  addNodeDataField: () => {},
-  editNodeDataField: () => {},
-  deleteNodeDataField: () => {},
-  addEdge: () => {},
-  changeEdge: () => {},
-  deleteEdge: () => {},
-}, useEditorRepoImpl, { unmountIfNoConsumers: false });
+const useEditorRepo = singletonHook(
+  {
+    addNode: () => {},
+    moveNode: () => {},
+    deleteNode: () => {},
+    editNodeData: () => {},
+    addNodeDataField: () => {},
+    editNodeDataField: () => {},
+    deleteNodeDataField: () => {},
+    addEdge: () => {},
+    changeEdge: () => {},
+    deleteEdge: () => {},
+  },
+  useEditorRepoImpl,
+  { unmountIfNoConsumers: false }
+);
 
 export default useEditorRepo;
