@@ -1,4 +1,4 @@
-import { bucket } from "@root/config/firebase";
+import { bucket, getAuth } from "@root/config/firebase";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import ValidationError from "@root/errors/ValidationError.ts";
 import CreatedResponse from "@root/success/CreatedResponse.ts";
@@ -210,12 +210,31 @@ export const deleteUser = async (
 ) => {
   try {
     // Find the user by ID and delete
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
 
     // Check if user exists
     if (!user) {
       throw new NotFoundError("User not found.");
     }
+
+    // Delete profile pictrure from bucket
+    if (user.profilePicture) {
+      try {
+        const fileName = user.profilePicture.split("/").pop()?.split("?")[0];
+        if (fileName) {
+          await bucket.file(`profile-pictures/${fileName}`).delete();
+          console.log("Profile picture deleted:", fileName);
+        }
+      } catch (error) {
+        console.error("Failed to delete profile picture:", error);
+      }
+    }
+
+    // Delete from firebase
+    await getAuth().currentUser?.delete();
+
+    // Delete from database
+    await User.findByIdAndDelete(user._id);
 
     // Send success response
     next(
