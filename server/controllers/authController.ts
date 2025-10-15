@@ -7,6 +7,7 @@ import { AuthRequest, AuthUser } from "@root/types/authTypes";
 import dotenv from "dotenv";
 import { NextFunction, Request, Response } from "express";
 import {
+  admin,
   createUserWithEmailAndPassword,
   getAuth,
   sendEmailVerification,
@@ -220,6 +221,42 @@ export const authenticateUser = async (
     next(
       new SuccessResponse("User authenticated successfully.", {
         user,
+        emailVerified: authUser.email_verified,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const emailVerifiedStatus = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authUser: AuthUser = req.user;
+
+    if (!authUser) {
+      throw new BadRequestError("User not authenticated.");
+    }
+
+    // Get user from database
+    const user = await admin.auth().getUser(authUser.uid);
+
+    if (!user) {
+      throw new BadRequestError("Error getting user.");
+    }
+
+    if (user.emailVerified) {
+      // Clear authentication-related cookies from the client
+      res.clearCookie("access_token");
+      res.clearCookie("connect.sid", { path: "/" });
+    }
+
+    next(
+      new SuccessResponse("Retrieve email verification status", {
+        emailVerified: user.emailVerified,
       })
     );
   } catch (error) {

@@ -8,6 +8,7 @@ import {
   googleAuthFailed,
   googleCallback,
   googleAuth,
+  emailVerifiedStatus,
 } from "@root/controllers/authController";
 import {
   validateToken,
@@ -27,11 +28,15 @@ router.post("/login", loginUser);
 router.post("/logout", [validateToken, validate], logoutUser);
 router.post("/reset-password", resetPassword);
 router.get("/check-auth", [validateToken, validate], authenticateUser);
+router.get(
+  "/email-verified-status",
+  [validateToken, validate],
+  emailVerifiedStatus
+);
 
 // Google OAuth routes
 router.get("/google/callback", googleCallback);
 router.get("/google", googleAuth);
 router.get("/google/callback/failed", googleAuthFailed);
-
 
 export default router;
