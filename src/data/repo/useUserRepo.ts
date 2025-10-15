@@ -15,6 +15,7 @@ import {
   getUserByUsernameApi,
   updateUserApi,
   uploadProfilePictureApi,
+  deleteUserApi,
 } from "../api/userApi";
 
 const useUserRepo = () => {
@@ -215,6 +216,23 @@ const useUserRepo = () => {
     }
   };
 
+  const deleteUser = async () => {
+    if (!user?.email || !user?.username) {
+      return false;
+    }
+
+    try {
+      await deleteUserApi(user.id);
+
+      setCurrentUser(null);
+
+      return true;
+    } catch (err: any) {
+      console.error(err);
+      return false;
+    }
+  };
+
   return {
     user,
     getUser,
@@ -227,6 +245,7 @@ const useUserRepo = () => {
     resetPassword,
     setProfileImage,
     uploadProfileImage,
+    deleteUser,
   };
 };
 

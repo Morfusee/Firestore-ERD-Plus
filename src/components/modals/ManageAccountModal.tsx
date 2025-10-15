@@ -1,10 +1,8 @@
 import {
-  Avatar,
   Box,
   Button,
   FileButton,
   Group,
-  Skeleton,
   Stack,
   Text,
   TextInput,
@@ -13,14 +11,21 @@ import { useForm } from "@mantine/form";
 import { ContextModalProps, modals } from "@mantine/modals";
 import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { Cropper, CropperRef } from "react-advanced-cropper";
 import useUserRepo from "../../data/repo/useUserRepo";
 import ProfileAvatar from "../ui/ProfileAvatar";
+import { showNotification } from "@mantine/notifications";
+import { NavigateFunction } from "react-router-dom";
 
-function ManageAccountModal({ context, id, innerProps }: ContextModalProps) {
-  const { user, changeUserDisplayname } = useUserRepo();
+function ManageAccountModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<{ navigate: NavigateFunction }>) {
+  const { user, changeUserDisplayname, deleteUser } = useUserRepo();
 
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
+
+  const { navigate } = innerProps;
 
   useEffect(() => {
     context.updateModal({
@@ -75,6 +80,46 @@ function ManageAccountModal({ context, id, innerProps }: ContextModalProps) {
       modal: "cropImage",
       innerProps: {
         image: dataUrl,
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (!user) return;
+
+    modals.openConfirmModal({
+      title: "Delete your account",
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete your account? This action is
+          irreversible.
+        </Text>
+      ),
+      labels: { confirm: "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: async () => {
+        try {
+          const deleted = await deleteUser();
+          if (deleted) {
+            context.closeModal(id);
+
+            navigate("/login");
+
+            showNotification({
+              title: "Deleted",
+              message: "Your account has been deleted successfully.",
+              color: "green",
+            });
+          }
+        } catch (err: unknown) {
+          console.error(err);
+          showNotification({
+            title: "Error",
+            message:
+              err instanceof Error ? err.message : "Failed to delete account",
+            color: "red",
+          });
+        }
       },
     });
   };
@@ -140,7 +185,14 @@ function ManageAccountModal({ context, id, innerProps }: ContextModalProps) {
               </Button>
             </Group>
 
-            <Button variant="subtle">Delete Account</Button>
+            <Button
+              variant="subtle"
+              c="red"
+              leftSection={<IconTrash size={16} />}
+              onClick={handleDelete}
+            >
+              Delete Account
+            </Button>
           </Group>
         </Stack>
       </form>
