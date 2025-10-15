@@ -136,6 +136,17 @@ const useUserRepo = () => {
     }
   };
 
+  const checkEmailVerification = async () => {
+    try {
+      const authenticateUserResponse = await authenticateUserApi();
+
+      return authenticateUserResponse.data.emailVerified;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
   const logoutUser = async () => {
     try {
       const logoutUserResponse = await logoutUserApi();
@@ -223,6 +234,7 @@ const useUserRepo = () => {
     registerUser,
     changeUserDisplayname,
     authenticateUser,
+    checkEmailVerification,
     logoutUser,
     resetPassword,
     setProfileImage,

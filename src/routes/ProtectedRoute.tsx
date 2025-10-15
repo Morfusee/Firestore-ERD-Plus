@@ -1,10 +1,11 @@
 import { Navigate, Outlet } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { Box, Loader } from "@mantine/core";
+import EmailVerification from "../pages/email-verification";
 
 function ProtectedRoute() {
   // Check if the user is authenticated
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, emailVerified, loading } = useAuth();
 
   if (loading)
     return (
@@ -12,6 +13,8 @@ function ProtectedRoute() {
         <Loader />
       </Box>
     );
+
+  if (!emailVerified) return <EmailVerification />;
 
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 }
