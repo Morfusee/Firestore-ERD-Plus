@@ -14,7 +14,7 @@ function ProtectedRoute() {
       </Box>
     );
 
-  if (!emailVerified) return <EmailVerification />;
+  if (isAuthenticated && !emailVerified) return <EmailVerification />;
 
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 }
