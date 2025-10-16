@@ -105,8 +105,8 @@ function EmailVerification() {
           variant="filled"
           color={verified ? "green" : "blue"}
           onClick={() => {
-            navigate("/login");
             logoutUser();
+            navigate("/login");
           }}
         >
           Go to Login
