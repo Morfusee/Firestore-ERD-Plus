@@ -5,6 +5,8 @@ import CreatedResponse from "@root/success/CreatedResponse.ts";
 import SuccessResponse from "@root/success/SuccessResponse.ts";
 import { NextFunction, Request, Response } from "express";
 import User from "../models/userModel.ts";
+import { sendEmailNotification } from "@root/service/emailService/mailer.ts";
+import { accountDeletedEmail } from "@root/service/emailService/emailTemplates.ts";
 
 export const getAllUsers = async (
   req: Request,
@@ -217,6 +219,8 @@ export const deleteUser = async (
       throw new NotFoundError("User not found.");
     }
 
+    const { email: deletedUserEmail, username: deletedUsername } = user;
+
     // Delete profile pictrure from bucket
     if (user.profilePicture) {
       try {
@@ -235,6 +239,14 @@ export const deleteUser = async (
 
     // Delete from database
     await User.findByIdAndDelete(user._id);
+
+    await sendEmailNotification({
+      to: deletedUserEmail,
+
+      subject: `✅ Your FirestoreERD Account Has Been Deleted`,
+
+      html: accountDeletedEmail(deletedUsername),
+    });
 
     // Send success response
     next(
