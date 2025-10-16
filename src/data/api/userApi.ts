@@ -27,7 +27,7 @@ export const getUserByUsernameApi = async (
     })
     .then((res) => res.data);
 
-  console.log(response)
+  console.log(response);
 
   return response;
 };
@@ -68,6 +68,16 @@ export const uploadProfilePictureApi = async (
       }
     )
     .then((res) => res.data);
+
+  return response;
+};
+
+export const deleteUserApi = async (userId: string) => {
+  const response = await axiosInstance
+    .delete<APIResponse<{ message: string }>>(`/users/${userId}`)
+    .then((res) => {
+      res.data;
+    });
 
   return response;
 };

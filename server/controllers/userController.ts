@@ -1,10 +1,12 @@
-import { bucket } from "@root/config/firebase";
+import { bucket, getAuth } from "@root/config/firebase";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import ValidationError from "@root/errors/ValidationError.ts";
 import CreatedResponse from "@root/success/CreatedResponse.ts";
 import SuccessResponse from "@root/success/SuccessResponse.ts";
 import { NextFunction, Request, Response } from "express";
 import User from "../models/userModel.ts";
+import { sendEmailNotification } from "@root/service/emailService/mailer.ts";
+import { accountDeletedEmail } from "@root/service/emailService/emailTemplates.ts";
 
 export const getAllUsers = async (
   req: Request,
@@ -210,12 +212,41 @@ export const deleteUser = async (
 ) => {
   try {
     // Find the user by ID and delete
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
 
     // Check if user exists
     if (!user) {
       throw new NotFoundError("User not found.");
     }
+
+    const { email: deletedUserEmail, username: deletedUsername } = user;
+
+    // Delete profile pictrure from bucket
+    if (user.profilePicture) {
+      try {
+        const fileName = user.profilePicture.split("/").pop()?.split("?")[0];
+        if (fileName) {
+          await bucket.file(`profile-pictures/${fileName}`).delete();
+          console.log("Profile picture deleted:", fileName);
+        }
+      } catch (error) {
+        console.error("Failed to delete profile picture:", error);
+      }
+    }
+
+    // Delete from firebase
+    await getAuth().currentUser?.delete();
+
+    // Delete from database
+    await User.findByIdAndDelete(user._id);
+
+    await sendEmailNotification({
+      to: deletedUserEmail,
+
+      subject: `✅ Your FirestoreERD Account Has Been Deleted`,
+
+      html: accountDeletedEmail(deletedUsername),
+    });
 
     // Send success response
     next(

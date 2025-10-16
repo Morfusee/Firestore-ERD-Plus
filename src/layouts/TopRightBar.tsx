@@ -149,7 +149,7 @@ function ActionButtons({
                   handlers.close();
                   modals.openContextModal({
                     modal: "manageAcc",
-                    innerProps: {},
+                    innerProps: { navigate },
                   });
                 }}
               >
@@ -268,7 +268,7 @@ interface HistoryItemProps {
   dateTime: Date;
   currentVersion: boolean;
   memberChanges: IMember[];
-  disabled?: boolean
+  disabled?: boolean;
   onClick: () => void;
 }
 
