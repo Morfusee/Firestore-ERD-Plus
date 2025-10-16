@@ -3,14 +3,16 @@ import axiosInstance from "../../utils/axiosInstance";
 
 export const authenticateUserApi = async () => {
   const response = await axiosInstance
-    .get<APIResponse<FetchedUser>>(`/auth/check-auth`)
+    .get<APIResponse<FetchedUser & { emailVerified: boolean }>>(
+      `/auth/check-auth`
+    )
     .then((res) => {
       if (!res.data.success) {
         throw new Error("Failed to authenticate user");
       }
 
       return res.data;
-    })
+    });
 
   return response;
 };
@@ -74,6 +76,20 @@ export const resetPasswordApi = async (email: string) => {
     .then((res) => {
       if (!res.data.success) {
         throw new Error("Failed to send password reset email");
+      }
+
+      return res.data;
+    });
+
+  return response;
+};
+
+export const emailVerifiedStatusApi = async () => {
+  const response = await axiosInstance
+    .get<APIResponse<{ emailVerified: boolean }>>(`/auth/email-verified-status`)
+    .then((res) => {
+      if (!res.data.success) {
+        throw new Error("Failed to check verification status of the user");
       }
 
       return res.data;
