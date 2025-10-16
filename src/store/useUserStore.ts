@@ -8,6 +8,8 @@ export interface IUser {
   displayName?: string;
   profilePicture?: string;
   token: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface IUserState {
@@ -15,7 +17,7 @@ interface IUserState {
 }
 
 interface IUserActions {
-  getCurrentUser: () => IUser | null
+  getCurrentUser: () => IUser | null;
   setCurrentUser: (user: IUser | null) => void;
   setProfileImage: (image: string) => void;
 }
