@@ -21,7 +21,7 @@ function ManageAccountModal({
   id,
   innerProps,
 }: ContextModalProps<{ navigate: NavigateFunction }>) {
-  const { user, changeUserDisplayname, deleteUser } = useUserRepo();
+  const { user, changeUserDisplayname, deleteUser, logoutUser } = useUserRepo();
 
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
 
@@ -103,7 +103,8 @@ function ManageAccountModal({
           if (deleted) {
             context.closeModal(id);
 
-            navigate("/login");
+            logoutUser();
+            // navigate("/login");
 
             showNotification({
               title: "Deleted",

@@ -1,4 +1,4 @@
-import { bucket, getAuth } from "@root/config/firebase";
+import { admin, bucket, getAuth } from "@root/config/firebase";
 import NotFoundError from "@root/errors/NotFoundError.ts";
 import ValidationError from "@root/errors/ValidationError.ts";
 import CreatedResponse from "@root/success/CreatedResponse.ts";
@@ -7,6 +7,7 @@ import { NextFunction, Request, Response } from "express";
 import User from "../models/userModel.ts";
 import { sendEmailNotification } from "@root/service/emailService/mailer.ts";
 import { accountDeletedEmail } from "@root/service/emailService/emailTemplates.ts";
+import { AuthRequest, AuthUser } from "@root/types/authTypes.ts";
 
 export const getAllUsers = async (
   req: Request,
@@ -213,6 +214,7 @@ export const deleteUser = async (
   try {
     // Find the user by ID and delete
     const user = await User.findById(req.params.id);
+    const authUser = req.user as AuthUser;
 
     // Check if user exists
     if (!user) {
@@ -235,7 +237,8 @@ export const deleteUser = async (
     }
 
     // Delete from firebase
-    await getAuth().currentUser?.delete();
+    // await getAuth().currentUser?.delete();
+    await admin.auth().deleteUser(authUser.uid);
 
     // Delete from database
     await User.findByIdAndDelete(user._id);
