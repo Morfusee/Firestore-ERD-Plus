@@ -103,14 +103,14 @@ function ManageAccountModal({
           if (deleted) {
             context.closeModal(id);
 
-            logoutUser();
-            // navigate("/login");
-
             showNotification({
               title: "Deleted",
               message: "Your account has been deleted successfully.",
               color: "green",
             });
+
+            await logoutUser();
+            navigate("/login");
           }
         } catch (err: unknown) {
           console.error(err);
