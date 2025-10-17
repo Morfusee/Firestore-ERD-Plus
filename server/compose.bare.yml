@@ -1,10 +1,8 @@
 services: 
   mongo:
     image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_INITDB_DATABASE: FERD
+    env_file:
+      - .env
     volumes:
     - ./mongodb-data:/data/db
     restart: always
@@ -13,15 +11,8 @@ services:
   
   server:
     image: ghcr.io/morfusee/ferd-server:latest
-    environment:
-      SESSION_KEY: ${SESSION_KEY}
-      SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      CLIENT_URL: ${CLIENT_URL}
-      BASE_URL: ${BASE_URL}
-      MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
-      IS_DOCKERIZED: true
+    env_file:
+      - .env
     labels:
     # Since you have two replicas, you can't put all of these inside dynamic.yml :(
     # Enable Traefik for this service
