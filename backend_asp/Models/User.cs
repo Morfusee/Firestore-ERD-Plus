@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace backend_asp.Models;
 
+[BsonIgnoreExtraElements]
 public class User
 {
     [BsonId]
