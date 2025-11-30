@@ -1,3 +1,4 @@
+using System.Reflection;
 using backend_asp.Config;
 using backend_asp.Services;
 using DotNetEnv;
@@ -20,6 +21,17 @@ builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Register all services
+var serviceAssembly = Assembly.GetExecutingAssembly();
+
+var serviceTypes = serviceAssembly.GetTypes()
+    .Where(t => t.IsClass && !t.IsAbstract && t.Name.EndsWith("Service"));
+
+foreach (var type in serviceTypes)
+{
+    builder.Services.AddScoped(type);
+}
 
 var app = builder.Build();
 
