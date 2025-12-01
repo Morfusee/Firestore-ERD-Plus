@@ -1,11 +1,12 @@
-
-
+using backend_asp.Common.Attributes;
 using backend_asp.Models;
+using backend_asp.Services.Interfaces;
 using MongoDB.Driver;
 
 namespace backend_asp.Services;
 
-public class UserService(MongoDbContext context)
+[ScopedService]
+public class UserService(MongoDbContext context) : IUserService
 {
     private readonly MongoDbContext _context = context;
 
@@ -27,6 +28,16 @@ public class UserService(MongoDbContext context)
 
     public async Task<User?> UpdateUserAsync(string id, User updatedUser)
     {
+        var existingUser = await GetUserByIdAsync(id);
+
+        if (existingUser == null)
+        {
+            return null;
+        }
+
+        updatedUser.Id = existingUser.Id;
+        updatedUser.UpdatedAt = DateTime.UtcNow;
+
         var result = await _context.Users.ReplaceOneAsync(user => user.Id == id, updatedUser);
         return result.IsAcknowledged && result.ModifiedCount > 0 ? updatedUser : null;
     }

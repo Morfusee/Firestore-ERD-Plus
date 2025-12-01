@@ -1,10 +1,12 @@
 using MongoDB.Driver;
 using backend_asp.Config;
 using backend_asp.Models;
+using backend_asp.Common.Attributes;
 using Microsoft.Extensions.Options;
 
 namespace backend_asp.Services;
 
+[SingletonService]
 public class MongoDbContext
 {
     private readonly IMongoDatabase _database;
