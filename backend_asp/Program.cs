@@ -1,7 +1,7 @@
 using System.Reflection;
+using backend_asp.Common.Extensions;
 using backend_asp.Common.Handlers;
 using backend_asp.Config;
-using backend_asp.Services;
 using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,21 +15,15 @@ builder.Services.AddProblemDetails();
 
 // Configure MongoDbSettings
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
-builder.Services.AddSingleton<MongoDbContext>(); // Register MongoDbContext
 
 // Add controllers
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Register all services
-var serviceAssembly = Assembly.GetExecutingAssembly();
-var serviceTypes = serviceAssembly.GetTypes()
-    .Where(t => t.IsClass && !t.IsAbstract && t.Name.EndsWith("Service"));
-foreach (var type in serviceTypes)
-{
-    builder.Services.AddScoped(type);
-}
+// Register all services with attributes dynamically
+var assembly = Assembly.GetExecutingAssembly();
+builder.Services.RegisterServicesWithAttributes(assembly);
 
 var app = builder.Build();
 
