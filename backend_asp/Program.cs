@@ -1,4 +1,5 @@
 using System.Reflection;
+using backend_asp.Common.Handlers;
 using backend_asp.Config;
 using backend_asp.Services;
 using DotNetEnv;
@@ -9,13 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-// Add services to the container.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Configure MongoDbSettings
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
-
-// Register MongoDbContext
-builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddSingleton<MongoDbContext>(); // Register MongoDbContext
 
 // Add controllers
 builder.Services.AddControllers();
@@ -24,16 +24,19 @@ builder.Services.AddOpenApi();
 
 // Register all services
 var serviceAssembly = Assembly.GetExecutingAssembly();
-
 var serviceTypes = serviceAssembly.GetTypes()
     .Where(t => t.IsClass && !t.IsAbstract && t.Name.EndsWith("Service"));
-
 foreach (var type in serviceTypes)
 {
     builder.Services.AddScoped(type);
 }
 
 var app = builder.Build();
+
+// Source - https://stackoverflow.com/a
+// Posted by Andrei, modified by community. See post 'Timeline' for change history
+// Retrieved 2025-12-01, License - CC BY-SA 4.0
+app.UseExceptionHandler(_ => { });
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -42,9 +45,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
