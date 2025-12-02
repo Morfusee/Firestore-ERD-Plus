@@ -15,8 +15,8 @@ public class UserService(MongoDbContext context, UserMapper mapper) : IUserServi
 
     public async Task<List<UserResponseDto>> GetAllUsersAsync()
     {
-        return await _context.Users
-            .Find(_ => true).Project(user => _mapper.ToDto(user)).ToListAsync();
+        var users = await _context.Users.Find(_ => true).ToListAsync();
+        return users.Select(u => _mapper.ToDto(u)).ToList();
     }
 
     public async Task<UserResponseDto?> GetUserByIdAsync(string id)
