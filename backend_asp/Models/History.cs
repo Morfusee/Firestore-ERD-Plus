@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace backend_asp.Models;
 
@@ -35,9 +36,11 @@ public class Version
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     [BsonIgnore]
+    [JsonIgnore]
     public Project? Project { get; set; }
 
     [BsonIgnore]
+    [JsonIgnore]
     public History? CurrentHistory { get; set; }
 }
 
@@ -71,5 +74,6 @@ public class History
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     [BsonIgnore]
+    [JsonIgnore]
     public Version? Version { get; set; }
 }
