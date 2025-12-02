@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -15,6 +16,7 @@ public class Member
     public MemberRole Role { get; set; } = MemberRole.Viewer;
 
     [BsonIgnore]
+    [JsonIgnore]
     public User? User { get; set; }
 }
 
@@ -37,6 +39,7 @@ public class GeneralAccess
     public MemberRole Role { get; set; } = MemberRole.Viewer;
 
     [BsonIgnore]
+    [JsonIgnore]
     public List<User> Users { get; set; } = [];
 }
 

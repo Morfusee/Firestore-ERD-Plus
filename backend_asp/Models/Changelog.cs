@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace backend_asp.Models;
 
@@ -34,5 +35,6 @@ public class Changelog
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [BsonIgnore]
+    [JsonIgnore]
     public Project? Project { get; set; }
 }
