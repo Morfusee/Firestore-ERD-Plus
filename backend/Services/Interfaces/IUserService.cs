@@ -1,14 +1,13 @@
-using backend.Common.Attributes;
 using backend.DTOs.User;
-using backend.Models;
+using FluentResults;
 
 namespace backend.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<List<UserResponseDto>> GetAllUsersAsync();
-    Task<UserResponseDto?> GetUserByIdAsync(string id);
-    Task<UserResponseDto> CreateUserAsync(CreateUserDto user);
-    Task<UserResponseDto?> UpdateUserAsync(string id, UpdateUserDto updatedUser);
-    Task<bool> DeleteUserAsync(string id);
+    Task<Result<IEnumerable<UserResponseDto>>> GetAllUsersAsync();
+    Task<Result<UserResponseDto?>> GetUserByIdAsync(string id);
+    Task<Result<UserResponseDto>> CreateUserAsync(CreateUserDto user);
+    Task<Result<UserResponseDto?>> UpdateUserAsync(string id, UpdateUserDto updatedUser);
+    Task<Result<bool>> DeleteUserAsync(string id);
 }
