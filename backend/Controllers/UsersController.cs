@@ -16,7 +16,14 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
     {
-        return Ok(await _userService.GetAllUsersAsync());
+        var users = await _userService.GetAllUsersAsync();
+
+        if (users.IsFailed)
+        {
+            return StatusCode(500, "An error occurred while retrieving users.");
+        }
+
+        return Ok(users);
     }
 
     [HttpGet("{id}")]
@@ -26,15 +33,20 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
 
         if (user == null) return NotFound();
 
-        return Ok(user);
+        return Ok(user.Value);
     }
 
     [HttpPost]
     public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserDto user)
     {
         var createdUser = await _userService.CreateUserAsync(user);
-        
-        return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
+
+        if (createdUser.IsFailed)
+        {
+            return StatusCode(500, createdUser.Errors[0].Message);
+        }
+
+        return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Value.Id }, createdUser);
     }
 
     [HttpPut("{id}")]
@@ -52,7 +64,10 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     {
         var result = await _userService.DeleteUserAsync(id);
 
-        if (!result) return NotFound();
+        if (result.IsFailed || !result.Value)
+        {
+            return StatusCode(500, result.Errors[0].Message);
+        }
 
         return NoContent();
     }
