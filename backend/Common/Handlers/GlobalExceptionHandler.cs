@@ -19,7 +19,7 @@ internal sealed class GlobalExceptionHandler(
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
 
             // Default to 500 for all other unexpected errors/crashes
-            _ => StatusCodes.Status500InternalServerError
+            _ => httpContext.Response.StatusCode
         };
 
         var context = new ProblemDetailsContext
