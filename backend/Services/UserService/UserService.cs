@@ -2,11 +2,10 @@ using backend.Common.Attributes;
 using backend.DTOs.User;
 using backend.Mappers;
 using backend.Models;
-using backend.Services.Interfaces;
 using FluentResults;
 using MongoDB.Driver;
 
-namespace backend.Services;
+namespace backend.Services.UserService;
 
 [ScopedService]
 public class UserService(MongoDbContext context, UserMapper mapper) : IUserService
