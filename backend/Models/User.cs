@@ -1,7 +1,7 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Models;
 
@@ -45,6 +45,5 @@ public class User
 
     [BsonIgnore]
     [JsonIgnore]
-    // How do I not return this in queries?
     public List<Project> Projects { get; set; } = [];
 }
