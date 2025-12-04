@@ -16,14 +16,33 @@ public class UserService(MongoDbContext context, UserMapper mapper) : IUserServi
 
     public async Task<Result<IEnumerable<UserResponseDto>>> GetAllUsersAsync()
     {
-        var users = await _context.Users.Find(_ => true).ToListAsync();
-        return users.Select(u => _mapper.ToDto(u)).ToList();
+        try
+        {
+            var users = await _context.Users.Find(_ => true).ToListAsync();
+            var userDtos = users.ConvertAll(user => _mapper.ToDto(user));
+            return Result.Ok<IEnumerable<UserResponseDto>>(userDtos);
+        }
+        catch (Exception ex)
+        {
+            return Result
+                .Fail<IEnumerable<UserResponseDto>>("Failed to retrieve users")
+                .WithError(ex.Message);
+        }
     }
 
-    public async Task<Result<UserResponseDto?>> GetUserByIdAsync(string id)
+    public async Task<Result<UserResponseDto>> GetUserByIdAsync(string id)
     {
-        var user = await _context.Users.Find(user => user.Id == id).FirstOrDefaultAsync();
-        return user == null ? null : _mapper.ToDto(user);
+        try
+        {
+            var user = await _context.Users.Find(user => user.Id == id).FirstOrDefaultAsync();
+            return user == null
+                ? Result.Fail<UserResponseDto>("User not found")
+                : Result.Ok(_mapper.ToDto(user));
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<UserResponseDto>("Failed to retrieve user").WithError(ex.Message);
+        }
     }
 
     public async Task<Result<UserResponseDto>> CreateUserAsync(CreateUserDto user)
@@ -36,29 +55,54 @@ public class UserService(MongoDbContext context, UserMapper mapper) : IUserServi
         }
         catch (Exception ex)
         {
-            return Result.Fail(ex.Message);
+            return Result.Fail("Failed to create user").WithError(ex.Message);
         }
     }
 
-    public async Task<Result<UserResponseDto?>> UpdateUserAsync(string id, UpdateUserDto updatedUser)
+    public async Task<Result<UserResponseDto>> UpdateUserAsync(string id, UpdateUserDto updatedUser)
     {
-        var existingUser = await GetUserByIdAsync(id);
-
-        if (existingUser.IsFailed || existingUser.Value == null)
+        try
         {
-            return Result.Fail("User not found");
+            var updateDefinition = Builders<User>
+                .Update.Set(u => u.DisplayName, updatedUser.DisplayName)
+                .Set(u => u.Email, updatedUser.Email);
+
+            var result = await _context.Users.UpdateOneAsync(
+                user => user.Id == id,
+                updateDefinition
+            );
+
+            if (result.MatchedCount == 0)
+            {
+                return Result.Fail<UserResponseDto>("User not found");
+            }
+
+            var user = await _context.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
+
+            return Result.Ok(_mapper.ToDto(user!));
         }
-
-        _mapper.UpdateUser(updatedUser, existingUser.Value);
-
-        var result = await _context.Users.ReplaceOneAsync(user => user.Id == id, _mapper.ToUser(existingUser.Value));
-        return result.IsAcknowledged ? _mapper.ToDto(_mapper.ToUser(existingUser.Value)) : null;
+        catch (Exception ex)
+        {
+            return Result.Fail<UserResponseDto>("Failed to update user").WithError(ex.Message);
+        }
     }
 
     public async Task<Result<bool>> DeleteUserAsync(string id)
     {
-        var result = await _context.Users.DeleteOneAsync(user => user.Id == id);
-        return result.IsAcknowledged && result.DeletedCount > 0;
-    }
+        try
+        {
+            var result = await _context.Users.DeleteOneAsync(user => user.Id == id);
 
+            if (result.DeletedCount == 0)
+            {
+                return Result.Fail<bool>("User not found");
+            }
+
+            return Result.Ok(true);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<bool>("Failed to delete user").WithError(ex.Message);
+        }
+    }
 }
