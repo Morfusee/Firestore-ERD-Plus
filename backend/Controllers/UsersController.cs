@@ -1,7 +1,7 @@
 using backend.Common.Extensions;
 using backend.Common.Models;
 using backend.DTOs.User;
-using backend.Services.Interfaces;
+using backend.Services.UserService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;

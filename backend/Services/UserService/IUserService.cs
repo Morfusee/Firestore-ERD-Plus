@@ -1,7 +1,7 @@
 using backend.DTOs.User;
 using FluentResults;
 
-namespace backend.Services.Interfaces;
+namespace backend.Services.UserService;
 
 public interface IUserService
 {
