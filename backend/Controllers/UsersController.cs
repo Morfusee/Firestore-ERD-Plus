@@ -1,6 +1,6 @@
-
+using backend.Common.Extensions;
+using backend.Common.Models;
 using backend.DTOs.User;
-using backend.Models;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,67 +8,68 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(IUserService userService, ILogger<UsersController> logger) : ControllerBase
+public class UsersController(IUserService userService, ILogger<UsersController> logger)
+    : ControllerBase
 {
     private readonly IUserService _userService = userService;
     private readonly ILogger<UsersController> _logger = logger;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
+    [ProducesResponseType(
+        typeof(ApiResponse<IEnumerable<UserResponseDto>>),
+        StatusCodes.Status200OK
+    )]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetUsers()
     {
         var users = await _userService.GetAllUsersAsync();
 
-        if (users.IsFailed)
-        {
-            return StatusCode(500, "An error occurred while retrieving users.");
-        }
-
-        return Ok(users);
+        return this.ToApiResponse(users);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserResponseDto>> GetUserById(string id)
+    [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<UserResponseDto>>> GetUserById(string id)
     {
         var user = await _userService.GetUserByIdAsync(id);
 
-        if (user == null) return NotFound();
-
-        return Ok(user.Value);
+        return this.ToApiResponse(user)!;
     }
 
     [HttpPost]
-    public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserDto user)
+    [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserResponseDto>>> CreateUser(
+        [FromBody] CreateUserDto user
+    )
     {
         var createdUser = await _userService.CreateUserAsync(user);
 
-        if (createdUser.IsFailed)
-        {
-            return StatusCode(500, createdUser.Errors[0].Message);
-        }
-
-        return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Value.Id }, createdUser);
+        return this.ToApiResponse(createdUser);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto updatedUser)
+    [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<UserResponseDto>>> UpdateUser(
+        string id,
+        [FromBody] UpdateUserDto updatedUser
+    )
     {
         var result = await _userService.UpdateUserAsync(id, updatedUser);
 
-        if (result == null) return NotFound();
-
-        return Ok(result);
+        return this.ToApiResponse(result);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUser(string id)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
     {
         var result = await _userService.DeleteUserAsync(id);
 
-        if (result.IsFailed || !result.Value)
-        {
-            return StatusCode(500, result.Errors[0].Message);
-        }
-
-        return NoContent();
+        return this.ToApiResponse(result);
     }
 }
