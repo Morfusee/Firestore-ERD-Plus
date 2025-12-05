@@ -2,6 +2,7 @@ using backend.Common.Extensions;
 using backend.Common.Models;
 using backend.DTOs.User;
 using backend.Services.UserService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -15,10 +16,12 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     private readonly ILogger<UsersController> _logger = logger;
 
     [HttpGet]
+    [Authorize]
     [ProducesResponseType(
         typeof(ApiResponse<IEnumerable<UserResponseDto>>),
         StatusCodes.Status200OK
     )]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetUsers()
     {
@@ -28,7 +31,9 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<UserResponseDto>>> GetUserById(string id)
     {
@@ -50,7 +55,9 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<UserResponseDto>>> UpdateUser(
         string id,
@@ -63,7 +70,9 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)

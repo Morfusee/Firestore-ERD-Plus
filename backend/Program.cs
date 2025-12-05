@@ -3,6 +3,7 @@ using backend.Common.Extensions;
 using backend.Common.Handlers;
 using backend.Config;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,19 @@ builder.Services.AddProblemDetails();
 
 // Configure MongoDbSettings
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+
+// Configure FirebaseSettings
+builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection("FirebaseSettings"));
+
+// Configure Authentication
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddScheme<JwtBearerOptions, FirebaseAuthenticationHandler>(
+        JwtBearerDefaults.AuthenticationScheme,
+        options => { }
+    );
+
+builder.Services.AddAuthorization();
 
 // Add controllers
 builder.Services.AddControllers();
@@ -69,6 +83,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
