@@ -10,4 +10,6 @@ public class CreateUserDto
     [Required]
     [EmailAddress]
     public required string Email { get; set; }
+
+    public string? DisplayName { get; set; }
 }
