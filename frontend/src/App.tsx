@@ -4,36 +4,32 @@ import { Notifications } from "@mantine/notifications";
 import { ReactFlowProvider } from "@xyflow/react";
 import { ContextMenuProvider } from "mantine-contextmenu";
 import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
+  RouterProvider
 } from "react-router-dom";
+import { SingletonHooksContainer } from "react-singleton-hook";
 import { customModals } from "./constants/modalConstants";
+import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext";
 import useGlobalHotkeys from "./hooks/useGlobalHotkeys";
 import useTheme from "./hooks/useTheme";
-import FirestoreERD from "./pages/FirestoreERD";
-import Login from "./pages/login";
-import Register from "./pages/register";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import { useThemeStore } from "./store/globalStore";
 import { AppRoutes } from "./routes/AppRoutes";
-import { SingletonHooksContainer } from "react-singleton-hook";
+import { useThemeStore } from "./store/globalStore";
 
 function App() {
   const { theme } = useThemeStore();
   return (
-    <ReactFlowProvider>
-      <MantineProvider theme={theme} defaultColorScheme="light">
-        <SingletonHooksContainer />
-        <ContextMenuProvider>
-          <ModalsProvider modals={customModals}>
-            <Notifications />
-            <AppRouting />
-          </ModalsProvider>
-        </ContextMenuProvider>
-      </MantineProvider>
-    </ReactFlowProvider>
+    <FirebaseAuthProvider>
+      <ReactFlowProvider>
+        <MantineProvider theme={theme} defaultColorScheme="light">
+          <SingletonHooksContainer />
+          <ContextMenuProvider>
+            <ModalsProvider modals={customModals}>
+              <Notifications />
+              <AppRouting />
+            </ModalsProvider>
+          </ContextMenuProvider>
+        </MantineProvider>
+      </ReactFlowProvider>
+    </FirebaseAuthProvider>
   );
 }
 
