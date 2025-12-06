@@ -12,61 +12,29 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
+// Services
+builder.Services.AddAppCors(builder.Configuration);
+builder.Services.AddAppOptions(builder.Configuration);
+builder.Services.AddAppAuthentication(builder.Configuration);
+builder.Services.AddAppSwagger(builder.Configuration);
+
 // Add the HttpClientFactory service to the container.
 builder.Services.AddHttpClient();
 
+// Exception Handling
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Configure MongoDbSettings
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
-
-// Configure FirebaseSettings
-builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection("FirebaseSettings"));
-
-// Configure Authentication
-builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddScheme<JwtBearerOptions, FirebaseAuthenticationHandler>(
-        JwtBearerDefaults.AuthenticationScheme,
-        options => { }
-    );
-
-builder.Services.AddAuthorization();
-
 // Add controllers
 builder.Services.AddControllers();
-
-// Configure OpenAPI/Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc(
-        "v1",
-        new OpenApiInfo
-        {
-            Title = "Firestore ERD Plus API",
-            Version = "v1",
-            Description = "API for Firestore ERD Plus application",
-        }
-    );
-
-    // Include XML comments if available
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        options.IncludeXmlComments(xmlPath);
-    }
-});
-
-builder.Services.AddOpenApi();
 
 // Register all services with attributes dynamically
 var assembly = Assembly.GetExecutingAssembly();
 builder.Services.RegisterServicesWithAttributes(assembly);
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 // Source - https://stackoverflow.com/a
 // Posted by Andrei, modified by community. See post 'Timeline' for change history
