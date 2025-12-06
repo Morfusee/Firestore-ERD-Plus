@@ -1,11 +1,12 @@
 import { IChangelog } from "../store/useChangelogStore";
 import { IUser } from "../store/useUserStore";
-import { IProject, IProjectMembers, MemberRole } from "./ProjectTypes";
 import { EmojiData } from "./EmojiData";
+import { IProject, IProjectMembers, MemberRole } from "./ProjectTypes";
 
 export interface APIResponse<T> {
   success: boolean;
   message: string;
+  statusText: "OK";
   data: T;
   error:
     | string
@@ -46,7 +47,7 @@ export interface FetchedProjectMembers {
 }
 
 export interface FetchedMemberRole {
-  role: MemberRole
+  role: MemberRole;
 }
 
 export interface CreatedProjectMember {
@@ -68,6 +69,7 @@ export interface CreatedUser {
 
 export interface FetchedUser {
   user: IUser;
+  token: string;
 }
 
 export interface FetchedUsers {
