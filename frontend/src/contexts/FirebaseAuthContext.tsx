@@ -14,7 +14,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { auth } from "../integrations/firebase/initialize-firebase";
+import { auth } from "../integrations/firebase/firebase-client";
 
 /**
  * Firebase Auth Context Type

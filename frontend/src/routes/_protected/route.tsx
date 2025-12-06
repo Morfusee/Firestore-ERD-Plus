@@ -1,4 +1,4 @@
-import { auth } from "@/integrations/firebase/initialize-firebase";
+import { auth } from "@/integrations/firebase/firebase-client";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_protected")({
