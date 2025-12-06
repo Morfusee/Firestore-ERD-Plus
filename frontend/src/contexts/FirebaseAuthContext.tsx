@@ -1,20 +1,20 @@
 import {
-    AuthError,
-    signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
-    GoogleAuthProvider,
-    onAuthStateChanged,
-    signInWithPopup,
-    signOut,
-    User,
+  AuthError,
+  signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  User,
 } from "firebase/auth";
 import {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
-import { auth } from "../lib/firebase";
+import { auth } from "../integrations/firebase/initialize-firebase";
 
 /**
  * Firebase Auth Context Type
