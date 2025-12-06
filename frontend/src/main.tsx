@@ -1,14 +1,60 @@
+import { MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import { ModalsProvider } from "@mantine/modals";
+import { Notifications } from "@mantine/notifications";
+import "@mantine/notifications/styles.css";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { ReactFlowProvider } from "@xyflow/react";
+import { ContextMenuProvider } from "mantine-contextmenu";
+import "mantine-contextmenu/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import { SingletonHooksContainer } from "react-singleton-hook";
+import { customModals } from "./constants/modalConstants.ts";
+import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext.tsx";
+
+import * as TanStackQueryProvider from "@/integrations/tanstack-query/root-provider.tsx";
+import { routeTree } from "./routeTree.gen";
+
 import "./css/index.css";
-import "@mantine/core/styles.css";
-import "@mantine/notifications/styles.css";
-import 'mantine-contextmenu/styles.css';
 
+const router = createRouter({
+  routeTree,
+  context: {
+    ...TanStackQueryProvider.getContext(),
+  },
+  defaultPreload: "intent",
+  defaultStructuralSharing: true,
+  defaultPreloadStaleTime: 0,
+});
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+const rootElement = document.getElementById("root")!;
+if (rootElement && !rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <TanStackQueryProvider.Provider>
+        <FirebaseAuthProvider>
+          <ReactFlowProvider>
+            <MantineProvider defaultColorScheme="light">
+              <SingletonHooksContainer />
+              <ContextMenuProvider>
+                <ModalsProvider modals={customModals}>
+                  <Notifications />
+                  <RouterProvider router={router} />
+                </ModalsProvider>
+              </ContextMenuProvider>
+            </MantineProvider>
+          </ReactFlowProvider>
+        </FirebaseAuthProvider>
+      </TanStackQueryProvider.Provider>
+    </React.StrictMode>
+  );
+}
