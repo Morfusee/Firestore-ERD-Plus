@@ -10,19 +10,19 @@ export const authenticateUserApi = async () => {
       }
 
       return res.data;
-    })
+    });
 
   return response;
 };
 
 export const loginUserApi = async (email: string, password: string) => {
   const response = await axiosInstance
-    .post<APIResponse<FetchedUser>>(`/auth/login`, {
+    .post<APIResponse<FetchedUser>>(`api/auth/login`, {
       email,
       password,
     })
     .then((res) => {
-      if (!res.data.success) {
+      if (!(res.statusText === "OK")) {
         throw new Error("Failed to login user");
       }
 
