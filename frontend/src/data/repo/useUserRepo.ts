@@ -1,6 +1,6 @@
 import axios from "axios";
 import { signInWithCustomToken } from "firebase/auth";
-import { auth } from "../../integrations/firebase/initialize-firebase";
+import { auth } from "../../integrations/firebase/firebase-client";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
 import { IUser, useUserStore } from "../../store/useUserStore";
