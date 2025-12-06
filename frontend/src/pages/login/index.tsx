@@ -14,8 +14,8 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
@@ -49,7 +49,9 @@ function Login() {
 
     // Prevent the early redirecting of the user if the login fails
     if (response.statusText === "OK") {
-      navigate("/");
+      navigate({
+        to: "/",
+      });
     } else {
       // Show an error message if the login fails
       form.setErrors({
@@ -106,7 +108,11 @@ function Login() {
                 <Group gap="xs" justify="flex-end">
                   <Anchor
                     size="sm"
-                    onClick={() => navigate("/forgot-password")}
+                    onClick={() =>
+                      navigate({
+                        to: "/forgot-password",
+                      })
+                    }
                   >
                     Forgot password?
                   </Anchor>
@@ -127,7 +133,14 @@ function Login() {
             <Center mt="lg">
               <Group gap="xs">
                 <Text size="sm">Don't have an account?</Text>
-                <Anchor size="sm" onClick={() => navigate("/register")}>
+                <Anchor
+                  size="sm"
+                  onClick={() =>
+                    navigate({
+                      to: "/register",
+                    })
+                  }
+                >
                   Sign up
                 </Anchor>
               </Group>
