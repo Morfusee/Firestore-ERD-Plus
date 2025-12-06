@@ -5,6 +5,7 @@ using backend.Config;
 using backend.DTOs.Auth;
 using backend.DTOs.User;
 using backend.Mappers;
+using backend.Models;
 using backend.Services.UserService;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
@@ -29,15 +30,8 @@ public class AuthService(
 {
     private readonly MongoDbContext _context = context;
     private readonly UserMapper _userMapper = userMapper;
-    private readonly IUserService _userService = userService;
     private readonly ILogger<AuthService> _logger = logger;
-    private readonly IOptions<FirebaseSettings> _firebaseSettings = firebaseSettings;
-
     private readonly FirebaseAuth _firebaseAuth = firebaseAuthProvider.Auth;
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-
-    private const string SignInUrlBase =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
 
     public async Task<Result<AuthResponseDto>> LoginAsync(LoginDto loginDto)
     {
@@ -186,12 +180,9 @@ public class AuthService(
             var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(googleAuthDto.IdToken);
 
             // Get or create Firebase user
-            UserRecord firebaseUser;
-            try
-            {
-                firebaseUser = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
-            }
-            catch (FirebaseAuthException)
+            UserRecord firebaseUser = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
+
+            if (firebaseUser == null)
             {
                 return Result.Fail<AuthResponseDto>("Invalid Google authentication token.");
             }
@@ -208,7 +199,7 @@ public class AuthService(
                 )
                 .FirstOrDefaultAsync();
 
-            Models.User user;
+            User user;
 
             if (existingUser == null)
             {
@@ -260,11 +251,6 @@ public class AuthService(
             };
 
             return Result.Ok(response);
-        }
-        catch (FirebaseAuthException ex)
-        {
-            _logger.LogError(ex, "Google authentication failed - invalid token.");
-            return Result.Fail<AuthResponseDto>("Invalid Google authentication token.");
         }
         catch (Exception ex)
         {
