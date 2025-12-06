@@ -1,6 +1,6 @@
 import useAuth from "@/hooks/useAuth";
 import { Box, Loader } from "@mantine/core";
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -9,6 +9,7 @@ export const Route = createFileRoute("/")({
 function RouteComponent() {
   // Check if the user is authenticated
   const { isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading)
     return (
@@ -17,7 +18,7 @@ function RouteComponent() {
       </Box>
     );
 
-  if (!isAuthenticated) {
-    return <Navigate to={"/login"} />;
-  }
+  !isAuthenticated
+    ? navigate({ to: "/login" })
+    : navigate({ to: "/app" });
 }
