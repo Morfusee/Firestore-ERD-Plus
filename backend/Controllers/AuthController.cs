@@ -52,6 +52,22 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     {
         var result = await _authService.LoginAsync(loginDto);
 
+        return this.ToApiResponse(result);
+    }
+
+    /// <summary>
+    /// Authenticate with Google OAuth
+    /// </summary>
+    [HttpPost("google")]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<AuthResponseDto>>> GoogleAuth(
+        [FromBody] GoogleAuthDto googleAuthDto
+    )
+    {
+        var result = await _authService.GoogleAuthAsync(googleAuthDto);
+
         if (result.IsSuccess)
         {
             Response.Cookies.Append(
