@@ -16,7 +16,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { GoogleButton } from "../../components/ui/SocialButtons";
+import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorHelpers";
@@ -48,7 +48,7 @@ function Login() {
     const response = await loginUser(email, password);
 
     // Prevent the early redirecting of the user if the login fails
-    if (response.success) {
+    if (response.statusText === "OK") {
       navigate("/");
     } else {
       // Show an error message if the login fails
@@ -59,14 +59,6 @@ function Login() {
     }
 
     setIsLoggingIn(false);
-  };
-
-  const handleSignInWithGoogle = () => {
-    // Redirect to the Google OAuth route
-    window.open(
-      `${import.meta.env.VITE_SERVER_URL}/auth/google/callback`,
-      "_self"
-    );
   };
 
   // Show nothing while fetching data
@@ -129,9 +121,7 @@ function Login() {
             <Divider my="md" label="or" labelPosition="center" />
 
             <Stack>
-              <GoogleButton onClick={handleSignInWithGoogle}>
-                Login with Google
-              </GoogleButton>
+              <GoogleSignInButton />
             </Stack>
 
             <Center mt="lg">
