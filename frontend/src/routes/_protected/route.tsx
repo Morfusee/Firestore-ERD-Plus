@@ -1,25 +1,19 @@
-import useAuth from "@/hooks/useAuth";
-import { Box, Loader } from "@mantine/core";
-import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
+import { auth } from "@/integrations/firebase/initialize-firebase";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_protected")({
   component: RouteComponent,
+  beforeLoad: async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw redirect({ to: "/login" });
+    }
+
+    return;
+  },
 });
 
 function RouteComponent() {
-  // Check if the user is authenticated
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading)
-    return (
-      <Box className="w-screen h-screen grid place-content-center">
-        <Loader />
-      </Box>
-    );
-
-  if (!isAuthenticated) {
-    return <Navigate to={"/login"} />;
-  }
-
   return <Outlet />;
 }
