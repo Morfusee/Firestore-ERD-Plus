@@ -1,4 +1,6 @@
 import axios from "axios";
+import { signInWithCustomToken } from "firebase/auth";
+import { auth } from "../../lib/firebase";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
 import { IUser, useUserStore } from "../../store/useUserStore";
@@ -37,6 +39,8 @@ const useUserRepo = () => {
   ): Promise<APIResponse<FetchedUser>> => {
     try {
       const loginResponse = await loginUserApi(email, password);
+
+      await signInWithCustomToken(auth, loginResponse.data.token);
 
       // Set the current user to the user response from api
       setCurrentUser(loginResponse.data.user);
