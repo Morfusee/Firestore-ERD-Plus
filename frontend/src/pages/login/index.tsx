@@ -1,3 +1,5 @@
+import { postApiAuthLoginMutation } from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { auth } from "@/integrations/firebase/firebase-client";
 import {
   Anchor,
   Button,
@@ -14,12 +16,13 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useMutation } from "@tanstack/react-query";
 import { Navigate, useNavigate } from "@tanstack/react-router";
+import { signInWithCustomToken } from "firebase/auth";
 import { useState } from "react";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
-import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -41,24 +44,21 @@ function Login() {
     },
   });
 
+  const { mutateAsync: loginUserMutation } = useMutation(
+    postApiAuthLoginMutation()
+  );
+
   const handleLogin = async (email: string, password: string) => {
     setIsLoggingIn(true);
 
-    // Login the user
-    const response = await loginUser(email, password);
-
-    // Prevent the early redirecting of the user if the login fails
-    if (response.statusText === "OK") {
-      navigate({
-        to: "/",
-      });
-    } else {
-      // Show an error message if the login fails
-      form.setErrors({
-        email: " ",
-        password: getErrorMessage(response.error, response.message),
-      });
-    }
+    await loginUserMutation({
+      body: {
+        email,
+        password,
+      },
+    }).then(async (data) => {
+      await signInWithCustomToken(auth, data.data?.token!);
+    });
 
     setIsLoggingIn(false);
   };
