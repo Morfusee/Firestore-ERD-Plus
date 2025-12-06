@@ -22,16 +22,16 @@ import {
   IconHistoryToggle,
   IconLogout,
 } from "@tabler/icons-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useProjectStore } from "../store/useProjectStore";
-import useUserRepo from "../data/repo/useUserRepo";
-import useChangelogRepo from "../data/repo/useChangelogRepo";
-import { IChangelog, IMember } from "../store/useChangelogStore";
-import useProjectRepo from "../data/repo/useProjectRepo";
-import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
-import { useNavigate } from "react-router-dom";
 import ProfileAvatar from "../components/ui/ProfileAvatar";
 import TooltipIconButton from "../components/ui/TooltipIconButton";
+import useChangelogRepo from "../data/repo/useChangelogRepo";
+import useProjectRepo from "../data/repo/useProjectRepo";
+import useUserRepo from "../data/repo/useUserRepo";
+import { IChangelog, IMember } from "../store/useChangelogStore";
+import { useProjectStore } from "../store/useProjectStore";
+import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
 
 function TopRightBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -81,7 +81,10 @@ function ActionButtons({
     setIsLoggingOut(true);
     logoutUser()
       .then((status) => {
-        if (status) navigate("/login");
+        if (status)
+          navigate({
+            to: "/login",
+          });
         setIsLoggingOut(false);
       })
       .catch(() => {
@@ -268,7 +271,7 @@ interface HistoryItemProps {
   dateTime: Date;
   currentVersion: boolean;
   memberChanges: IMember[];
-  disabled?: boolean
+  disabled?: boolean;
   onClick: () => void;
 }
 

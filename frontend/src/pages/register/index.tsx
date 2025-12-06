@@ -14,11 +14,11 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { GoogleButton } from "../../components/ui/SocialButtons";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
-import { useState } from "react";
 import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Register() {
@@ -93,7 +93,9 @@ function Register() {
 
     // Prevent the early redirecting of the user if the registering fails
     if (response.success) {
-      navigate("/");
+      navigate({
+        to: "/",
+      });
     } else {
       // Show an error message if the register fails
 
@@ -182,7 +184,14 @@ function Register() {
             <Center mt="lg">
               <Group gap="xs">
                 <Text size="sm">Have an account?</Text>
-                <Anchor size="sm" onClick={() => navigate("/login")}>
+                <Anchor
+                  size="sm"
+                  onClick={() =>
+                    navigate({
+                      to: "/login",
+                    })
+                  }
+                >
                   Login
                 </Anchor>
               </Group>

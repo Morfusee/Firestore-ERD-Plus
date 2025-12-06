@@ -1,5 +1,7 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import CustomNotification from "../../components/ui/CustomNotification";
 import { useEmojiStore } from "../../store/globalStore";
 import { getProjectsApi } from "../api/projectsApi";
 import { db } from "../db/db";
@@ -9,8 +11,6 @@ import useHistoryRepo from "./useHistoryRepo";
 import useProjectRepo from "./useProjectRepo";
 import { useSettingsRepo } from "./useSettingsRepo";
 import useUserRepo from "./useUserRepo";
-import CustomNotification from "../../components/ui/CustomNotification";
-import { AxiosError } from "axios";
 
 export const useDataInitializer = () => {
   const { user } = useUserRepo();
@@ -21,7 +21,9 @@ export const useDataInitializer = () => {
   const navigate = useNavigate();
 
   // Router
-  const params = useParams();
+  const params: {
+    projectId?: string;
+  } = useSearch({ strict: false });
   const id = params.projectId;
 
   // Emojis
@@ -46,7 +48,6 @@ export const useDataInitializer = () => {
           if (res) {
             loadChangelogs(id);
           }
-    
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -56,11 +57,14 @@ export const useDataInitializer = () => {
             message: err.response?.data.message,
           });
         }
-        navigate("/", { replace: true })
+        navigate({
+          to: "/",
+          replace: true,
+        });
       }
-    }
+    };
 
-    loadSelectedProject()
+    loadSelectedProject();
   }, [id, isLoaded]);
 
   const loadProjects = async () => {
