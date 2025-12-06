@@ -21,11 +21,8 @@ namespace backend.Services.AuthService;
 public class AuthService(
     MongoDbContext context,
     UserMapper userMapper,
-    IUserService userService,
-    IOptions<FirebaseSettings> firebaseSettings,
     FirebaseAuthProvider firebaseAuthProvider,
-    ILogger<AuthService> logger,
-    IHttpClientFactory httpClientFactory
+    ILogger<AuthService> logger
 ) : IAuthService
 {
     private readonly MongoDbContext _context = context;
