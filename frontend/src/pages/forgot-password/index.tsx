@@ -1,21 +1,21 @@
 import {
-    Anchor,
-    Button,
-    Card,
-    Center,
-    Container,
-    Group,
-    Loader,
-    rem,
-    Stack,
-    Text,
-    TextInput,
-    Title,
+  Anchor,
+  Button,
+  Card,
+  Center,
+  Container,
+  Group,
+  Loader,
+  rem,
+  Stack,
+  Text,
+  TextInput,
+  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
 
@@ -145,7 +145,7 @@ function ForgotPasswordPage() {
               <Anchor
                 size="sm"
                 ml={"auto"}
-                onClick={() => navigate("/login")}
+                onClick={() => navigate({ to: "/login" })}
                 style={{ cursor: "pointer", textAlign: "center" }}
               >
                 <Group gap={rem(5)} justify="flex-end">
