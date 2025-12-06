@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   ),
   beforeLoad: () => {
     client.setConfig({
-      baseUrl: import.meta.env.VITE_API_URL,
+      baseUrl: import.meta.env.VITE_SERVER_URL,
     });
   },
   pendingComponent: Loader,
