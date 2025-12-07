@@ -13,6 +13,7 @@ export type AuthResponseDtoApiResponse = {
     data?: AuthResponseDto;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -35,6 +36,7 @@ export type ObjectApiResponse = {
     data?: unknown;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -77,6 +79,7 @@ export type UserResponseDtoApiResponse = {
     data?: UserResponseDto;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -84,6 +87,7 @@ export type UserResponseDtoIEnumerableApiResponse = {
     data?: Array<UserResponseDto> | null;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -181,11 +185,20 @@ export type PostApiAuthLogoutData = {
     url: '/api/Auth/logout';
 };
 
+export type PostApiAuthLogoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type PostApiAuthLogoutError = PostApiAuthLogoutErrors[keyof PostApiAuthLogoutErrors];
+
 export type PostApiAuthLogoutResponses = {
     /**
-     * No Content
+     * OK
      */
-    204: void;
+    200: ObjectApiResponse;
 };
 
 export type PostApiAuthLogoutResponse = PostApiAuthLogoutResponses[keyof PostApiAuthLogoutResponses];
