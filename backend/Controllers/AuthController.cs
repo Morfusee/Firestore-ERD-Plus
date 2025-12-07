@@ -87,7 +87,8 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     }
 
     [HttpPost("logout")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public ActionResult<ApiResponse<object>> Logout()
     {
         // Clear the access token cookie
@@ -107,7 +108,8 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
                 new ApiResponse<object>(
                     new object(),
                     "No access token provided.",
-                    StatusCodes.Status401Unauthorized
+                    StatusCodes.Status401Unauthorized,
+                    IsSuccess: false
                 )
             );
         }
