@@ -27,6 +27,7 @@ export const zObjectApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -130,6 +131,7 @@ export const zAuthResponseDtoApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -140,6 +142,7 @@ export const zUserResponseDtoApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -153,6 +156,7 @@ export const zUserResponseDtoIEnumerableApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -196,9 +200,9 @@ export const zPostApiAuthLogoutData = z.object({
 });
 
 /**
- * No Content
+ * OK
  */
-export const zPostApiAuthLogoutResponse = z.void();
+export const zPostApiAuthLogoutResponse = zObjectApiResponse;
 
 export const zGetApiAuthMeData = z.object({
     body: z.optional(z.never()),
