@@ -23,7 +23,8 @@ public static class ResultExtensions
                 Data: default!,
                 Message: result.Errors[0].Message,
                 Status: status,
-                Errors: errors
+                Errors: errors,
+                IsSuccess: false
             );
 
             return controller.StatusCode(status, response);
@@ -34,7 +35,8 @@ public static class ResultExtensions
             new ApiResponse<T>(
                 Data: result.Value!,
                 Message: "Operation successful",
-                Status: StatusCodes.Status200OK
+                Status: StatusCodes.Status200OK,
+                IsSuccess: true
             )
         );
     }
