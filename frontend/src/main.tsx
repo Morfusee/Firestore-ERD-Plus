@@ -1,4 +1,3 @@
-import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
@@ -16,10 +15,12 @@ import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext.tsx";
 import * as TanStackQueryProvider from "@/integrations/tanstack-query/root-provider.tsx";
 import { routeTree } from "./routeTree.gen";
 
-// Import configured API client to set up interceptors
-import "./integrations/api/client";
-
 import "./css/index.css";
+
+// Import configured API client to set up interceptors
+// IMPORTANT: Keep this import, even if it seems unused
+import "./integrations/api/client";
+import { ReactiveThemeProvider } from "./integrations/mantine/mantine-context-provider.tsx";
 
 const router = createRouter({
   routeTree,
@@ -46,7 +47,7 @@ if (rootElement && !rootElement.innerHTML) {
       <TanStackQueryProvider.Provider>
         <FirebaseAuthProvider>
           <ReactFlowProvider>
-            <MantineProvider defaultColorScheme="light">
+            <ReactiveThemeProvider>
               <SingletonHooksContainer />
               <ContextMenuProvider>
                 <ModalsProvider modals={customModals}>
@@ -54,7 +55,7 @@ if (rootElement && !rootElement.innerHTML) {
                   <RouterProvider router={router} />
                 </ModalsProvider>
               </ContextMenuProvider>
-            </MantineProvider>
+            </ReactiveThemeProvider>
           </ReactFlowProvider>
         </FirebaseAuthProvider>
       </TanStackQueryProvider.Provider>
