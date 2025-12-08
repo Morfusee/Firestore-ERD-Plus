@@ -18,15 +18,13 @@ import { useForm } from "@mantine/form";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
-import useUserRepo from "../../data/repo/useUserRepo";
 import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { signInWithEmailAndPassword, loading, error } = useFirebaseAuth();
+  const { signInWithEmailAndPassword, loading } = useFirebaseAuth();
 
   const navigate = useNavigate();
-  const { loginUser } = useUserRepo();
 
   const form = useForm({
     mode: "uncontrolled",

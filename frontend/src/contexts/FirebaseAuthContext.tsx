@@ -35,7 +35,7 @@ interface FirebaseAuthContextType {
     password: string
   ) => Promise<User>;
   signInWithGoogle: () => Promise<User>;
-  logout: () => Promise<void>;
+  logout: () => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -174,12 +174,12 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
   /**
    * Sign out from Firebase and backend
    */
-  const logout = async (): Promise<void> => {
+  const logout = async (): Promise<boolean> => {
     try {
       setError(null);
 
       // Logout from backend
-      await logoutMutate({}).catch(() => {
+      const response = await logoutMutate({}).catch(() => {
         // Backend logout failure shouldn't prevent Firebase logout
         console.warn(
           "Backend logout failed, but continuing with Firebase logout"
@@ -189,6 +189,8 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       // Sign out from Firebase
       await signOut(auth);
       setUser(null);
+
+      return (response && response?.isSuccess) || false;
     } catch (err) {
       const error = err as AuthError;
       const errorMessage = error.message || "Failed to sign out";
