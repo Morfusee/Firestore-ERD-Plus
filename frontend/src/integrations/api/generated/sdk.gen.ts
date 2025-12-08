@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersErrors, GetApiUsersResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
+import type { DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -72,3 +72,5 @@ export const putApiUsersById = <ThrowOnError extends boolean = false>(options: O
         ...options.headers
     }
 });
+
+export const getApiUsersEmailByEmail = <ThrowOnError extends boolean = false>(options: Options<GetApiUsersEmailByEmailData, ThrowOnError>) => (options.client ?? client).get<GetApiUsersEmailByEmailResponses, GetApiUsersEmailByEmailErrors, ThrowOnError>({ url: '/api/Users/email/{email}', ...options });
