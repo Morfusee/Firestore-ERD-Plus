@@ -1,4 +1,10 @@
 import {
+  postApiAuthGoogleMutation,
+  postApiAuthLoginMutation,
+  postApiAuthLogoutMutation,
+} from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { useMutation } from "@tanstack/react-query";
+import {
   AuthError,
   signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -68,6 +74,18 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  const { mutateAsync: signInWithEmailAndPasswordMutate } = useMutation(
+    postApiAuthLoginMutation()
+  );
+
+  const { mutateAsync: signInWithGoogleMutate } = useMutation(
+    postApiAuthGoogleMutation()
+  );
+
+  const { mutateAsync: logoutMutate } = useMutation(
+    postApiAuthLogoutMutation()
+  );
+
   /**
    * Sign in with email and password
    */
@@ -87,21 +105,14 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       const idToken = await result.user.getIdToken();
 
       // Authenticate with your backend
-      const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idToken }),
-          credentials: "include", // Important for cookies
-        }
-      );
+      const response = await signInWithEmailAndPasswordMutate({
+        body: {
+          idToken,
+        },
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Backend authentication failed");
+      if (!response.isSuccess) {
+        throw new Error(response.message || "Backend authentication failed");
       }
 
       setUser(result.user);
@@ -139,21 +150,14 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       const idToken = await result.user.getIdToken();
 
       // Authenticate with your backend
-      const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/auth/google`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idToken }),
-          credentials: "include", // Important for cookies
-        }
-      );
+      const response = await signInWithGoogleMutate({
+        body: {
+          idToken,
+        },
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Backend authentication failed");
+      if (!response.isSuccess) {
+        throw new Error(response.message || "Backend authentication failed");
       }
 
       setUser(result.user);
@@ -175,10 +179,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       // Logout from backend
-      await fetch(`${import.meta.env.VITE_SERVER_URL}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      }).catch(() => {
+      await logoutMutate({}).catch(() => {
         // Backend logout failure shouldn't prevent Firebase logout
         console.warn(
           "Backend logout failed, but continuing with Firebase logout"
