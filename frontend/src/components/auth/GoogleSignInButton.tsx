@@ -1,10 +1,6 @@
-import { Alert, Button, Center, Loader, Stack, Text } from "@mantine/core";
-import {
-    IconAlertCircle,
-    IconBrandGoogle,
-    IconLogout,
-} from "@tabler/icons-react";
-import { useGoogleAuth } from "../../hooks/useGoogleAuth";
+import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
+import { Center, Loader, Stack } from "@mantine/core";
+import { useNavigate } from "@tanstack/react-router";
 import { GoogleButton } from "../ui/SocialButtons";
 
 /**
@@ -23,31 +19,21 @@ import { GoogleButton } from "../ui/SocialButtons";
  * ```
  */
 export function GoogleSignInButton() {
-  const {
-    user,
-    loading,
-    error,
-    isAuthenticated,
-    signInWithGoogle,
-    logout,
-    clearError,
-  } = useGoogleAuth();
+  const navigate = useNavigate();
+  const { loading, signInWithGoogle, clearError } = useFirebaseAuth();
 
   const handleSignIn = async () => {
     try {
       clearError();
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+
+      if (user) {
+        navigate({
+          to: "/",
+        });
+      }
     } catch (err) {
       console.error("Sign in error:", err);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      clearError();
-      await logout();
-    } catch (err) {
-      console.error("Logout error:", err);
     }
   };
 
@@ -60,48 +46,9 @@ export function GoogleSignInButton() {
     );
   }
 
-  // User is authenticated
-  if (isAuthenticated && user) {
-    return (
-      <Stack gap="md">
-        <Alert
-          icon={<IconBrandGoogle size={16} />}
-          title="Signed In"
-          color="green"
-        >
-          <Text size="sm">Email: {user.email}</Text>
-          <Text size="sm">Name: {user.displayName}</Text>
-        </Alert>
-
-        <Button
-          variant="filled"
-          color="red"
-          leftSection={<IconLogout size={16} />}
-          onClick={handleLogout}
-          loading={loading}
-          fullWidth
-        >
-          Sign Out
-        </Button>
-      </Stack>
-    );
-  }
-
   // Show sign-in button
   return (
     <Stack gap="md">
-      {error && (
-        <Alert
-          icon={<IconAlertCircle size={16} />}
-          title="Authentication Error"
-          color="red"
-          onClose={() => clearError()}
-          withCloseButton
-        >
-          {error}
-        </Alert>
-      )}
-
       <GoogleButton
         variant="filled"
         color="blue"

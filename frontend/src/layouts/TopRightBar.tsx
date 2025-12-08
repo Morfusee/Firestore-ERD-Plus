@@ -1,3 +1,6 @@
+import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
+import { UserResponseDto } from "@/integrations/api/generated";
+import { getApiUsersEmailByEmailOptions } from "@/integrations/api/generated/@tanstack/react-query.gen";
 import {
   Avatar,
   Box,
@@ -22,16 +25,38 @@ import {
   IconHistoryToggle,
   IconLogout,
 } from "@tabler/icons-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useProjectStore } from "../store/useProjectStore";
-import useUserRepo from "../data/repo/useUserRepo";
-import useChangelogRepo from "../data/repo/useChangelogRepo";
-import { IChangelog, IMember } from "../store/useChangelogStore";
-import useProjectRepo from "../data/repo/useProjectRepo";
-import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
-import { useNavigate } from "react-router-dom";
 import ProfileAvatar from "../components/ui/ProfileAvatar";
 import TooltipIconButton from "../components/ui/TooltipIconButton";
+import useChangelogRepo from "../data/repo/useChangelogRepo";
+import useProjectRepo from "../data/repo/useProjectRepo";
+import { IChangelog, IMember } from "../store/useChangelogStore";
+import { useProjectStore } from "../store/useProjectStore";
+import { IEditorDataSnapshot } from "../types/EditorStoreTypes";
+
+function TopRightBarQueryProvider({
+  children,
+  props: { email },
+}: {
+  children: (user: UserResponseDto | undefined) => React.ReactNode;
+  props: {
+    email: string | undefined | null;
+  };
+}) {
+  const { data: response } = useSuspenseQuery(
+    getApiUsersEmailByEmailOptions({
+      path: {
+        email: email || "",
+      },
+    })
+  );
+
+  const user = response.data;
+
+  return children(user);
+}
 
 function TopRightBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -61,32 +86,35 @@ function ActionButtons({
   toggleDrawer: () => void;
   openedDrawer: boolean;
 }) {
+  const navigate = useNavigate();
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  const navigate = useNavigate();
-
-  const { logoutUser } = useUserRepo();
   const { validateRole } = useProjectRepo();
   const { selectedProject } = useProjectStore();
+  const { width } = useViewportSize();
+  const [opened, handlers] = useDisclosure(false);
+  const { logout, user: firebaseUser } = useFirebaseAuth();
+
   const isButtonDisabled = !selectedProject;
 
-  const { width } = useViewportSize();
-
-  const [opened, handlers] = useDisclosure(false);
-
-  const { user } = useUserRepo();
-
   const handleLogout = async () => {
-    setIsLoggingOut(true);
-    logoutUser()
-      .then((status) => {
-        if (status) navigate("/login");
+    try {
+      setIsLoggingOut(true);
+      const status = await logout();
+
+      if (status) {
+        navigate({
+          to: "/login",
+        });
         setIsLoggingOut(false);
-      })
-      .catch(() => {
-        setIsLoggingOut(false);
-      });
+        return;
+      }
+    } catch (error) {
+      setIsLoggingOut(false);
+      console.log("Logout error:", error);
+    }
   };
 
   return (
@@ -115,56 +143,72 @@ function ActionButtons({
         onChange={() => handlers.close()}
         clickOutsideEvents={["click", "mousedown", "pointerdown"]}
       >
-        <Popover.Target>
-          <Avatar
-            component="button"
-            size={34}
-            onClick={() => handlers.toggle()}
-            src={user?.profilePicture}
-          />
-        </Popover.Target>
+        <TopRightBarQueryProvider
+          props={{
+            email: firebaseUser?.email,
+          }}
+        >
+          {(user) => (
+            <Popover.Target>
+              <Avatar
+                component="button"
+                size={34}
+                onClick={() => handlers.toggle()}
+                src={user?.profilePicture}
+              />
+            </Popover.Target>
+          )}
+        </TopRightBarQueryProvider>
 
         <Popover.Dropdown>
-          <Stack align="center" gap="sm">
-            <ProfileAvatar
-              isImageLoaded={isImageLoaded}
-              setIsImageLoaded={setIsImageLoaded}
-              profilePicture={user?.profilePicture}
-              avatarSize={72}
-            />
+          <TopRightBarQueryProvider
+            props={{
+              email: firebaseUser?.email,
+            }}
+          >
+            {(user) => (
+              <Stack align="center" gap="sm">
+                <ProfileAvatar
+                  isImageLoaded={isImageLoaded}
+                  setIsImageLoaded={setIsImageLoaded}
+                  profilePicture={user?.profilePicture!}
+                  avatarSize={72}
+                />
 
-            <Stack gap={2} justify="center">
-              <Title order={2} ta="center">
-                {user?.username}
-              </Title>
-              <Text ta="center">{user?.email}</Text>
-            </Stack>
+                <Stack gap={2} justify="center">
+                  <Title order={2} ta="center">
+                    {user?.username}
+                  </Title>
+                  <Text ta="center">{user?.email}</Text>
+                </Stack>
 
-            <Group w="100%" gap="xs">
-              <Button
-                className="flex-1"
-                variant="light"
-                leftSection={<IconEdit />}
-                onClick={() => {
-                  handlers.close();
-                  modals.openContextModal({
-                    modal: "manageAcc",
-                    innerProps: {},
-                  });
-                }}
-              >
-                Manage
-              </Button>
-              <Button
-                className="flex-1"
-                variant="default"
-                leftSection={<IconLogout />}
-                onClick={handleLogout}
-              >
-                {isLoggingOut ? <Loader size={"sm"} /> : "Log out"}
-              </Button>
-            </Group>
-          </Stack>
+                <Group w="100%" gap="xs">
+                  <Button
+                    className="flex-1"
+                    variant="light"
+                    leftSection={<IconEdit />}
+                    onClick={() => {
+                      handlers.close();
+                      modals.openContextModal({
+                        modal: "manageAcc",
+                        innerProps: {},
+                      });
+                    }}
+                  >
+                    Manage
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    variant="default"
+                    leftSection={<IconLogout />}
+                    onClick={handleLogout}
+                  >
+                    {isLoggingOut ? <Loader size={"sm"} /> : "Log out"}
+                  </Button>
+                </Group>
+              </Stack>
+            )}
+          </TopRightBarQueryProvider>
         </Popover.Dropdown>
       </Popover>
     </Flex>
@@ -268,7 +312,7 @@ interface HistoryItemProps {
   dateTime: Date;
   currentVersion: boolean;
   memberChanges: IMember[];
-  disabled?: boolean
+  disabled?: boolean;
   onClick: () => void;
 }
 

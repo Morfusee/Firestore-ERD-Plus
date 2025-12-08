@@ -16,8 +16,7 @@ export const zGoogleAuthDto = z.object({
 });
 
 export const zLoginDto = z.object({
-    email: z.email().min(1),
-    password: z.string().min(1)
+    idToken: z.string().min(1)
 });
 
 export const zObjectApiResponse = z.object({
@@ -27,6 +26,7 @@ export const zObjectApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -56,7 +56,6 @@ export const zProblemDetails = z.object({
 export const zRegisterDto = z.object({
     username: z.string().min(3),
     email: z.email().min(1),
-    password: z.string().min(6),
     displayName: z.optional(z.union([
         z.string(),
         z.null()
@@ -116,10 +115,6 @@ export const zUserResponseDto = z.object({
 });
 
 export const zAuthResponseDto = z.object({
-    token: z.union([
-        z.string(),
-        z.null()
-    ]),
     user: zUserResponseDto
 });
 
@@ -130,6 +125,7 @@ export const zAuthResponseDtoApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -140,6 +136,7 @@ export const zUserResponseDtoApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -153,6 +150,7 @@ export const zUserResponseDtoIEnumerableApiResponse = z.object({
         z.null()
     ])),
     status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
     errors: z.optional(z.unknown())
 });
 
@@ -196,9 +194,9 @@ export const zPostApiAuthLogoutData = z.object({
 });
 
 /**
- * No Content
+ * OK
  */
-export const zPostApiAuthLogoutResponse = z.void();
+export const zPostApiAuthLogoutResponse = zObjectApiResponse;
 
 export const zGetApiAuthMeData = z.object({
     body: z.optional(z.never()),
@@ -271,3 +269,16 @@ export const zPutApiUsersByIdData = z.object({
  * OK
  */
 export const zPutApiUsersByIdResponse = zUserResponseDtoApiResponse;
+
+export const zGetApiUsersEmailByEmailData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        email: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zGetApiUsersEmailByEmailResponse = zUserResponseDtoApiResponse;

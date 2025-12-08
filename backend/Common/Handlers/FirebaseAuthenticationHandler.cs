@@ -46,7 +46,10 @@ public class FirebaseAuthenticationHandler(
 
             if (result.IsFailed)
             {
-                return AuthenticateResult.Fail(result.Errors[0].Message);
+                // Return NoResult instead of Fail for non-protected endpoints
+                // This prevents error logging when authentication is optional
+                Logger.LogDebug("Token verification failed: {Error}", result.Errors[0].Message);
+                return AuthenticateResult.NoResult();
             }
 
             var userId = result.Value;
@@ -61,8 +64,8 @@ public class FirebaseAuthenticationHandler(
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Authentication failed.");
-            return AuthenticateResult.Fail("Authentication failed.");
+            Logger.LogDebug(ex, "Authentication failed.");
+            return AuthenticateResult.NoResult();
         }
     }
 }

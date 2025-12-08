@@ -24,21 +24,6 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     {
         var result = await _authService.RegisterAsync(registerDto);
 
-        if (result.IsSuccess)
-        {
-            Response.Cookies.Append(
-                "access_token",
-                result.Value.Token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7),
-                }
-            );
-        }
-
         return this.ToApiResponse(result);
     }
 
@@ -68,26 +53,12 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     {
         var result = await _authService.GoogleAuthAsync(googleAuthDto);
 
-        if (result.IsSuccess)
-        {
-            Response.Cookies.Append(
-                "access_token",
-                result.Value.Token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7),
-                }
-            );
-        }
-
         return this.ToApiResponse(result);
     }
 
     [HttpPost("logout")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public ActionResult<ApiResponse<object>> Logout()
     {
         // Clear the access token cookie
@@ -107,7 +78,8 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
                 new ApiResponse<object>(
                     new object(),
                     "No access token provided.",
-                    StatusCodes.Status401Unauthorized
+                    StatusCodes.Status401Unauthorized,
+                    IsSuccess: false
                 )
             );
         }
