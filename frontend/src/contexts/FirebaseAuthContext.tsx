@@ -1,5 +1,13 @@
 import {
+  postApiAuthGoogleMutation,
+  postApiAuthLoginMutation,
+  postApiAuthLogoutMutation,
+  postApiAuthRegisterMutation,
+} from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { useMutation } from "@tanstack/react-query";
+import {
   AuthError,
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -14,7 +22,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { auth } from "../integrations/firebase/initialize-firebase";
+import { auth } from "../integrations/firebase/firebase-client";
 
 /**
  * Firebase Auth Context Type
@@ -29,7 +37,12 @@ interface FirebaseAuthContextType {
     password: string
   ) => Promise<User>;
   signInWithGoogle: () => Promise<User>;
-  logout: () => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string
+  ) => Promise<User>;
+  logout: () => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -68,6 +81,22 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  const { mutateAsync: signInWithEmailAndPasswordMutate } = useMutation(
+    postApiAuthLoginMutation()
+  );
+
+  const { mutateAsync: signInWithGoogleMutate } = useMutation(
+    postApiAuthGoogleMutation()
+  );
+
+  const { mutateAsync: registerUserMutate } = useMutation(
+    postApiAuthRegisterMutation()
+  );
+
+  const { mutateAsync: logoutMutate } = useMutation(
+    postApiAuthLogoutMutation()
+  );
+
   /**
    * Sign in with email and password
    */
@@ -87,21 +116,14 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       const idToken = await result.user.getIdToken();
 
       // Authenticate with your backend
-      const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idToken }),
-          credentials: "include", // Important for cookies
-        }
-      );
+      const response = await signInWithEmailAndPasswordMutate({
+        body: {
+          idToken,
+        },
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Backend authentication failed");
+      if (!response.isSuccess) {
+        throw new Error(response.message || "Backend authentication failed");
       }
 
       setUser(result.user);
@@ -135,25 +157,18 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
 
       const result = await signInWithPopup(auth, provider);
 
-      // Get the ID token to send to your backend
+      // Get the ID token to send to  backend
       const idToken = await result.user.getIdToken();
 
-      // Authenticate with your backend
-      const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/auth/google`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idToken }),
-          credentials: "include", // Important for cookies
-        }
-      );
+      // Authenticate with  backend
+      const response = await signInWithGoogleMutate({
+        body: {
+          idToken,
+        },
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Backend authentication failed");
+      if (!response.isSuccess) {
+        throw new Error(response.message || "Backend authentication failed");
       }
 
       setUser(result.user);
@@ -167,18 +182,53 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const register = async (
+    username: string,
+    email: string,
+    password: string
+  ): Promise<User> => {
+    try {
+      setError(null);
+
+      // Create user with email and password in Firebase
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const response = await registerUserMutate({
+        body: {
+          email,
+          username,
+          displayName: username,
+        },
+      });
+
+      if (!response.isSuccess) {
+        throw new Error(response.message || "Backend registration failed");
+      }
+
+      setUser(result.user);
+      return result.user;
+    } catch (err) {
+      const error = err as AuthError;
+      const errorMessage = error.message || "Failed to register user";
+      setError(errorMessage);
+      setUser(null);
+      throw error;
+    }
+  };
+
   /**
    * Sign out from Firebase and backend
    */
-  const logout = async (): Promise<void> => {
+  const logout = async (): Promise<boolean> => {
     try {
       setError(null);
 
       // Logout from backend
-      await fetch(`${import.meta.env.VITE_SERVER_URL}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      }).catch(() => {
+      const response = await logoutMutate({}).catch(() => {
         // Backend logout failure shouldn't prevent Firebase logout
         console.warn(
           "Backend logout failed, but continuing with Firebase logout"
@@ -188,6 +238,8 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       // Sign out from Firebase
       await signOut(auth);
       setUser(null);
+
+      return (response && response?.isSuccess) || false;
     } catch (err) {
       const error = err as AuthError;
       const errorMessage = error.message || "Failed to sign out";
@@ -209,6 +261,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     error,
     signInWithEmailAndPassword,
     signInWithGoogle,
+    register,
     logout,
     clearError,
   };

@@ -25,8 +25,10 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import ConditionalHoverCard from "../components/ui/ConditionalHoverCard";
+import CustomNotification from "../components/ui/CustomNotification";
+import TooltipIconButton from "../components/ui/TooltipIconButton";
 import useChangelogRepo from "../data/repo/useChangelogRepo";
 import useHistoryRepo from "../data/repo/useHistoryRepo";
 import useProjectRepo from "../data/repo/useProjectRepo";
@@ -35,12 +37,10 @@ import useIsDarkMode from "../hooks/useIsDarkMode";
 import useIsTruncated from "../hooks/useIsTruncated";
 import useProjectIcon from "../hooks/useProjectIcon";
 import { useEditorStore } from "../store/useEditorStore";
+import { APIResponse, SavedProject } from "../types/APITypes";
 import { IProject } from "../types/ProjectTypes";
 import { DrawerModalFormValues } from "../types/TopLeftBarTypes";
 import { determineTitle } from "../utils/successHelpers";
-import CustomNotification from "../components/ui/CustomNotification";
-import { APIResponse, SavedProject } from "../types/APITypes";
-import TooltipIconButton from "../components/ui/TooltipIconButton";
 
 function TopLeftBar() {
   const [drawerLocalStorage, setDrawerLocalStorage] = useLocalStorage({
@@ -77,8 +77,8 @@ function ActionButtons({
 
   const { onSave, onUndo, canUndo, canRedo, onRedo } = useHistoryRepo();
   const { saveChangelog } = useChangelogRepo();
-  const { hasPendingChanges, } = useEditorStore();
-  const { validateRole } = useProjectRepo()
+  const { hasPendingChanges } = useEditorStore();
+  const { validateRole } = useProjectRepo();
 
   const handleSave = async () => {
     try {
@@ -95,7 +95,6 @@ function ActionButtons({
         message: "An error has occured while saving the project",
       } as APIResponse<SavedProject>);
     }
-
   };
 
   const showNotification = (response: APIResponse<SavedProject>) => {
@@ -121,7 +120,10 @@ function ActionButtons({
       <TooltipIconButton
         label="Menu"
         icon={openedDrawer ? <IconX /> : <IconMenu2 />}
-        variant="subtle" size="lg" radius="xl" onClick={toggleDrawer}
+        variant="subtle"
+        size="lg"
+        radius="xl"
+        onClick={toggleDrawer}
       />
       <TooltipIconButton
         label="Undo"
@@ -136,10 +138,10 @@ function ActionButtons({
         label="Redo"
         icon={
           <IconArrowBackUp
-          style={{
-            transform: "scaleX(-1)",
-          }}
-        />
+            style={{
+              transform: "scaleX(-1)",
+            }}
+          />
         }
         variant="subtle"
         size="lg"
@@ -233,7 +235,10 @@ function DrawerHeader() {
       loadChangelogs(response.data.createdProject.id);
 
       // Navigate/Enter the project on creation
-      navigate(`/${response.data.createdProject.id}`);
+      navigate({
+        to: `/${response.data.createdProject.id}`,
+        replace: true,
+      });
     }
 
     // Show notification
@@ -330,7 +335,7 @@ function DrawerItems({ project }: { project: IProject }) {
             root: "group/rightSection relative",
           }}
           onClick={() => {
-            navigate(`/${project.id}`, { replace: true });
+            navigate({ to: `/${project.id}`, replace: true });
             selectProject(project.id);
             loadChangelogs(project.id);
           }}
@@ -376,10 +381,14 @@ function DrawerItemMenu({
 }) {
   // Router
   const navigate = useNavigate();
-  const params = useParams();
+  const params: {
+    projectId?: string;
+  } = useSearch({
+    strict: false,
+  });
 
   // State
-  const { user } = useUserRepo()
+  const { user } = useUserRepo();
   const {
     selectProject,
     duplicateProject,
@@ -438,7 +447,10 @@ function DrawerItemMenu({
     // Check if the current project is the one that's deleted
     if (res.success && params.projectId == res.data.deletedProjectId) {
       // Navigate to "/" if the deleted project is the current project the user is on.
-      navigate("/");
+      navigate({
+        to: "/",
+        replace: true,
+      });
 
       // Reset the selectedProject field
       clearProject();

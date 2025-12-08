@@ -44,6 +44,22 @@ public class UserService(MongoDbContext context, UserMapper mapper) : IUserServi
         }
     }
 
+    public async Task<Result<UserResponseDto>> GetUserByEmailAsync(string email)
+    {
+        try
+        {
+            var user = await _context.Users.Find(user => user.Email == email).FirstOrDefaultAsync();
+
+            return user == null
+                ? Result.Fail<UserResponseDto>("User not found")
+                : Result.Ok(_mapper.ToDto(user));
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<UserResponseDto>("Failed to retrieve user").WithError(ex.Message);
+        }
+    }
+
     public async Task<Result<UserResponseDto>> CreateUserAsync(CreateUserDto user)
     {
         try

@@ -5,7 +5,6 @@ export type ClientOptions = {
 };
 
 export type AuthResponseDto = {
-    token: string | null;
     user: UserResponseDto;
 };
 
@@ -13,6 +12,7 @@ export type AuthResponseDtoApiResponse = {
     data?: AuthResponseDto;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -27,14 +27,14 @@ export type GoogleAuthDto = {
 };
 
 export type LoginDto = {
-    email: string;
-    password: string;
+    idToken: string;
 };
 
 export type ObjectApiResponse = {
     data?: unknown;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -50,7 +50,6 @@ export type ProblemDetails = {
 export type RegisterDto = {
     username: string;
     email: string;
-    password: string;
     displayName?: string | null;
 };
 
@@ -77,6 +76,7 @@ export type UserResponseDtoApiResponse = {
     data?: UserResponseDto;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -84,6 +84,7 @@ export type UserResponseDtoIEnumerableApiResponse = {
     data?: Array<UserResponseDto> | null;
     message?: string | null;
     status?: number;
+    isSuccess?: boolean;
     errors?: unknown;
 };
 
@@ -181,11 +182,20 @@ export type PostApiAuthLogoutData = {
     url: '/api/Auth/logout';
 };
 
+export type PostApiAuthLogoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type PostApiAuthLogoutError = PostApiAuthLogoutErrors[keyof PostApiAuthLogoutErrors];
+
 export type PostApiAuthLogoutResponses = {
     /**
-     * No Content
+     * OK
      */
-    204: void;
+    200: ObjectApiResponse;
 };
 
 export type PostApiAuthLogoutResponse = PostApiAuthLogoutResponses[keyof PostApiAuthLogoutResponses];
@@ -349,3 +359,30 @@ export type PutApiUsersByIdResponses = {
 };
 
 export type PutApiUsersByIdResponse = PutApiUsersByIdResponses[keyof PutApiUsersByIdResponses];
+
+export type GetApiUsersEmailByEmailData = {
+    body?: never;
+    path: {
+        email: string;
+    };
+    query?: never;
+    url: '/api/Users/email/{email}';
+};
+
+export type GetApiUsersEmailByEmailErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiUsersEmailByEmailError = GetApiUsersEmailByEmailErrors[keyof GetApiUsersEmailByEmailErrors];
+
+export type GetApiUsersEmailByEmailResponses = {
+    /**
+     * OK
+     */
+    200: UserResponseDtoApiResponse;
+};
+
+export type GetApiUsersEmailByEmailResponse = GetApiUsersEmailByEmailResponses[keyof GetApiUsersEmailByEmailResponses];

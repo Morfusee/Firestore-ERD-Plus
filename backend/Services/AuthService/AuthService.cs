@@ -34,34 +34,29 @@ public class AuthService(
     {
         try
         {
-            // Find user in MongoDB
+            var token = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(loginDto.IdToken);
+
+            var uid = token.Uid;
+            var firebaseUser = await _firebaseAuth.GetUserAsync(uid);
+            if (firebaseUser == null)
+            {
+                return Result.Fail<AuthResponseDto>("Invalid authentication token.");
+            }
+
+            // Note: Password verification happens on the client side with Firebase SDK
+            // For server-side, we generate a custom token that the client can use
             var user = await _context
                 .Users.Find(u =>
-                    u.Email.Equals(loginDto.Email, StringComparison.CurrentCultureIgnoreCase)
+                    u.Email.Equals(firebaseUser.Email, StringComparison.CurrentCultureIgnoreCase)
                 )
                 .FirstOrDefaultAsync();
 
             if (user == null)
             {
-                return Result.Fail<AuthResponseDto>("Invalid email or password.");
+                return Result.Fail<AuthResponseDto>("User not found.");
             }
 
-            // Get Firebase user by email
-            UserRecord firebaseUser;
-            try
-            {
-                firebaseUser = await _firebaseAuth.GetUserByEmailAsync(loginDto.Email);
-            }
-            catch (FirebaseAuthException)
-            {
-                return Result.Fail<AuthResponseDto>("Invalid email or password.");
-            }
-
-            // Note: Password verification happens on the client side with Firebase SDK
-            // For server-side, we generate a custom token that the client can use
-            var token = await _firebaseAuth.CreateCustomTokenAsync(firebaseUser.Uid);
-
-            var response = new AuthResponseDto { Token = token, User = _userMapper.ToDto(user) };
+            var response = new AuthResponseDto { User = _userMapper.ToDto(user) };
 
             return Result.Ok(response);
         }
@@ -96,22 +91,6 @@ public class AuthService(
                 );
             }
 
-            // Create user in Firebase Auth
-            var userRecordArgs = new UserRecordArgs
-            {
-                Email = registerDto.Email,
-                Password = registerDto.Password,
-                EmailVerified = false,
-                DisplayName = registerDto.DisplayName ?? registerDto.Username,
-            };
-
-            UserRecord firebaseUser = await _firebaseAuth.CreateUserAsync(userRecordArgs);
-
-            if (firebaseUser == null)
-            {
-                return Result.Fail<AuthResponseDto>("Failed to create user in Firebase.");
-            }
-
             // Create user in MongoDB
             var newUser = new CreateUserDto
             {
@@ -122,12 +101,8 @@ public class AuthService(
 
             await _context.Users.InsertOneAsync(_userMapper.ToUser(newUser));
 
-            // Generate custom token
-            var token = await _firebaseAuth.CreateCustomTokenAsync(firebaseUser.Uid);
-
             var response = new AuthResponseDto
             {
-                Token = token,
                 User = _userMapper.ToDto(_userMapper.ToUser(newUser)),
             };
 
@@ -241,11 +216,7 @@ public class AuthService(
             }
 
             // Return the ID token and user data
-            var response = new AuthResponseDto
-            {
-                Token = googleAuthDto.IdToken,
-                User = _userMapper.ToDto(user),
-            };
+            var response = new AuthResponseDto { User = _userMapper.ToDto(user) };
 
             return Result.Ok(response);
         }

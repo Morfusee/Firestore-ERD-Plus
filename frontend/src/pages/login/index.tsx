@@ -1,3 +1,4 @@
+import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
 import {
   Anchor,
   Button,
@@ -14,19 +15,16 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
-import useUserRepo from "../../data/repo/useUserRepo";
-import useAuth from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { isAuthenticated, loading } = useAuth();
+  const { signInWithEmailAndPassword, loading } = useFirebaseAuth();
 
   const navigate = useNavigate();
-  const { loginUser } = useUserRepo();
 
   const form = useForm({
     mode: "uncontrolled",
@@ -44,31 +42,31 @@ function Login() {
   const handleLogin = async (email: string, password: string) => {
     setIsLoggingIn(true);
 
-    // Login the user
-    const response = await loginUser(email, password);
+    try {
+      // Login the user
+      const user = await signInWithEmailAndPassword(email, password);
 
-    // Prevent the early redirecting of the user if the login fails
-    if (response.statusText === "OK") {
-      navigate("/");
-    } else {
-      // Show an error message if the login fails
+      // Prevent the early redirecting of the user if the login fails
+      if (user) {
+        navigate({
+          to: "/",
+        });
+      }
+
+      setIsLoggingIn(false);
+    } catch (err) {
+      setIsLoggingIn(false);
+      const message = getErrorMessage(err);
       form.setErrors({
         email: " ",
-        password: getErrorMessage(response.error, response.message),
+        password: message,
       });
     }
-
-    setIsLoggingIn(false);
   };
 
   // Show nothing while fetching data
   if (loading) {
     return null;
-  }
-
-  // If the user is logged in already, redirect to the main page
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
   }
 
   return (
@@ -106,7 +104,11 @@ function Login() {
                 <Group gap="xs" justify="flex-end">
                   <Anchor
                     size="sm"
-                    onClick={() => navigate("/forgot-password")}
+                    onClick={() =>
+                      navigate({
+                        to: "/forgot-password",
+                      })
+                    }
                   >
                     Forgot password?
                   </Anchor>
@@ -127,7 +129,14 @@ function Login() {
             <Center mt="lg">
               <Group gap="xs">
                 <Text size="sm">Don't have an account?</Text>
-                <Anchor size="sm" onClick={() => navigate("/register")}>
+                <Anchor
+                  size="sm"
+                  onClick={() =>
+                    navigate({
+                      to: "/register",
+                    })
+                  }
+                >
                   Sign up
                 </Anchor>
               </Group>
