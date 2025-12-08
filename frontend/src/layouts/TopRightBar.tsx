@@ -1,3 +1,4 @@
+import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
 import {
   Avatar,
   Box,
@@ -61,35 +62,36 @@ function ActionButtons({
   toggleDrawer: () => void;
   openedDrawer: boolean;
 }) {
+  const navigate = useNavigate();
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  const navigate = useNavigate();
-
-  const { logoutUser } = useUserRepo();
   const { validateRole } = useProjectRepo();
   const { selectedProject } = useProjectStore();
+  const { user } = useUserRepo();
+  const { width } = useViewportSize();
+  const [opened, handlers] = useDisclosure(false);
+  const { logout } = useFirebaseAuth();
+
   const isButtonDisabled = !selectedProject;
 
-  const { width } = useViewportSize();
-
-  const [opened, handlers] = useDisclosure(false);
-
-  const { user } = useUserRepo();
-
   const handleLogout = async () => {
-    setIsLoggingOut(true);
-    logoutUser()
-      .then((status) => {
-        if (status)
-          navigate({
-            to: "/login",
-          });
+    try {
+      setIsLoggingOut(true);
+      const status = await logout();
+
+      if (status) {
+        navigate({
+          to: "/login",
+        });
         setIsLoggingOut(false);
-      })
-      .catch(() => {
-        setIsLoggingOut(false);
-      });
+        return;
+      }
+    } catch (error) {
+      setIsLoggingOut(false);
+      console.log("Logout error:", error);
+    }
   };
 
   return (

@@ -1,12 +1,9 @@
-import { AuthResponseDtoApiResponse } from "@/integrations/api/generated";
 import {
   postApiAuthLoginMutation,
   postApiAuthLogoutMutation,
 } from "@/integrations/api/generated/@tanstack/react-query.gen";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../integrations/firebase/firebase-client";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
 import { IUser, useUserStore } from "../../store/useUserStore";
@@ -44,42 +41,6 @@ const useUserRepo = () => {
   const { mutateAsync: loginMutateAsync } = useMutation(
     postApiAuthLoginMutation()
   );
-
-  const loginUser = async (
-    email: string,
-    password: string
-  ): Promise<AuthResponseDtoApiResponse | void> => {
-    try {
-      const token = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      ).then((userCredential) => userCredential.user.getIdToken());
-
-      const loginResponse = await loginMutateAsync({
-        body: {
-          idToken: token,
-        },
-      });
-
-      // Set the current user to the user response from api
-      setCurrentUser(loginResponse.data?.user as IUser);
-
-      // Return the whole login response to get the message and success status
-      return loginResponse;
-    } catch (err: any | APIResponse<FetchedUser>) {
-      // Log the error
-      console.log(err);
-
-      // Check if the error is an AxiosError
-      if (axios.isAxiosError(err)) {
-        return err.response?.data;
-      }
-
-      // Return the error response either way
-      return err.response?.data;
-    }
-  };
 
   const getUser = async (userId: string) => {
     try {
@@ -160,32 +121,6 @@ const useUserRepo = () => {
     }
   };
 
-  const logoutUser = async () => {
-    try {
-      const logoutUserResponse = await logoutMutateAsync({});
-
-      await auth.signOut();
-
-      // Set the current user to null
-      setCurrentUser(null);
-
-      /* These two solves the appearance of pending/unsaved changes 
-        from one account to another when logging in */
-
-      // Clear the selected project
-      clearSelectedProject();
-      clearSelectedProjectRole();
-
-      // Clear the editor state snapshot
-      clearStateSnapshot();
-
-      return logoutUserResponse.isSuccess;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
-
   const resetPassword = async (email: string) => {
     try {
       const res = await resetPasswordApi(email);
@@ -245,11 +180,9 @@ const useUserRepo = () => {
     user,
     getUser,
     getUserByUsername,
-    loginUser,
     registerUser,
     changeUserDisplayname,
     authenticateUser,
-    logoutUser,
     resetPassword,
     setProfileImage,
     uploadProfileImage,
