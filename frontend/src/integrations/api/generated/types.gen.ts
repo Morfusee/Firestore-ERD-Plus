@@ -5,7 +5,6 @@ export type ClientOptions = {
 };
 
 export type AuthResponseDto = {
-    token: string | null;
     user: UserResponseDto;
 };
 
@@ -28,8 +27,7 @@ export type GoogleAuthDto = {
 };
 
 export type LoginDto = {
-    email: string;
-    password: string;
+    idToken: string;
 };
 
 export type ObjectApiResponse = {

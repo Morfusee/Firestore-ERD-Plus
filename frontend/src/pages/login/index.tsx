@@ -1,5 +1,3 @@
-import { postApiAuthLoginMutation } from "@/integrations/api/generated/@tanstack/react-query.gen";
-import { auth } from "@/integrations/firebase/firebase-client";
 import {
   Anchor,
   Button,
@@ -16,13 +14,12 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useMutation } from "@tanstack/react-query";
-import { Navigate, useNavigate } from "@tanstack/react-router";
-import { signInWithCustomToken } from "firebase/auth";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
 import useUserRepo from "../../data/repo/useUserRepo";
 import useAuth from "../../hooks/useAuth";
+import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -44,21 +41,24 @@ function Login() {
     },
   });
 
-  const { mutateAsync: loginUserMutation } = useMutation(
-    postApiAuthLoginMutation()
-  );
-
   const handleLogin = async (email: string, password: string) => {
     setIsLoggingIn(true);
 
-    await loginUserMutation({
-      body: {
-        email,
-        password,
-      },
-    }).then(async (data) => {
-      await signInWithCustomToken(auth, data.data?.token!);
-    });
+    // Login the user
+    const response = await loginUser(email, password);
+
+    // Prevent the early redirecting of the user if the login fails
+    if (response?.isSuccess) {
+      navigate({
+        to: "/",
+      });
+    } else {
+      // Show an error message if the login fails
+      form.setErrors({
+        email: " ",
+        password: getErrorMessage(response?.errors, response?.message),
+      });
+    }
 
     setIsLoggingIn(false);
   };
@@ -66,11 +66,6 @@ function Login() {
   // Show nothing while fetching data
   if (loading) {
     return null;
-  }
-
-  // If the user is logged in already, redirect to the main page
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
   }
 
   return (
