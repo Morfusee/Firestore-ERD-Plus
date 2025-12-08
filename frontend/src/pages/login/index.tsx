@@ -1,3 +1,4 @@
+import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
 import {
   Anchor,
   Button,
@@ -18,12 +19,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
 import useUserRepo from "../../data/repo/useUserRepo";
-import useAuth from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { isAuthenticated, loading } = useAuth();
+  const { signInWithEmailAndPassword, loading, error } = useFirebaseAuth();
 
   const navigate = useNavigate();
   const { loginUser } = useUserRepo();
@@ -44,23 +44,26 @@ function Login() {
   const handleLogin = async (email: string, password: string) => {
     setIsLoggingIn(true);
 
-    // Login the user
-    const response = await loginUser(email, password);
+    try {
+      // Login the user
+      const user = await signInWithEmailAndPassword(email, password);
 
-    // Prevent the early redirecting of the user if the login fails
-    if (response?.isSuccess) {
-      navigate({
-        to: "/",
-      });
-    } else {
-      // Show an error message if the login fails
+      // Prevent the early redirecting of the user if the login fails
+      if (user) {
+        navigate({
+          to: "/",
+        });
+      }
+
+      setIsLoggingIn(false);
+    } catch (err) {
+      setIsLoggingIn(false);
+      const message = getErrorMessage(err);
       form.setErrors({
         email: " ",
-        password: getErrorMessage(response?.errors, response?.message),
+        password: message,
       });
     }
-
-    setIsLoggingIn(false);
   };
 
   // Show nothing while fetching data
