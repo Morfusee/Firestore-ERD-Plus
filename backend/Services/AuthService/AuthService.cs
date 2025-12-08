@@ -91,22 +91,6 @@ public class AuthService(
                 );
             }
 
-            // Create user in Firebase Auth
-            var userRecordArgs = new UserRecordArgs
-            {
-                Email = registerDto.Email,
-                Password = registerDto.Password,
-                EmailVerified = false,
-                DisplayName = registerDto.DisplayName ?? registerDto.Username,
-            };
-
-            UserRecord firebaseUser = await _firebaseAuth.CreateUserAsync(userRecordArgs);
-
-            if (firebaseUser == null)
-            {
-                return Result.Fail<AuthResponseDto>("Failed to create user in Firebase.");
-            }
-
             // Create user in MongoDB
             var newUser = new CreateUserDto
             {
