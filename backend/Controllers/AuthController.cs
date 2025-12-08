@@ -24,21 +24,6 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     {
         var result = await _authService.RegisterAsync(registerDto);
 
-        if (result.IsSuccess)
-        {
-            Response.Cookies.Append(
-                "access_token",
-                result.Value.Token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7),
-                }
-            );
-        }
-
         return this.ToApiResponse(result);
     }
 
@@ -67,21 +52,6 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     )
     {
         var result = await _authService.GoogleAuthAsync(googleAuthDto);
-
-        if (result.IsSuccess)
-        {
-            Response.Cookies.Append(
-                "access_token",
-                result.Value.Token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7),
-                }
-            );
-        }
 
         return this.ToApiResponse(result);
     }

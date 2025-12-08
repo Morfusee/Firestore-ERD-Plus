@@ -16,8 +16,7 @@ export const zGoogleAuthDto = z.object({
 });
 
 export const zLoginDto = z.object({
-    email: z.email().min(1),
-    password: z.string().min(1)
+    idToken: z.string().min(1)
 });
 
 export const zObjectApiResponse = z.object({
@@ -117,10 +116,6 @@ export const zUserResponseDto = z.object({
 });
 
 export const zAuthResponseDto = z.object({
-    token: z.union([
-        z.string(),
-        z.null()
-    ]),
     user: zUserResponseDto
 });
 

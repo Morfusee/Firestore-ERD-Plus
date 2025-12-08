@@ -1,5 +1,11 @@
+import { AuthResponseDtoApiResponse } from "@/integrations/api/generated";
+import {
+  postApiAuthLoginMutation,
+  postApiAuthLogoutMutation,
+} from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { signInWithCustomToken } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../integrations/firebase/firebase-client";
 import { useEditorStore } from "../../store/useEditorStore";
 import { useProjectStore } from "../../store/useProjectStore";
@@ -7,8 +13,6 @@ import { IUser, useUserStore } from "../../store/useUserStore";
 import { APIResponse, CreatedUser, FetchedUser } from "../../types/APITypes";
 import {
   authenticateUserApi,
-  loginUserApi,
-  logoutUserApi,
   registerUserApi,
   resetPasswordApi,
 } from "../api/authApi";
@@ -33,17 +37,33 @@ const useUserRepo = () => {
     (state) => state.clearStateSnapshot
   );
 
+  const { mutateAsync: logoutMutateAsync } = useMutation(
+    postApiAuthLogoutMutation()
+  );
+
+  const { mutateAsync: loginMutateAsync } = useMutation(
+    postApiAuthLoginMutation()
+  );
+
   const loginUser = async (
     email: string,
     password: string
-  ): Promise<APIResponse<FetchedUser>> => {
+  ): Promise<AuthResponseDtoApiResponse | void> => {
     try {
-      const loginResponse = await loginUserApi(email, password);
+      const token = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      ).then((userCredential) => userCredential.user.getIdToken());
 
-      await signInWithCustomToken(auth, loginResponse.data.token);
+      const loginResponse = await loginMutateAsync({
+        body: {
+          idToken: token,
+        },
+      });
 
       // Set the current user to the user response from api
-      setCurrentUser(loginResponse.data.user);
+      setCurrentUser(loginResponse.data?.user as IUser);
 
       // Return the whole login response to get the message and success status
       return loginResponse;
@@ -142,7 +162,9 @@ const useUserRepo = () => {
 
   const logoutUser = async () => {
     try {
-      const logoutUserResponse = await logoutUserApi();
+      const logoutUserResponse = await logoutMutateAsync({});
+
+      await auth.signOut();
 
       // Set the current user to null
       setCurrentUser(null);
@@ -157,7 +179,7 @@ const useUserRepo = () => {
       // Clear the editor state snapshot
       clearStateSnapshot();
 
-      return logoutUserResponse.success;
+      return logoutUserResponse.isSuccess;
     } catch (error) {
       console.log(error);
       return false;
