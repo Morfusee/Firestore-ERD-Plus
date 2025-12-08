@@ -40,6 +40,17 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
         return this.ToApiResponse(user)!;
     }
 
+    [HttpGet("email/{email}")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<UserResponseDto>>> GetUserByEmail(string email)
+    {
+        var user = await _userService.GetUserByEmailAsync(email);
+
+        return this.ToApiResponse(user)!;
+    }
+
     [HttpPost]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status201Created)]
