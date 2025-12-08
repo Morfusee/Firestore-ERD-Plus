@@ -1,5 +1,6 @@
 import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
 import { Center, Loader, Stack } from "@mantine/core";
+import { useNavigate } from "@tanstack/react-router";
 import { GoogleButton } from "../ui/SocialButtons";
 
 /**
@@ -18,12 +19,19 @@ import { GoogleButton } from "../ui/SocialButtons";
  * ```
  */
 export function GoogleSignInButton() {
+  const navigate = useNavigate();
   const { loading, signInWithGoogle, clearError } = useFirebaseAuth();
 
   const handleSignIn = async () => {
     try {
       clearError();
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+
+      if (user) {
+        navigate({
+          to: "/",
+        });
+      }
     } catch (err) {
       console.error("Sign in error:", err);
     }
