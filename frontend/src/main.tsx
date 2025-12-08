@@ -16,6 +16,9 @@ import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext.tsx";
 import * as TanStackQueryProvider from "@/integrations/tanstack-query/root-provider.tsx";
 import { routeTree } from "./routeTree.gen";
 
+// Import configured API client to set up interceptors
+import "./integrations/api/client";
+
 import "./css/index.css";
 
 const router = createRouter({
