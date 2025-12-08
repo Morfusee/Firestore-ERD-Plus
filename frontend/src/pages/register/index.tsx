@@ -1,3 +1,4 @@
+import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
 import {
   Anchor,
   Button,
@@ -14,18 +15,15 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Navigate, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { GoogleButton } from "../../components/ui/SocialButtons";
-import useUserRepo from "../../data/repo/useUserRepo";
-import useAuth from "../../hooks/useAuth";
-import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
 
-  const { registerUser } = useUserRepo();
-  const { isAuthenticated, loading } = useAuth();
+  const { register, loading } = useFirebaseAuth();
+
   const navigate = useNavigate();
 
   const form = useForm({
@@ -89,20 +87,20 @@ function Register() {
   ) => {
     setIsRegistering(true);
 
-    const response = await registerUser(username, email, password);
+    try {
+      const user = await register(username, email, password);
 
-    // Prevent the early redirecting of the user if the registering fails
-    if (response.success) {
-      navigate({
-        to: "/",
-      });
-    } else {
-      // Show an error message if the register fails
-
+      if (user) {
+        navigate({
+          to: "/",
+        });
+      }
+    } catch (error) {
+      const message = (error as Error).message || "Registration failed";
       form.setErrors({
         username: " ",
         email: " ",
-        password: getErrorMessage(response.error, response.message),
+        password: message,
       });
     }
 
@@ -120,11 +118,6 @@ function Register() {
   // Show nothing while fetching data
   if (loading) {
     return null;
-  }
-
-  // If the user is logged in already, redirect to the main page
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
   }
 
   return (

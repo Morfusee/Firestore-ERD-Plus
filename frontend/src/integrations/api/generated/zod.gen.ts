@@ -56,7 +56,6 @@ export const zProblemDetails = z.object({
 export const zRegisterDto = z.object({
     username: z.string().min(3),
     email: z.email().min(1),
-    password: z.string().min(6),
     displayName: z.optional(z.union([
         z.string(),
         z.null()

@@ -50,7 +50,6 @@ export type ProblemDetails = {
 export type RegisterDto = {
     username: string;
     email: string;
-    password: string;
     displayName?: string | null;
 };
 
