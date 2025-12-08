@@ -3,8 +3,8 @@
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApiUsersById, getApiAuthMe, getApiUsers, getApiUsersById, type Options, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiUsers, putApiUsersById } from '../sdk.gen';
-import type { DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersError, GetApiUsersResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
+import { deleteApiUsersById, getApiAuthMe, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiUsers, putApiUsersById } from '../sdk.gen';
+import type { DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
 
 export const postApiAuthRegisterMutation = (options?: Partial<Options<PostApiAuthRegisterData>>): UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> => {
     const mutationOptions: UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> = {
@@ -181,3 +181,18 @@ export const putApiUsersByIdMutation = (options?: Partial<Options<PutApiUsersByI
     };
     return mutationOptions;
 };
+
+export const getApiUsersEmailByEmailQueryKey = (options: Options<GetApiUsersEmailByEmailData>) => createQueryKey('getApiUsersEmailByEmail', options);
+
+export const getApiUsersEmailByEmailOptions = (options: Options<GetApiUsersEmailByEmailData>) => queryOptions<GetApiUsersEmailByEmailResponse, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, ReturnType<typeof getApiUsersEmailByEmailQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApiUsersEmailByEmail({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApiUsersEmailByEmailQueryKey(options)
+});

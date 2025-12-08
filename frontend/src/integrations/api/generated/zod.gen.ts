@@ -269,3 +269,16 @@ export const zPutApiUsersByIdData = z.object({
  * OK
  */
 export const zPutApiUsersByIdResponse = zUserResponseDtoApiResponse;
+
+export const zGetApiUsersEmailByEmailData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        email: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zGetApiUsersEmailByEmailResponse = zUserResponseDtoApiResponse;

@@ -359,3 +359,30 @@ export type PutApiUsersByIdResponses = {
 };
 
 export type PutApiUsersByIdResponse = PutApiUsersByIdResponses[keyof PutApiUsersByIdResponses];
+
+export type GetApiUsersEmailByEmailData = {
+    body?: never;
+    path: {
+        email: string;
+    };
+    query?: never;
+    url: '/api/Users/email/{email}';
+};
+
+export type GetApiUsersEmailByEmailErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiUsersEmailByEmailError = GetApiUsersEmailByEmailErrors[keyof GetApiUsersEmailByEmailErrors];
+
+export type GetApiUsersEmailByEmailResponses = {
+    /**
+     * OK
+     */
+    200: UserResponseDtoApiResponse;
+};
+
+export type GetApiUsersEmailByEmailResponse = GetApiUsersEmailByEmailResponses[keyof GetApiUsersEmailByEmailResponses];
