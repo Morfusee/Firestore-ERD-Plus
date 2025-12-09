@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "concurrently -k -n FRONTEND,BACKEND -c blue,green \"pnpm frontend\" \"pnpm backend\"",
     "frontend": "pnpm --filter frontend dev",
-    "backend": "pnpm --filter backend dev",
+    "backend": "dotnet watch run --project backend",
+    "old_backend": "pnpm --filter old_backend dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
