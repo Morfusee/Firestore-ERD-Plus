@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using backend.Common.Extensions;
 using backend.Common.Handlers;
 using backend.Config;
@@ -25,8 +26,13 @@ builder.Services.AddHttpClient();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Add controllers
-builder.Services.AddControllers();
+// Add controllers with JSON options for enum serialization
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 // Register all services with attributes dynamically
 var assembly = Assembly.GetExecutingAssembly();
