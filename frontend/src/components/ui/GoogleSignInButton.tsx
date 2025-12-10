@@ -1,4 +1,4 @@
-import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
 import { Center, Loader, Stack } from "@mantine/core";
 import { useNavigate } from "@tanstack/react-router";
 import { GoogleButton } from "../ui/SocialButtons";
