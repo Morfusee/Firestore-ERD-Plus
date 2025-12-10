@@ -1,6 +1,6 @@
-import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
 import { UserResponseDto } from "@/integrations/api/generated";
 import { getApiUsersEmailByEmailOptions } from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
 import {
   Avatar,
   Box,
