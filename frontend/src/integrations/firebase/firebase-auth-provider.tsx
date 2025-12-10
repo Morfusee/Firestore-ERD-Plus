@@ -22,7 +22,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { auth } from "../integrations/firebase/firebase-client";
+import { auth } from "./firebase-client";
 
 /**
  * Firebase Auth Context Type
