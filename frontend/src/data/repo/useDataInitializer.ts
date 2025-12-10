@@ -1,7 +1,4 @@
-import { getApiSettingsOptions } from "@/integrations/api/generated/@tanstack/react-query.gen";
 import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
-import { MantineColorScheme, useMantineColorScheme } from "@mantine/core";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -13,21 +10,15 @@ import useChangelogRepo from "./useChangelogRepo";
 import useEmojiRepo from "./useEmojiRepo";
 import useHistoryRepo from "./useHistoryRepo";
 import useProjectRepo from "./useProjectRepo";
-import { useSettingsRepo } from "./useSettingsRepo";
 import useUserRepo from "./useUserRepo";
 
 export const useDataInitializer = () => {
   const { user } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
-  const { fetchUserSettings } = useSettingsRepo();
   const { resetHistory } = useHistoryRepo();
   const { user: firebaseUser } = useFirebaseAuth();
   const navigate = useNavigate();
-
-  const { setColorScheme } = useMantineColorScheme({
-    keepTransitions: true,
-  });
 
   // Router
   const params: {
@@ -42,17 +33,8 @@ export const useDataInitializer = () => {
   // State
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
-  // Query
-  const { data } = useSuspenseQuery(
-    getApiSettingsOptions({
-      query: {
-        Email: firebaseUser?.email || "",
-      },
-    })
-  );
-
   useEffect(() => {
-    Promise.all([loadProjects(), loadEmojis(), loadUserSettings()]).then(() => {
+    Promise.all([loadProjects(), loadEmojis()]).then(() => {
       setIsLoaded(true);
     });
   }, []);
@@ -117,12 +99,6 @@ export const useDataInitializer = () => {
     return fetchEmojis().then((data) => {
       setEmojisDB(data);
     });
-  };
-
-  const loadUserSettings = async () => {
-    console.log("Loading user settings from server");
-    if (!user && !data?.data) return;
-    setColorScheme(data.data?.theme!.toLowerCase() as MantineColorScheme);
   };
 
   return {
