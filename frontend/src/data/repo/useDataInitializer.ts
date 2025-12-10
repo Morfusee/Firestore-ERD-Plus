@@ -1,3 +1,7 @@
+import { getApiSettingsOptions } from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
+import { MantineColorScheme, useMantineColorScheme } from "@mantine/core";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -18,7 +22,12 @@ export const useDataInitializer = () => {
   const { loadChangelogs } = useChangelogRepo();
   const { fetchUserSettings } = useSettingsRepo();
   const { resetHistory } = useHistoryRepo();
+  const { user: firebaseUser } = useFirebaseAuth();
   const navigate = useNavigate();
+
+  const { setColorScheme } = useMantineColorScheme({
+    keepTransitions: true,
+  });
 
   // Router
   const params: {
@@ -32,6 +41,15 @@ export const useDataInitializer = () => {
 
   // State
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
+
+  // Query
+  const { data } = useSuspenseQuery(
+    getApiSettingsOptions({
+      query: {
+        Email: firebaseUser?.email || "",
+      },
+    })
+  );
 
   useEffect(() => {
     Promise.all([loadProjects(), loadEmojis(), loadUserSettings()]).then(() => {
@@ -103,8 +121,8 @@ export const useDataInitializer = () => {
 
   const loadUserSettings = async () => {
     console.log("Loading user settings from server");
-    if (!user) return;
-    await fetchUserSettings(user.id);
+    if (!user && !data?.data) return;
+    setColorScheme(data.data?.theme!.toLowerCase() as MantineColorScheme);
   };
 
   return {
