@@ -1,3 +1,14 @@
+import useUserSettings from "@/hooks/useUserSettings";
+import {
+  CanvasBackgroundOptions,
+  SettingsResponseDto,
+  ThemeOptions,
+} from "@/integrations/api/generated";
+import {
+  getApiSettingsOptions,
+  putApiSettingsMutation,
+} from "@/integrations/api/generated/@tanstack/react-query.gen";
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
 import {
   Divider,
   Flex,
@@ -7,28 +18,46 @@ import {
   Tabs,
   Text,
   rem,
-  useMantineColorScheme
+  useMantineColorScheme,
 } from "@mantine/core";
 import { ContextModalProps, closeModal } from "@mantine/modals";
 import { IconBuilding, IconEye } from "@tabler/icons-react";
-import { BackgroundVariant } from "@xyflow/react";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
-import { IUserSettings } from "../../store/useSettingsStore";
-import { useUserStore } from "../../store/useUserStore";
+
+function SettingsModelQueryProvider({
+  children,
+}: {
+  children: (props: {
+    settings: SettingsResponseDto | undefined;
+  }) => React.ReactNode;
+}) {
+  const { user } = useFirebaseAuth();
+
+  const { data } = useSuspenseQuery({
+    ...getApiSettingsOptions({
+      query: {
+        Email: user?.email || "",
+      },
+    }),
+  });
+
+  const settings = data?.data;
+
+  return <>{children({ settings })}</>;
+}
 
 function SettingsModal({ context, id }: ContextModalProps) {
-  const { currentUser } = useUserStore();
-  const {
-    settings,
-    getSettings,
-    fetchUserSettings,
-    updateUserSettings,
-    updateSettings,
-  } = useSettingsRepo();
+  const { user } = useFirebaseAuth();
   const { setColorScheme } = useMantineColorScheme({
     keepTransitions: true,
   });
+
+  const { settings, setSettings } = useUserSettings();
+
+  const { mutateAsync: updateUserSettingsMutate } = useMutation(
+    putApiSettingsMutation()
+  );
 
   useEffect(() => {
     context.updateModal({
@@ -42,34 +71,32 @@ function SettingsModal({ context, id }: ContextModalProps) {
       centered: true,
       onClose: () => handleSave(),
     });
-
-    if (currentUser?.id) {
-      fetchUserSettings(currentUser.id);
-    }
-  }, []);
+  }, [settings]);
 
   const handleSave = async () => {
-    if (!currentUser?.id || !settings) return;
+    if (!user) return;
 
-    await updateUserSettings(currentUser.id, getSettings()!);
+    await updateUserSettingsMutate({
+      body: {
+        email: user.email || "",
+        ...settings,
+      },
+    });
     closeModal(id);
   };
 
   const handleThemeChange = (value: string) => {
-    // Update theme immediately
-    const theme = value as IUserSettings["theme"];
-    updateSettings("theme", theme);
-    setColorScheme(theme.toLowerCase() as MantineColorScheme);
+    setSettings("theme", value as ThemeOptions);
+    setColorScheme(value.toLowerCase() as MantineColorScheme);
   };
 
   const handleCanvasChange = (value: string) => {
     // Update canvas background immediately
-    updateSettings("canvasBackground", value as BackgroundVariant);
+    setSettings("canvasBackground", value as CanvasBackgroundOptions);
   };
 
   const handleAutoSaveChange = (value: string | number) => {
-    // Update auto save interval immediately
-    updateSettings("autoSaveInterval", Number(value));
+    setSettings("autoSaveInterval", Number(value));
   };
 
   return (
@@ -114,13 +141,17 @@ function SettingsModal({ context, id }: ContextModalProps) {
                   "0" to disable auto save.
                 </Text>
               </Flex>
-              <NumberInput
-                placeholder="Interval in seconds"
-                allowNegative={false}
-                allowDecimal={false}
-                value={settings?.autoSaveInterval ?? 0}
-                onChange={handleAutoSaveChange}
-              />
+              <SettingsModelQueryProvider>
+                {({ settings }) => (
+                  <NumberInput
+                    placeholder="Interval in seconds"
+                    allowNegative={false}
+                    allowDecimal={false}
+                    value={settings?.autoSaveInterval ?? 0}
+                    onChange={handleAutoSaveChange}
+                  />
+                )}
+              </SettingsModelQueryProvider>
             </Flex>
           </Flex>
         </Tabs.Panel>
@@ -143,12 +174,16 @@ function SettingsModal({ context, id }: ContextModalProps) {
                   Choose between light and dark mode
                 </Text>
               </Flex>
-              <SegmentedControl
-                size="xs"
-                data={["Light", "Dark"]}
-                value={settings?.theme ?? "Light"}
-                onChange={handleThemeChange}
-              />
+              <SettingsModelQueryProvider>
+                {({ settings }) => (
+                  <SegmentedControl
+                    size="xs"
+                    data={["Light", "Dark"]}
+                    value={settings?.theme ?? "Light"}
+                    onChange={handleThemeChange}
+                  />
+                )}
+              </SettingsModelQueryProvider>
             </Flex>
             <Flex direction={"column"} gap={"xs"}>
               <Flex direction={"column"}>
@@ -157,12 +192,16 @@ function SettingsModal({ context, id }: ContextModalProps) {
                   Select a background pattern for your canvas.
                 </Text>
               </Flex>
-              <SegmentedControl
-                size="xs"
-                data={["Dots", "Lines", "Cross"]}
-                value={settings?.canvasBackground}
-                onChange={handleCanvasChange}
-              />
+              <SettingsModelQueryProvider>
+                {({ settings }) => (
+                  <SegmentedControl
+                    size="xs"
+                    data={["Dots", "Lines", "Cross"]}
+                    value={settings?.canvasBackground}
+                    onChange={handleCanvasChange}
+                  />
+                )}
+              </SettingsModelQueryProvider>
             </Flex>
           </Flex>
         </Tabs.Panel>
