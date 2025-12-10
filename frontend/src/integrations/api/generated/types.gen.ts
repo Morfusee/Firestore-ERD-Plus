@@ -16,9 +16,18 @@ export type AuthResponseDtoApiResponse = {
     errors?: unknown;
 };
 
-export type CreateUserDto = {
-    username: string;
+export type CanvasBackgroundOptions = 'Dots' | 'Lines' | 'Cross';
+
+export type CreateSettingsDto = {
     email: string;
+    autoSaveInterval?: number;
+    canvasBackground?: CanvasBackgroundOptions;
+    theme?: ThemeOptions;
+};
+
+export type CreateUserDto = {
+    email: string;
+    username: string;
     displayName?: string | null;
 };
 
@@ -53,6 +62,33 @@ export type RegisterDto = {
     displayName?: string | null;
 };
 
+export type SettingsResponseDto = {
+    id?: string | null;
+    userId: string;
+    autoSaveInterval?: number;
+    canvasBackground?: CanvasBackgroundOptions;
+    theme?: ThemeOptions;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type SettingsResponseDtoApiResponse = {
+    data?: SettingsResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type ThemeOptions = 'Light' | 'Dark';
+
+export type UpdateSettingsDto = {
+    email: string;
+    autoSaveInterval?: number | null;
+    canvasBackground?: CanvasBackgroundOptions;
+    theme?: ThemeOptions;
+};
+
 export type UpdateUserDto = {
     username?: string | null;
     email?: string | null;
@@ -62,8 +98,8 @@ export type UpdateUserDto = {
 
 export type UserResponseDto = {
     id?: string | null;
-    username?: string | null;
-    email?: string | null;
+    username: string;
+    email: string;
     displayName?: string | null;
     profilePicture?: string | null;
     ownedProjects?: Array<string> | null;
@@ -224,6 +260,83 @@ export type GetApiAuthMeResponses = {
 };
 
 export type GetApiAuthMeResponse = GetApiAuthMeResponses[keyof GetApiAuthMeResponses];
+
+export type GetApiSettingsData = {
+    body?: never;
+    path?: never;
+    query: {
+        Email: string;
+    };
+    url: '/api/Settings';
+};
+
+export type GetApiSettingsErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiSettingsError = GetApiSettingsErrors[keyof GetApiSettingsErrors];
+
+export type GetApiSettingsResponses = {
+    /**
+     * OK
+     */
+    200: SettingsResponseDtoApiResponse;
+};
+
+export type GetApiSettingsResponse = GetApiSettingsResponses[keyof GetApiSettingsResponses];
+
+export type PostApiSettingsData = {
+    body?: CreateSettingsDto;
+    path?: never;
+    query?: never;
+    url: '/api/Settings';
+};
+
+export type PostApiSettingsErrors = {
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type PostApiSettingsError = PostApiSettingsErrors[keyof PostApiSettingsErrors];
+
+export type PostApiSettingsResponses = {
+    /**
+     * Created
+     */
+    201: SettingsResponseDtoApiResponse;
+};
+
+export type PostApiSettingsResponse = PostApiSettingsResponses[keyof PostApiSettingsResponses];
+
+export type PutApiSettingsData = {
+    body?: UpdateSettingsDto;
+    path?: never;
+    query?: never;
+    url: '/api/Settings';
+};
+
+export type PutApiSettingsErrors = {
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type PutApiSettingsError = PutApiSettingsErrors[keyof PutApiSettingsErrors];
+
+export type PutApiSettingsResponses = {
+    /**
+     * OK
+     */
+    200: SettingsResponseDtoApiResponse;
+};
+
+export type PutApiSettingsResponse = PutApiSettingsResponses[keyof PutApiSettingsResponses];
 
 export type GetApiUsersData = {
     body?: never;

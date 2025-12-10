@@ -2,9 +2,15 @@
 
 import { z } from 'zod';
 
+export const zCanvasBackgroundOptions = z.enum([
+    'Dots',
+    'Lines',
+    'Cross'
+]);
+
 export const zCreateUserDto = z.object({
-    username: z.string().min(1),
     email: z.email().min(1),
+    username: z.string().min(1),
     displayName: z.optional(z.union([
         z.string(),
         z.null()
@@ -62,6 +68,49 @@ export const zRegisterDto = z.object({
     ]))
 });
 
+export const zThemeOptions = z.enum(['Light', 'Dark']);
+
+export const zCreateSettingsDto = z.object({
+    email: z.email().min(1),
+    autoSaveInterval: z.optional(z.int()),
+    canvasBackground: z.optional(zCanvasBackgroundOptions),
+    theme: z.optional(zThemeOptions)
+});
+
+export const zSettingsResponseDto = z.object({
+    id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    userId: z.string().min(1),
+    autoSaveInterval: z.optional(z.int()),
+    canvasBackground: z.optional(zCanvasBackgroundOptions),
+    theme: z.optional(zThemeOptions),
+    createdAt: z.optional(z.iso.datetime()),
+    updatedAt: z.optional(z.iso.datetime())
+});
+
+export const zSettingsResponseDtoApiResponse = z.object({
+    data: z.optional(zSettingsResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zUpdateSettingsDto = z.object({
+    email: z.email().min(1),
+    autoSaveInterval: z.optional(z.union([
+        z.int(),
+        z.null()
+    ])),
+    canvasBackground: z.optional(zCanvasBackgroundOptions),
+    theme: z.optional(zThemeOptions)
+});
+
 export const zUpdateUserDto = z.object({
     username: z.optional(z.union([
         z.string(),
@@ -86,14 +135,8 @@ export const zUserResponseDto = z.object({
         z.string(),
         z.null()
     ])),
-    username: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    email: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
+    username: z.string().min(1),
+    email: z.email().min(1),
     displayName: z.optional(z.union([
         z.string(),
         z.null()
@@ -208,6 +251,41 @@ export const zGetApiAuthMeData = z.object({
  * OK
  */
 export const zGetApiAuthMeResponse = zObjectApiResponse;
+
+export const zGetApiSettingsData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.object({
+        Email: z.email()
+    })
+});
+
+/**
+ * OK
+ */
+export const zGetApiSettingsResponse = zSettingsResponseDtoApiResponse;
+
+export const zPostApiSettingsData = z.object({
+    body: z.optional(zCreateSettingsDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * Created
+ */
+export const zPostApiSettingsResponse = zSettingsResponseDtoApiResponse;
+
+export const zPutApiSettingsData = z.object({
+    body: z.optional(zUpdateSettingsDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPutApiSettingsResponse = zSettingsResponseDtoApiResponse;
 
 export const zGetApiUsersData = z.object({
     body: z.optional(z.never()),
