@@ -16,23 +16,23 @@ import {
 import { EditorNode } from "../../types/EditorTypes";
 import TableNode from "./nodes/TableNode";
 
+import useUserSettings from "@/hooks/useUserSettings";
 import "@xyflow/react/dist/style.css";
-import useIsDarkMode from "../../hooks/useIsDarkMode";
 import { useCallback, useMemo, useRef } from "react";
+import "../../css/react-flow.css";
 import useEditorRepo from "../../data/repo/useEditorRepo";
-import { useEditorStore } from "../../store/useEditorStore";
-import NoteNode from "./nodes/NoteNode";
-import { useSettingsRepo } from "../../data/repo/useSettingsRepo";
 import useProjectRepo from "../../data/repo/useProjectRepo";
-import { useToolbarStore } from "../../store/useToolbarStore";
 import useToolbarRepo from "../../data/repo/useToolbarRepo";
-import "../../css/react-flow.css"
-
+import useIsDarkMode from "../../hooks/useIsDarkMode";
+import { useEditorStore } from "../../store/useEditorStore";
+import { useToolbarStore } from "../../store/useToolbarStore";
+import NoteNode from "./nodes/NoteNode";
 
 function Editor() {
-  const { moveNode, addNode, addEdge, changeEdge, deleteEdge } = useEditorRepo();
-  const { validateRole } = useProjectRepo()
-  
+  const { moveNode, addNode, addEdge, changeEdge, deleteEdge } =
+    useEditorRepo();
+  const { validateRole } = useProjectRepo();
+
   const nodeTypes: NodeTypes = useMemo(
     () => ({
       table: TableNode,
@@ -47,32 +47,39 @@ function Editor() {
 
   const theme = useMantineTheme();
   const isDarkMode = useIsDarkMode();
-  const { getCanvasBackground } = useSettingsRepo();
-  const canvasBackground = getCanvasBackground();
+  const {
+    settings: { canvasBackground },
+  } = useUserSettings();
 
   const { screenToFlowPosition } = useReactFlow();
 
   const nodes = useEditorStore((state) => state.nodes);
   const edges = useEditorStore((state) => state.edges);
 
-  const currentTool = useToolbarStore(state => state.currentTool)
-  const { resetTool } = useToolbarRepo()
+  const currentTool = useToolbarStore((state) => state.currentTool);
+  const { resetTool } = useToolbarRepo();
 
   const onNodeDrag: OnNodeDrag<EditorNode> = useCallback(
     (_, node) => {
-      moveNode(node.id, node.position)
-      console.log("Node Dragging Stop")
+      moveNode(node.id, node.position);
+      console.log("Node Dragging Stop");
     },
     [useEditorRepo()]
   );
 
-  const onConnect: OnConnect = useCallback((conn) => addEdge(conn), [useEditorRepo()]);
+  const onConnect: OnConnect = useCallback(
+    (conn) => addEdge(conn),
+    [useEditorRepo()]
+  );
   const edgeReconnectSuccessful = useRef(true);
 
-  const onReconnect: OnReconnect = useCallback((oldEdge, newConn) => {
-    edgeReconnectSuccessful.current = true;
-    changeEdge(oldEdge, newConn);
-  }, [useEditorRepo()]);
+  const onReconnect: OnReconnect = useCallback(
+    (oldEdge, newConn) => {
+      edgeReconnectSuccessful.current = true;
+      changeEdge(oldEdge, newConn);
+    },
+    [useEditorRepo()]
+  );
 
   const onReconnectStart = useCallback(() => {
     edgeReconnectSuccessful.current = false;
@@ -89,25 +96,27 @@ function Editor() {
     [useEditorRepo()]
   );
 
-  const onPaneClick = useCallback((event: React.MouseEvent) => {
-    const position = screenToFlowPosition({
-      x: event.clientX + -50,
-      y: event.clientY + -50,
-    });
+  const onPaneClick = useCallback(
+    (event: React.MouseEvent) => {
+      const position = screenToFlowPosition({
+        x: event.clientX + -50,
+        y: event.clientY + -50,
+      });
 
-    console.log(position)
-    if(currentTool == "table") {
-      addNode("table", position);
-    } else if (currentTool == "note") {
-      addNode("note", position);
-    }
+      console.log(position);
+      if (currentTool == "table") {
+        addNode("table", position);
+      } else if (currentTool == "note") {
+        addNode("note", position);
+      }
 
-    resetTool();
-  }, [useEditorRepo(), currentTool]);
-
+      resetTool();
+    },
+    [useEditorRepo(), currentTool]
+  );
 
   return (
-    <Box className="w-full h-full">            
+    <Box className="w-full h-full">
       <ReactFlow
         colorMode={isDarkMode ? "dark" : "light"}
         //panOnDrag={[2]}
@@ -124,7 +133,7 @@ function Editor() {
         onPaneClick={onPaneClick}
         proOptions={proOptions}
         connectionMode={ConnectionMode.Loose}
-        className={`-z-10 ${currentTool !== "select" ? "cursor-cross": ""}`}
+        className={`-z-10 ${currentTool !== "select" ? "cursor-cross" : ""}`}
         nodesDraggable={validateRole()}
         nodesConnectable={validateRole()}
         nodesFocusable={validateRole()}
@@ -133,12 +142,10 @@ function Editor() {
       >
         <Background
           color={!isDarkMode ? theme.colors.dark[9] : theme.colors.dark[4]}
-          variant={canvasBackground as BackgroundVariant}
+          variant={canvasBackground.toLowerCase() as BackgroundVariant}
           gap={40}
         />
-        <Controls 
-          showInteractive={validateRole()}
-        />
+        <Controls showInteractive={validateRole()} />
       </ReactFlow>
     </Box>
   );
