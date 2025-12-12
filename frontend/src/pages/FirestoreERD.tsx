@@ -6,14 +6,12 @@ import BottomMiddleBar from "../layouts/BottomMiddleBar";
 import TopLeftBar from "../layouts/TopLeftBar";
 import TopMiddleBar from "../layouts/TopMiddleBar";
 import TopRightBar from "../layouts/TopRightBar";
-import { useEditorStore } from "../store/useEditorStore";
 import Editor from "./editor";
 
 function FirestoreERD() {
   const theme = useMantineTheme();
   const isDarkMode = useIsDarkMode();
   const { isLoaded } = useDataInitializer();
-  const { hasPendingChanges } = useEditorStore();
 
   // Invoke the useBlocker hook
   // This is a blocker for unsaved changes

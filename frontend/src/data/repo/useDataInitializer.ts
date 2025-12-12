@@ -1,3 +1,4 @@
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
@@ -9,15 +10,14 @@ import useChangelogRepo from "./useChangelogRepo";
 import useEmojiRepo from "./useEmojiRepo";
 import useHistoryRepo from "./useHistoryRepo";
 import useProjectRepo from "./useProjectRepo";
-import { useSettingsRepo } from "./useSettingsRepo";
 import useUserRepo from "./useUserRepo";
 
 export const useDataInitializer = () => {
   const { user } = useUserRepo();
   const { setProjectList, selectProject } = useProjectRepo();
   const { loadChangelogs } = useChangelogRepo();
-  const { fetchUserSettings } = useSettingsRepo();
   const { resetHistory } = useHistoryRepo();
+  const { user: firebaseUser } = useFirebaseAuth();
   const navigate = useNavigate();
 
   // Router
@@ -34,7 +34,7 @@ export const useDataInitializer = () => {
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    Promise.all([loadProjects(), loadEmojis(), loadUserSettings()]).then(() => {
+    Promise.all([loadProjects(), loadEmojis()]).then(() => {
       setIsLoaded(true);
     });
   }, []);
@@ -99,12 +99,6 @@ export const useDataInitializer = () => {
     return fetchEmojis().then((data) => {
       setEmojisDB(data);
     });
-  };
-
-  const loadUserSettings = async () => {
-    console.log("Loading user settings from server");
-    if (!user) return;
-    await fetchUserSettings(user.id);
   };
 
   return {

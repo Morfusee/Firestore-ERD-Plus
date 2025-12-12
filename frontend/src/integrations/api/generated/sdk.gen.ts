@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
+import type { DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiSettingsData, GetApiSettingsErrors, GetApiSettingsResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiSettingsData, PostApiSettingsErrors, PostApiSettingsResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiSettingsData, PutApiSettingsErrors, PutApiSettingsResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -48,6 +48,26 @@ export const postApiAuthGoogle = <ThrowOnError extends boolean = false>(options?
 export const postApiAuthLogout = <ThrowOnError extends boolean = false>(options?: Options<PostApiAuthLogoutData, ThrowOnError>) => (options?.client ?? client).post<PostApiAuthLogoutResponses, PostApiAuthLogoutErrors, ThrowOnError>({ url: '/api/Auth/logout', ...options });
 
 export const getApiAuthMe = <ThrowOnError extends boolean = false>(options?: Options<GetApiAuthMeData, ThrowOnError>) => (options?.client ?? client).get<GetApiAuthMeResponses, GetApiAuthMeErrors, ThrowOnError>({ url: '/api/Auth/me', ...options });
+
+export const getApiSettings = <ThrowOnError extends boolean = false>(options: Options<GetApiSettingsData, ThrowOnError>) => (options.client ?? client).get<GetApiSettingsResponses, GetApiSettingsErrors, ThrowOnError>({ url: '/api/Settings', ...options });
+
+export const postApiSettings = <ThrowOnError extends boolean = false>(options?: Options<PostApiSettingsData, ThrowOnError>) => (options?.client ?? client).post<PostApiSettingsResponses, PostApiSettingsErrors, ThrowOnError>({
+    url: '/api/Settings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const putApiSettings = <ThrowOnError extends boolean = false>(options?: Options<PutApiSettingsData, ThrowOnError>) => (options?.client ?? client).put<PutApiSettingsResponses, PutApiSettingsErrors, ThrowOnError>({
+    url: '/api/Settings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 export const getApiUsers = <ThrowOnError extends boolean = false>(options?: Options<GetApiUsersData, ThrowOnError>) => (options?.client ?? client).get<GetApiUsersResponses, GetApiUsersErrors, ThrowOnError>({ url: '/api/Users', ...options });
 

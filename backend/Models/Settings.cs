@@ -1,10 +1,11 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Models;
 
+[BsonIgnoreExtraElements]
 public class Settings
 {
     [BsonId]
@@ -20,9 +21,11 @@ public class Settings
     public int AutoSaveInterval { get; set; } = 0;
 
     [BsonElement("canvasBackground")]
+    [BsonRepresentation(BsonType.String)]
     public CanvasBackgroundOptions CanvasBackground { get; set; } = CanvasBackgroundOptions.Dots;
 
     [BsonElement("theme")]
+    [BsonRepresentation(BsonType.String)]
     public ThemeOptions Theme { get; set; } = ThemeOptions.Light;
 
     [BsonElement("createdAt")]
@@ -42,11 +45,11 @@ public enum CanvasBackgroundOptions
 {
     Dots,
     Lines,
-    Cross
+    Cross,
 }
 
 public enum ThemeOptions
 {
     Light,
-    Dark
+    Dark,
 }

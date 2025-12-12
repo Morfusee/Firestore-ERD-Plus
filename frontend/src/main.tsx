@@ -10,7 +10,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { SingletonHooksContainer } from "react-singleton-hook";
 import { customModals } from "./constants/modalConstants.ts";
-import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext.tsx";
+import { FirebaseAuthProvider } from "./integrations/firebase/firebase-auth-provider.tsx";
 
 import * as TanStackQueryProvider from "@/integrations/tanstack-query/root-provider.tsx";
 import { routeTree } from "./routeTree.gen";

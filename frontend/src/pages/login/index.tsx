@@ -1,4 +1,5 @@
-import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
+import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
 import {
   Anchor,
   Button,
@@ -17,7 +18,6 @@ import {
 import { useForm } from "@mantine/form";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
 import { getErrorMessage } from "../../utils/errorHelpers";
 
 function Login() {

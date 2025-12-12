@@ -1,15 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using backend.DTOs.Common;
 
 namespace backend.DTOs.User;
 
-public class CreateUserDto
+public class CreateUserDto : EmailDto
 {
     [Required]
     public required string Username { get; set; }
-
-    [Required]
-    [EmailAddress]
-    public required string Email { get; set; }
 
     public string? DisplayName { get; set; }
 }
