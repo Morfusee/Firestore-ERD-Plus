@@ -1,4 +1,4 @@
-import { useFirebaseAuth } from "@/contexts/FirebaseAuthContext";
+import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
 import {
   Anchor,
   Button,

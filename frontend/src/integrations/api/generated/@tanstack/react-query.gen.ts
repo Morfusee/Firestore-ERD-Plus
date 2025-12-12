@@ -3,8 +3,8 @@
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApiUsersById, getApiAuthMe, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiUsers, putApiUsersById } from '../sdk.gen';
-import type { DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
+import { deleteApiUsersById, getApiAuthMe, getApiSettings, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiSettings, postApiUsers, putApiSettings, putApiUsersById } from '../sdk.gen';
+import type { DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiSettingsData, GetApiSettingsError, GetApiSettingsResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiSettingsData, PostApiSettingsError, PostApiSettingsResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiSettingsData, PutApiSettingsError, PutApiSettingsResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
 
 export const postApiAuthRegisterMutation = (options?: Partial<Options<PostApiAuthRegisterData>>): UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> => {
     const mutationOptions: UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> = {
@@ -109,6 +109,49 @@ export const getApiAuthMeOptions = (options?: Options<GetApiAuthMeData>) => quer
     },
     queryKey: getApiAuthMeQueryKey(options)
 });
+
+export const getApiSettingsQueryKey = (options: Options<GetApiSettingsData>) => createQueryKey('getApiSettings', options);
+
+export const getApiSettingsOptions = (options: Options<GetApiSettingsData>) => queryOptions<GetApiSettingsResponse, GetApiSettingsError, GetApiSettingsResponse, ReturnType<typeof getApiSettingsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApiSettings({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApiSettingsQueryKey(options)
+});
+
+export const postApiSettingsMutation = (options?: Partial<Options<PostApiSettingsData>>): UseMutationOptions<PostApiSettingsResponse, PostApiSettingsError, Options<PostApiSettingsData>> => {
+    const mutationOptions: UseMutationOptions<PostApiSettingsResponse, PostApiSettingsError, Options<PostApiSettingsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postApiSettings({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const putApiSettingsMutation = (options?: Partial<Options<PutApiSettingsData>>): UseMutationOptions<PutApiSettingsResponse, PutApiSettingsError, Options<PutApiSettingsData>> => {
+    const mutationOptions: UseMutationOptions<PutApiSettingsResponse, PutApiSettingsError, Options<PutApiSettingsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await putApiSettings({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const getApiUsersQueryKey = (options?: Options<GetApiUsersData>) => createQueryKey('getApiUsers', options);
 
