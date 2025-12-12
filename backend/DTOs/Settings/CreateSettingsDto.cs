@@ -9,5 +9,5 @@ public class CreateSettingsDto : EmailDto
 
     public CanvasBackgroundOptions CanvasBackground { get; set; } = CanvasBackgroundOptions.Dots;
 
-    public ThemeOptions Theme { get; set; } = ThemeOptions.Light;
+    public ThemeOptions Theme { get; set; } = ThemeOptions.Dark;
 }
