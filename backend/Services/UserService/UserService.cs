@@ -1,16 +1,23 @@
 using backend.Common.Attributes;
+using backend.DTOs.Settings;
 using backend.DTOs.User;
 using backend.Mappers;
 using backend.Models;
+using backend.Services.SettingsService;
 using FluentResults;
 using MongoDB.Driver;
 
 namespace backend.Services.UserService;
 
 [ScopedService]
-public class UserService(MongoDbContext context, UserMapper mapper) : IUserService
+public class UserService(
+    MongoDbContext context,
+    ISettingsService settingsService,
+    UserMapper mapper
+) : IUserService
 {
     private readonly MongoDbContext _context = context;
+    private readonly ISettingsService _settingsService = settingsService;
     private readonly UserMapper _mapper = mapper;
 
     public async Task<Result<IEnumerable<UserResponseDto>>> GetAllUsersAsync()
@@ -66,6 +73,12 @@ public class UserService(MongoDbContext context, UserMapper mapper) : IUserServi
         {
             var newUser = _mapper.ToUser(user);
             await _context.Users.InsertOneAsync(newUser);
+
+            // Automatically create default settings for the new user
+            var defaultSettings = new CreateSettingsDto { Email = newUser.Email };
+
+            await _settingsService.CreateSettingsAsync(defaultSettings);
+
             return _mapper.ToDto(newUser);
         }
         catch (Exception ex)
@@ -107,6 +120,9 @@ public class UserService(MongoDbContext context, UserMapper mapper) : IUserServi
         try
         {
             var result = await _context.Users.DeleteOneAsync(user => user.Id == id);
+
+            // Also delete associated settings
+            var settings = await _context.Settings.DeleteManyAsync(s => s.UserId == id);
 
             if (result.DeletedCount == 0)
             {
