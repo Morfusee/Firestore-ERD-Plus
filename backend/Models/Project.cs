@@ -5,6 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Models;
 
+[BsonIgnoreExtraElements]
 public class Member
 {
     [BsonElement("userId")]
@@ -29,6 +30,7 @@ public enum MemberRole
     Admin,
 }
 
+[BsonIgnoreExtraElements]
 public class GeneralAccess
 {
     [Required]
@@ -52,6 +54,7 @@ public enum GeneralAccessType
     Link,
 }
 
+[BsonIgnoreExtraElements]
 public class Project
 {
     [BsonId]
