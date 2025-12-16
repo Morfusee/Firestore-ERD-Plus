@@ -2,7 +2,6 @@ using backend.Common.Attributes;
 using backend.DTOs.Common;
 using backend.DTOs.Project;
 using backend.Mappers;
-using backend.Models;
 using FluentResults;
 using MongoDB.Driver;
 
@@ -64,14 +63,39 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
         }
     }
 
-    public Task<Result<bool>> DeleteProjectAsync(string id)
+    public async Task<Result<bool>> DeleteProjectAsync(string id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var deleteProject = _context.Projects.DeleteOneAsync(proj => proj.Id == id);
+
+            return Result.Ok(true);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<bool>("Failed to delete project").WithError(ex.Message);
+        }
     }
 
-    public Task<Result<ProjectResponseDto>> GetProjectByIdAsync(string id)
+    public async Task<Result<ProjectResponseDto>> GetProjectByIdAsync(string id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var project = await _context.Projects.Find(proj => proj.Id == id).FirstOrDefaultAsync();
+
+            if (project == null)
+            {
+                return Result.Fail<ProjectResponseDto>("Project not found");
+            }
+
+            return Result.Ok(_mapper.ToDto(project));
+        }
+        catch (Exception ex)
+        {
+            return Result
+                .Fail<ProjectResponseDto>("Failed to retrieve project")
+                .WithError(ex.Message);
+        }
     }
 
     public Task<Result<ProjectResponseDto>> GetProjectsByEmailAsync(EmailDto emailDto)
