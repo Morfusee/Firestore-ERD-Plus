@@ -11,8 +11,9 @@ public class Member
     [BsonRepresentation(BsonType.ObjectId)]
     public string UserId { get; set; } = string.Empty;
 
-    [BsonElement("role")]
     [Required]
+    [BsonElement("role")]
+    [BsonRepresentation(BsonType.String)]
     public MemberRole Role { get; set; } = MemberRole.Viewer;
 
     [BsonIgnore]
@@ -25,17 +26,19 @@ public enum MemberRole
     Owner,
     Editor,
     Viewer,
-    Admin
+    Admin,
 }
 
 public class GeneralAccess
 {
-    [BsonElement("accessType")]
     [Required]
+    [BsonElement("accessType")]
+    [BsonRepresentation(BsonType.String)]
     public GeneralAccessType AccessType { get; set; } = GeneralAccessType.Restricted;
 
-    [BsonElement("role")]
     [Required]
+    [BsonElement("role")]
+    [BsonRepresentation(BsonType.String)]
     public MemberRole Role { get; set; } = MemberRole.Viewer;
 
     [BsonIgnore]
@@ -46,7 +49,7 @@ public class GeneralAccess
 public enum GeneralAccessType
 {
     Restricted,
-    Link
+    Link,
 }
 
 public class Project
