@@ -77,7 +77,17 @@ public class UserService(
             // Automatically create default settings for the new user
             var defaultSettings = new CreateSettingsDto { Email = newUser.Email };
 
-            await _settingsService.CreateSettingsAsync(defaultSettings);
+            var createdSettings = await _settingsService.CreateSettingsAsync(defaultSettings);
+
+            if (createdSettings.IsFailed)
+            {
+                // Rollback user creation if settings creation fails
+                await _context.Users.DeleteOneAsync(u => u.Id == newUser.Id);
+
+                return Result
+                    .Fail<UserResponseDto>("Failed to create default settings for the new user")
+                    .WithErrors(createdSettings.Errors);
+            }
 
             return _mapper.ToDto(newUser);
         }
