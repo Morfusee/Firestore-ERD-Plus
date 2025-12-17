@@ -5,6 +5,6 @@ namespace backend.DTOs.Project;
 
 public class SaveProjectDto : ProjectIdDto
 {
-    public string Data { get; set; } = string.Empty;
+    public required string Data { get; set; }
     public List<Member> Members { get; set; } = [];
 }
