@@ -2,6 +2,7 @@ using backend.Common.Attributes;
 using backend.DTOs.Common;
 using backend.DTOs.Project;
 using backend.Mappers;
+using backend.Models;
 using FluentResults;
 using MongoDB.Driver;
 
@@ -98,18 +99,87 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
         }
     }
 
-    public Task<Result<ProjectResponseDto>> GetProjectsByEmailAsync(EmailDto emailDto)
+    public async Task<Result<ProjectResponseDto>> GetProjectsByEmailAsync(EmailDto emailDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var projects = await _context
+                .Projects.Find(proj =>
+                    proj.Members.Any(m => m.User != null && m.User.Email == emailDto.Email)
+                )
+                .FirstOrDefaultAsync();
+
+            return Result.Ok(_mapper.ToDto(projects));
+        }
+        catch (Exception ex)
+        {
+            return Result
+                .Fail<ProjectResponseDto>("Failed to retrieve project")
+                .WithError(ex.Message);
+        }
     }
 
-    public Task<Result<ProjectResponseDto>> SaveProjectAsync(SaveProjectDto saveProjectDto)
+    public async Task<Result<ProjectResponseDto>> SaveProjectAsync(SaveProjectDto saveProjectDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var saveProject = await _context.Projects.FindOneAndUpdateAsync(
+                proj => proj.Id == saveProjectDto.Id,
+                Builders<Project>
+                    .Update.Set(p => p.Data, saveProjectDto.Data)
+                    .Set(p => p.UpdatedAt, DateTime.UtcNow),
+                new FindOneAndUpdateOptions<Project> { ReturnDocument = ReturnDocument.After }
+            );
+
+            if (saveProject == null)
+            {
+                return Result.Fail<ProjectResponseDto>("Project not found");
+            }
+
+            return Result.Ok(_mapper.ToDto(saveProject));
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<ProjectResponseDto>("Failed to save project").WithError(ex.Message);
+        }
     }
 
-    public Task<Result<ProjectResponseDto>> UpdateProjectAsync(UpdateProjectDto updateProjectDto)
+    public async Task<Result<ProjectResponseDto>> UpdateProjectAsync(
+        UpdateProjectDto updateProjectDto
+    )
     {
-        throw new NotImplementedException();
+        try
+        {
+            var updateDefinition = Builders<Project>.Update.Set(p => p.UpdatedAt, DateTime.UtcNow);
+
+            if (!string.IsNullOrEmpty(updateProjectDto.Name))
+            {
+                updateDefinition = updateDefinition.Set(p => p.Name, updateProjectDto.Name);
+            }
+
+            if (!string.IsNullOrEmpty(updateProjectDto.Icon))
+            {
+                updateDefinition = updateDefinition.Set(p => p.Icon, updateProjectDto.Icon);
+            }
+
+            var updatedProject = await _context.Projects.FindOneAndUpdateAsync(
+                proj => proj.Id == updateProjectDto.Id,
+                updateDefinition,
+                new FindOneAndUpdateOptions<Project> { ReturnDocument = ReturnDocument.After }
+            );
+
+            if (updatedProject == null)
+            {
+                return Result.Fail<ProjectResponseDto>("Project not found");
+            }
+
+            return Result.Ok(_mapper.ToDto(updatedProject));
+        }
+        catch (Exception ex)
+        {
+            return Result
+                .Fail<ProjectResponseDto>("Failed to update project")
+                .WithError(ex.Message);
+        }
     }
 }
