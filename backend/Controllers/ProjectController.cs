@@ -38,6 +38,17 @@ public class ProjectController(IProjectService projectService) : ControllerBase
         return this.ToApiResponse(project);
     }
 
+    [HttpGet("by-email")]
+    [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> GetProjectsByEmail(
+        [FromQuery] EmailDto email
+    )
+    {
+        var project = await _projectService.GetProjectsByEmailAsync(email);
+
+        return this.ToApiResponse(project);
+    }
+
     [HttpPost]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> CreateProject(
         [FromBody] CreateProjectDto createProjectDto
@@ -46,5 +57,35 @@ public class ProjectController(IProjectService projectService) : ControllerBase
         var project = await _projectService.CreateProjectAsync(createProjectDto);
 
         return this.ToApiResponse(project);
+    }
+
+    [HttpPatch]
+    public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> SaveProject(
+        [FromBody] SaveProjectDto saveProjectDto
+    )
+    {
+        var project = await _projectService.SaveProjectAsync(saveProjectDto);
+
+        return this.ToApiResponse(project);
+    }
+
+    [HttpPatch("details")]
+    public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> UpdateProject(
+        [FromBody] UpdateProjectDto updateProjectDto
+    )
+    {
+        var project = await _projectService.UpdateProjectAsync(updateProjectDto);
+
+        return this.ToApiResponse(project);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteProject(
+        [FromRoute(Name = "id")] string id
+    )
+    {
+        var result = await _projectService.DeleteProjectAsync(id);
+
+        return this.ToApiResponse(result);
     }
 }
