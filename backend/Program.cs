@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using backend.Common.Extensions;
 using backend.Common.Handlers;
 using backend.Config;
+using backend.Data.Seeders;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
@@ -39,6 +40,13 @@ var assembly = Assembly.GetExecutingAssembly();
 builder.Services.RegisterServicesWithAttributes(assembly);
 
 var app = builder.Build();
+
+// Seed emojis on startup
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<EmojiSeeder>();
+    await seeder.SeedAsync();
+}
 
 app.UseCors("AllowFrontend");
 
