@@ -99,7 +99,9 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
         }
     }
 
-    public async Task<Result<ProjectResponseDto>> GetProjectsByEmailAsync(EmailDto emailDto)
+    public async Task<Result<IEnumerable<ProjectResponseDto>>> GetProjectsByEmailAsync(
+        EmailDto emailDto
+    )
     {
         try
         {
@@ -107,14 +109,14 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
                 .Projects.Find(proj =>
                     proj.Members.Any(m => m.User != null && m.User.Email == emailDto.Email)
                 )
-                .FirstOrDefaultAsync();
-
-            return Result.Ok(_mapper.ToDto(projects));
+                .ToListAsync();
+            var projectDtos = projects.ConvertAll(proj => _mapper.ToDto(proj));
+            return Result.Ok<IEnumerable<ProjectResponseDto>>(projectDtos);
         }
         catch (Exception ex)
         {
             return Result
-                .Fail<ProjectResponseDto>("Failed to retrieve project")
+                .Fail<IEnumerable<ProjectResponseDto>>("Failed to retrieve project")
                 .WithError(ex.Message);
         }
     }

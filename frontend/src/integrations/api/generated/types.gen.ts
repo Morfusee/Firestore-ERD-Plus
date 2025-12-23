@@ -16,7 +16,21 @@ export type AuthResponseDtoApiResponse = {
     errors?: unknown;
 };
 
+export type BooleanApiResponse = {
+    data?: boolean;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
 export type CanvasBackgroundOptions = 'Dots' | 'Lines' | 'Cross';
+
+export type CreateProjectDto = {
+    email: string;
+    name: string | null;
+    icon: string | null;
+};
 
 export type CreateSettingsDto = {
     email: string;
@@ -31,6 +45,13 @@ export type CreateUserDto = {
     displayName?: string | null;
 };
 
+export type GeneralAccess = {
+    accessType: GeneralAccessType;
+    role: MemberRole;
+};
+
+export type GeneralAccessType = 'Restricted' | 'Link';
+
 export type GoogleAuthDto = {
     idToken: string;
 };
@@ -38,6 +59,13 @@ export type GoogleAuthDto = {
 export type LoginDto = {
     idToken: string;
 };
+
+export type Member = {
+    userId?: string | null;
+    role: MemberRole;
+};
+
+export type MemberRole = 'Owner' | 'Editor' | 'Viewer' | 'Admin';
 
 export type ObjectApiResponse = {
     data?: unknown;
@@ -56,10 +84,43 @@ export type ProblemDetails = {
     [key: string]: unknown | string | null | string | null | number | null | string | null | string | null | undefined;
 };
 
+export type ProjectResponseDto = {
+    id?: string | null;
+    name: string;
+    icon: string;
+    data?: string | null;
+    members?: Array<Member> | null;
+    generalAccess?: GeneralAccess;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type ProjectResponseDtoApiResponse = {
+    data?: ProjectResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type ProjectResponseDtoIEnumerableApiResponse = {
+    data?: Array<ProjectResponseDto> | null;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
 export type RegisterDto = {
     username: string;
     email: string;
     displayName?: string | null;
+};
+
+export type SaveProjectDto = {
+    id: string;
+    data: string | null;
+    members?: Array<Member> | null;
 };
 
 export type SettingsResponseDto = {
@@ -82,6 +143,12 @@ export type SettingsResponseDtoApiResponse = {
 
 export type ThemeOptions = 'Light' | 'Dark';
 
+export type UpdateProjectDto = {
+    id: string;
+    name?: string | null;
+    icon?: string | null;
+};
+
 export type UpdateSettingsDto = {
     email: string;
     autoSaveInterval?: number | null;
@@ -91,7 +158,7 @@ export type UpdateSettingsDto = {
 
 export type UpdateUserDto = {
     username?: string | null;
-    email?: string | null;
+    email: string | null;
     displayName?: string | null;
     profilePicture?: string | null;
 };
@@ -260,6 +327,187 @@ export type GetApiAuthMeResponses = {
 };
 
 export type GetApiAuthMeResponse = GetApiAuthMeResponses[keyof GetApiAuthMeResponses];
+
+export type GetApiProjectData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/Project';
+};
+
+export type GetApiProjectErrors = {
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type GetApiProjectError = GetApiProjectErrors[keyof GetApiProjectErrors];
+
+export type GetApiProjectResponses = {
+    /**
+     * OK
+     */
+    200: ProjectResponseDtoIEnumerableApiResponse;
+};
+
+export type GetApiProjectResponse = GetApiProjectResponses[keyof GetApiProjectResponses];
+
+export type PatchApiProjectData = {
+    body?: SaveProjectDto;
+    path?: never;
+    query?: never;
+    url: '/api/Project';
+};
+
+export type PatchApiProjectErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PatchApiProjectError = PatchApiProjectErrors[keyof PatchApiProjectErrors];
+
+export type PatchApiProjectResponses = {
+    /**
+     * OK
+     */
+    200: ProjectResponseDtoApiResponse;
+};
+
+export type PatchApiProjectResponse = PatchApiProjectResponses[keyof PatchApiProjectResponses];
+
+export type PostApiProjectData = {
+    body?: CreateProjectDto;
+    path?: never;
+    query?: never;
+    url: '/api/Project';
+};
+
+export type PostApiProjectErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiProjectError = PostApiProjectErrors[keyof PostApiProjectErrors];
+
+export type PostApiProjectResponses = {
+    /**
+     * Created
+     */
+    201: ProjectResponseDtoApiResponse;
+};
+
+export type PostApiProjectResponse = PostApiProjectResponses[keyof PostApiProjectResponses];
+
+export type DeleteApiProjectByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/Project/{id}';
+};
+
+export type DeleteApiProjectByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type DeleteApiProjectByIdError = DeleteApiProjectByIdErrors[keyof DeleteApiProjectByIdErrors];
+
+export type DeleteApiProjectByIdResponses = {
+    /**
+     * OK
+     */
+    200: BooleanApiResponse;
+};
+
+export type DeleteApiProjectByIdResponse = DeleteApiProjectByIdResponses[keyof DeleteApiProjectByIdResponses];
+
+export type GetApiProjectByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/Project/{id}';
+};
+
+export type GetApiProjectByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiProjectByIdError = GetApiProjectByIdErrors[keyof GetApiProjectByIdErrors];
+
+export type GetApiProjectByIdResponses = {
+    /**
+     * OK
+     */
+    200: ProjectResponseDtoApiResponse;
+};
+
+export type GetApiProjectByIdResponse = GetApiProjectByIdResponses[keyof GetApiProjectByIdResponses];
+
+export type GetApiProjectByEmailData = {
+    body?: never;
+    path?: never;
+    query: {
+        Email: string;
+    };
+    url: '/api/Project/by-email';
+};
+
+export type GetApiProjectByEmailErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiProjectByEmailError = GetApiProjectByEmailErrors[keyof GetApiProjectByEmailErrors];
+
+export type GetApiProjectByEmailResponses = {
+    /**
+     * OK
+     */
+    200: ProjectResponseDtoIEnumerableApiResponse;
+};
+
+export type GetApiProjectByEmailResponse = GetApiProjectByEmailResponses[keyof GetApiProjectByEmailResponses];
+
+export type PatchApiProjectDetailsData = {
+    body?: UpdateProjectDto;
+    path?: never;
+    query?: never;
+    url: '/api/Project/details';
+};
+
+export type PatchApiProjectDetailsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PatchApiProjectDetailsError = PatchApiProjectDetailsErrors[keyof PatchApiProjectDetailsErrors];
+
+export type PatchApiProjectDetailsResponses = {
+    /**
+     * OK
+     */
+    200: ProjectResponseDtoApiResponse;
+};
+
+export type PatchApiProjectDetailsResponse = PatchApiProjectDetailsResponses[keyof PatchApiProjectDetailsResponses];
 
 export type GetApiSettingsData = {
     body?: never;

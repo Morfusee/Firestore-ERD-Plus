@@ -2,11 +2,34 @@
 
 import { z } from 'zod';
 
+export const zBooleanApiResponse = z.object({
+    data: z.optional(z.boolean()),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
 export const zCanvasBackgroundOptions = z.enum([
     'Dots',
     'Lines',
     'Cross'
 ]);
+
+export const zCreateProjectDto = z.object({
+    email: z.email().min(1),
+    name: z.union([
+        z.string(),
+        z.null()
+    ]),
+    icon: z.union([
+        z.string(),
+        z.null()
+    ])
+});
 
 export const zCreateUserDto = z.object({
     email: z.email().min(1),
@@ -17,12 +40,34 @@ export const zCreateUserDto = z.object({
     ]))
 });
 
+export const zGeneralAccessType = z.enum(['Restricted', 'Link']);
+
 export const zGoogleAuthDto = z.object({
     idToken: z.string().min(1)
 });
 
 export const zLoginDto = z.object({
     idToken: z.string().min(1)
+});
+
+export const zMemberRole = z.enum([
+    'Owner',
+    'Editor',
+    'Viewer',
+    'Admin'
+]);
+
+export const zGeneralAccess = z.object({
+    accessType: zGeneralAccessType,
+    role: zMemberRole
+});
+
+export const zMember = z.object({
+    userId: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    role: zMemberRole
 });
 
 export const zObjectApiResponse = z.object({
@@ -59,11 +104,68 @@ export const zProblemDetails = z.object({
     ]))
 });
 
+export const zProjectResponseDto = z.object({
+    id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    name: z.string().min(1),
+    icon: z.string().min(1),
+    data: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    members: z.optional(z.union([
+        z.array(zMember),
+        z.null()
+    ])),
+    generalAccess: z.optional(zGeneralAccess),
+    createdAt: z.optional(z.iso.datetime()),
+    updatedAt: z.optional(z.iso.datetime())
+});
+
+export const zProjectResponseDtoApiResponse = z.object({
+    data: z.optional(zProjectResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zProjectResponseDtoIEnumerableApiResponse = z.object({
+    data: z.optional(z.union([
+        z.array(zProjectResponseDto),
+        z.null()
+    ])),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
 export const zRegisterDto = z.object({
     username: z.string().min(3),
     email: z.email().min(1),
     displayName: z.optional(z.union([
         z.string(),
+        z.null()
+    ]))
+});
+
+export const zSaveProjectDto = z.object({
+    id: z.string().min(1),
+    data: z.union([
+        z.string(),
+        z.null()
+    ]),
+    members: z.optional(z.union([
+        z.array(zMember),
         z.null()
     ]))
 });
@@ -101,6 +203,18 @@ export const zSettingsResponseDtoApiResponse = z.object({
     errors: z.optional(z.unknown())
 });
 
+export const zUpdateProjectDto = z.object({
+    id: z.string().min(1),
+    name: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    icon: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
+});
+
 export const zUpdateSettingsDto = z.object({
     email: z.email().min(1),
     autoSaveInterval: z.optional(z.union([
@@ -116,10 +230,10 @@ export const zUpdateUserDto = z.object({
         z.string(),
         z.null()
     ])),
-    email: z.optional(z.union([
+    email: z.union([
         z.email(),
         z.null()
-    ])),
+    ]),
     displayName: z.optional(z.union([
         z.string(),
         z.null()
@@ -251,6 +365,89 @@ export const zGetApiAuthMeData = z.object({
  * OK
  */
 export const zGetApiAuthMeResponse = zObjectApiResponse;
+
+export const zGetApiProjectData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zGetApiProjectResponse = zProjectResponseDtoIEnumerableApiResponse;
+
+export const zPatchApiProjectData = z.object({
+    body: z.optional(zSaveProjectDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPatchApiProjectResponse = zProjectResponseDtoApiResponse;
+
+export const zPostApiProjectData = z.object({
+    body: z.optional(zCreateProjectDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * Created
+ */
+export const zPostApiProjectResponse = zProjectResponseDtoApiResponse;
+
+export const zDeleteApiProjectByIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zDeleteApiProjectByIdResponse = zBooleanApiResponse;
+
+export const zGetApiProjectByIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zGetApiProjectByIdResponse = zProjectResponseDtoApiResponse;
+
+export const zGetApiProjectByEmailData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.object({
+        Email: z.email()
+    })
+});
+
+/**
+ * OK
+ */
+export const zGetApiProjectByEmailResponse = zProjectResponseDtoIEnumerableApiResponse;
+
+export const zPatchApiProjectDetailsData = z.object({
+    body: z.optional(zUpdateProjectDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPatchApiProjectDetailsResponse = zProjectResponseDtoApiResponse;
 
 export const zGetApiSettingsData = z.object({
     body: z.optional(z.never()),

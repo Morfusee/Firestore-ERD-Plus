@@ -3,8 +3,8 @@
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApiUsersById, getApiAuthMe, getApiSettings, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiSettings, postApiUsers, putApiSettings, putApiUsersById } from '../sdk.gen';
-import type { DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiSettingsData, GetApiSettingsError, GetApiSettingsResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiSettingsData, PostApiSettingsError, PostApiSettingsResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiSettingsData, PutApiSettingsError, PutApiSettingsResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
+import { deleteApiProjectById, deleteApiUsersById, getApiAuthMe, getApiProject, getApiProjectByEmail, getApiProjectById, getApiSettings, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, patchApiProject, patchApiProjectDetails, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiProject, postApiSettings, postApiUsers, putApiSettings, putApiUsersById } from '../sdk.gen';
+import type { DeleteApiProjectByIdData, DeleteApiProjectByIdError, DeleteApiProjectByIdResponse, DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiProjectByEmailData, GetApiProjectByEmailError, GetApiProjectByEmailResponse, GetApiProjectByIdData, GetApiProjectByIdError, GetApiProjectByIdResponse, GetApiProjectData, GetApiProjectError, GetApiProjectResponse, GetApiSettingsData, GetApiSettingsError, GetApiSettingsResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PatchApiProjectData, PatchApiProjectDetailsData, PatchApiProjectDetailsError, PatchApiProjectDetailsResponse, PatchApiProjectError, PatchApiProjectResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiProjectData, PostApiProjectError, PostApiProjectResponse, PostApiSettingsData, PostApiSettingsError, PostApiSettingsResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiSettingsData, PutApiSettingsError, PutApiSettingsResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
 
 export const postApiAuthRegisterMutation = (options?: Partial<Options<PostApiAuthRegisterData>>): UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> => {
     const mutationOptions: UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> = {
@@ -109,6 +109,107 @@ export const getApiAuthMeOptions = (options?: Options<GetApiAuthMeData>) => quer
     },
     queryKey: getApiAuthMeQueryKey(options)
 });
+
+export const getApiProjectQueryKey = (options?: Options<GetApiProjectData>) => createQueryKey('getApiProject', options);
+
+export const getApiProjectOptions = (options?: Options<GetApiProjectData>) => queryOptions<GetApiProjectResponse, GetApiProjectError, GetApiProjectResponse, ReturnType<typeof getApiProjectQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApiProject({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApiProjectQueryKey(options)
+});
+
+export const patchApiProjectMutation = (options?: Partial<Options<PatchApiProjectData>>): UseMutationOptions<PatchApiProjectResponse, PatchApiProjectError, Options<PatchApiProjectData>> => {
+    const mutationOptions: UseMutationOptions<PatchApiProjectResponse, PatchApiProjectError, Options<PatchApiProjectData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await patchApiProject({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const postApiProjectMutation = (options?: Partial<Options<PostApiProjectData>>): UseMutationOptions<PostApiProjectResponse, PostApiProjectError, Options<PostApiProjectData>> => {
+    const mutationOptions: UseMutationOptions<PostApiProjectResponse, PostApiProjectError, Options<PostApiProjectData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postApiProject({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const deleteApiProjectByIdMutation = (options?: Partial<Options<DeleteApiProjectByIdData>>): UseMutationOptions<DeleteApiProjectByIdResponse, DeleteApiProjectByIdError, Options<DeleteApiProjectByIdData>> => {
+    const mutationOptions: UseMutationOptions<DeleteApiProjectByIdResponse, DeleteApiProjectByIdError, Options<DeleteApiProjectByIdData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteApiProjectById({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiProjectByIdQueryKey = (options: Options<GetApiProjectByIdData>) => createQueryKey('getApiProjectById', options);
+
+export const getApiProjectByIdOptions = (options: Options<GetApiProjectByIdData>) => queryOptions<GetApiProjectByIdResponse, GetApiProjectByIdError, GetApiProjectByIdResponse, ReturnType<typeof getApiProjectByIdQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApiProjectById({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApiProjectByIdQueryKey(options)
+});
+
+export const getApiProjectByEmailQueryKey = (options: Options<GetApiProjectByEmailData>) => createQueryKey('getApiProjectByEmail', options);
+
+export const getApiProjectByEmailOptions = (options: Options<GetApiProjectByEmailData>) => queryOptions<GetApiProjectByEmailResponse, GetApiProjectByEmailError, GetApiProjectByEmailResponse, ReturnType<typeof getApiProjectByEmailQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApiProjectByEmail({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApiProjectByEmailQueryKey(options)
+});
+
+export const patchApiProjectDetailsMutation = (options?: Partial<Options<PatchApiProjectDetailsData>>): UseMutationOptions<PatchApiProjectDetailsResponse, PatchApiProjectDetailsError, Options<PatchApiProjectDetailsData>> => {
+    const mutationOptions: UseMutationOptions<PatchApiProjectDetailsResponse, PatchApiProjectDetailsError, Options<PatchApiProjectDetailsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await patchApiProjectDetails({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const getApiSettingsQueryKey = (options: Options<GetApiSettingsData>) => createQueryKey('getApiSettings', options);
 

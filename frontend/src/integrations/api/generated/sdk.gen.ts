@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiSettingsData, GetApiSettingsErrors, GetApiSettingsResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiSettingsData, PostApiSettingsErrors, PostApiSettingsResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiSettingsData, PutApiSettingsErrors, PutApiSettingsResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
+import type { DeleteApiProjectByIdData, DeleteApiProjectByIdErrors, DeleteApiProjectByIdResponses, DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiProjectByEmailData, GetApiProjectByEmailErrors, GetApiProjectByEmailResponses, GetApiProjectByIdData, GetApiProjectByIdErrors, GetApiProjectByIdResponses, GetApiProjectData, GetApiProjectErrors, GetApiProjectResponses, GetApiSettingsData, GetApiSettingsErrors, GetApiSettingsResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PatchApiProjectData, PatchApiProjectDetailsData, PatchApiProjectDetailsErrors, PatchApiProjectDetailsResponses, PatchApiProjectErrors, PatchApiProjectResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiProjectData, PostApiProjectErrors, PostApiProjectResponses, PostApiSettingsData, PostApiSettingsErrors, PostApiSettingsResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiSettingsData, PutApiSettingsErrors, PutApiSettingsResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -48,6 +48,41 @@ export const postApiAuthGoogle = <ThrowOnError extends boolean = false>(options?
 export const postApiAuthLogout = <ThrowOnError extends boolean = false>(options?: Options<PostApiAuthLogoutData, ThrowOnError>) => (options?.client ?? client).post<PostApiAuthLogoutResponses, PostApiAuthLogoutErrors, ThrowOnError>({ url: '/api/Auth/logout', ...options });
 
 export const getApiAuthMe = <ThrowOnError extends boolean = false>(options?: Options<GetApiAuthMeData, ThrowOnError>) => (options?.client ?? client).get<GetApiAuthMeResponses, GetApiAuthMeErrors, ThrowOnError>({ url: '/api/Auth/me', ...options });
+
+export const getApiProject = <ThrowOnError extends boolean = false>(options?: Options<GetApiProjectData, ThrowOnError>) => (options?.client ?? client).get<GetApiProjectResponses, GetApiProjectErrors, ThrowOnError>({ url: '/api/Project', ...options });
+
+export const patchApiProject = <ThrowOnError extends boolean = false>(options?: Options<PatchApiProjectData, ThrowOnError>) => (options?.client ?? client).patch<PatchApiProjectResponses, PatchApiProjectErrors, ThrowOnError>({
+    url: '/api/Project',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const postApiProject = <ThrowOnError extends boolean = false>(options?: Options<PostApiProjectData, ThrowOnError>) => (options?.client ?? client).post<PostApiProjectResponses, PostApiProjectErrors, ThrowOnError>({
+    url: '/api/Project',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const deleteApiProjectById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiProjectByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApiProjectByIdResponses, DeleteApiProjectByIdErrors, ThrowOnError>({ url: '/api/Project/{id}', ...options });
+
+export const getApiProjectById = <ThrowOnError extends boolean = false>(options: Options<GetApiProjectByIdData, ThrowOnError>) => (options.client ?? client).get<GetApiProjectByIdResponses, GetApiProjectByIdErrors, ThrowOnError>({ url: '/api/Project/{id}', ...options });
+
+export const getApiProjectByEmail = <ThrowOnError extends boolean = false>(options: Options<GetApiProjectByEmailData, ThrowOnError>) => (options.client ?? client).get<GetApiProjectByEmailResponses, GetApiProjectByEmailErrors, ThrowOnError>({ url: '/api/Project/by-email', ...options });
+
+export const patchApiProjectDetails = <ThrowOnError extends boolean = false>(options?: Options<PatchApiProjectDetailsData, ThrowOnError>) => (options?.client ?? client).patch<PatchApiProjectDetailsResponses, PatchApiProjectDetailsErrors, ThrowOnError>({
+    url: '/api/Project/details',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
 export const getApiSettings = <ThrowOnError extends boolean = false>(options: Options<GetApiSettingsData, ThrowOnError>) => (options.client ?? client).get<GetApiSettingsResponses, GetApiSettingsErrors, ThrowOnError>({ url: '/api/Settings', ...options });
 
