@@ -8,14 +8,19 @@ namespace backend.DTOs.Common;
 public class PaginationDto
 {
     /// <summary>
-    /// Number of items to skip
+    /// Page number (1-indexed)
     /// </summary>
-    [Range(0, int.MaxValue)]
-    public int Skip { get; set; } = 0;
+    [Range(1, int.MaxValue)]
+    public int Page { get; set; } = 1;
 
     /// <summary>
-    /// Maximum number of items to return (limit)
+    /// Maximum number of items to return per page (limit)
     /// </summary>
     [Range(1, 50)]
-    public int Take { get; set; } = 10;
+    public int Limit { get; set; } = 10;
+
+    /// <summary>
+    /// Calculated skip value based on page number
+    /// </summary>
+    public int Skip => (Page - 1) * Limit;
 }

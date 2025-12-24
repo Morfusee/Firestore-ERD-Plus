@@ -20,7 +20,7 @@ public static class MongoDbPaginationExtensions
         PaginationDto pagination
     )
     {
-        return query.Skip(pagination.Skip).Limit(pagination.Take);
+        return query.Skip(pagination.Skip).Limit(pagination.Limit);
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public static class MongoDbPaginationExtensions
         // Get paginated items
         var documents = await query
             .Skip(pagination.Skip)
-            .Limit(pagination.Take)
+            .Limit(pagination.Limit)
             .ToListAsync(cancellationToken);
 
         // Map to DTOs
@@ -56,8 +56,8 @@ public static class MongoDbPaginationExtensions
         {
             Items = items,
             TotalCount = totalCount,
-            Skip = pagination.Skip,
-            Take = pagination.Take,
+            Page = pagination.Page,
+            Limit = pagination.Limit,
         };
     }
 
@@ -84,7 +84,7 @@ public static class MongoDbPaginationExtensions
         // Get paginated items
         var documents = await query
             .Skip(pagination.Skip)
-            .Limit(pagination.Take)
+            .Limit(pagination.Limit)
             .ToListAsync(cancellationToken);
 
         // Map to DTOs
@@ -94,8 +94,8 @@ public static class MongoDbPaginationExtensions
         {
             Items = items,
             TotalCount = totalCount,
-            Skip = pagination.Skip,
-            Take = pagination.Take,
+            Page = pagination.Page,
+            Limit = pagination.Limit,
         };
     }
 }

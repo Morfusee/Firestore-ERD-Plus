@@ -17,27 +17,27 @@ public class PaginatedResponseDto<T>
     public long TotalCount { get; set; }
 
     /// <summary>
-    /// Number of items skipped
+    /// Current page number (1-indexed)
     /// </summary>
-    public int Skip { get; set; }
+    public int Page { get; set; }
 
     /// <summary>
     /// Maximum number of items per page
     /// </summary>
-    public int Take { get; set; }
-
-    /// <summary>
-    /// Whether there are more items available
-    /// </summary>
-    public bool HasMore => Skip + Items.Count() < TotalCount;
-
-    /// <summary>
-    /// Current page number (1-indexed)
-    /// </summary>
-    public int PageNumber => (Skip / Take) + 1;
+    public int Limit { get; set; }
 
     /// <summary>
     /// Total number of pages
     /// </summary>
-    public int TotalPages => (int)Math.Ceiling((double)TotalCount / Take);
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / Limit);
+
+    /// <summary>
+    /// Whether there is a next page available
+    /// </summary>
+    public bool HasNextPage => Page < TotalPages;
+
+    /// <summary>
+    /// Whether there is a previous page available
+    /// </summary>
+    public bool HasPreviousPage => Page > 1;
 }
