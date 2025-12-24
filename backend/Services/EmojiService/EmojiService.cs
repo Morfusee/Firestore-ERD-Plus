@@ -1,4 +1,6 @@
 using backend.Common.Attributes;
+using backend.Common.Extensions;
+using backend.DTOs.Common;
 using backend.DTOs.Emoji;
 using backend.Mappers;
 using backend.Models;
@@ -13,19 +15,22 @@ public class EmojiService(MongoDbContext context, EmojiMapper mapper) : IEmojiSe
     private readonly MongoDbContext _context = context;
     private readonly EmojiMapper _mapper = mapper;
 
-    public async Task<Result<IEnumerable<EmojiResponseDto>>> GetAllEmojisAsync()
+    public async Task<Result<PaginatedResponseDto<EmojiResponseDto>>> GetAllEmojisAsync(
+        PaginationDto pagination
+    )
     {
         try
         {
-            var emojis = await _context.Emojis.Find(_ => true).ToListAsync();
-            var emojiDtos = emojis.ConvertAll(emoji => _mapper.ToDto(emoji));
+            var emojis = await _context
+                .Emojis.Find(_ => true)
+                .ToPaginatedListAsync(pagination, emoji => _mapper.ToDto(emoji));
 
-            return Result.Ok<IEnumerable<EmojiResponseDto>>(emojiDtos);
+            return Result.Ok(emojis);
         }
         catch (Exception ex)
         {
             return Result
-                .Fail<IEnumerable<EmojiResponseDto>>("Failed to retrieve emojis")
+                .Fail<PaginatedResponseDto<EmojiResponseDto>>("Failed to retrieve emojis")
                 .WithError(ex.Message);
         }
     }

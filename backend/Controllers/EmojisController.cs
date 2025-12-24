@@ -1,5 +1,6 @@
 using backend.Common.Extensions;
 using backend.Common.Models;
+using backend.DTOs.Common;
 using backend.DTOs.Emoji;
 using backend.Services.EmojiService;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +16,11 @@ public class EmojisController(IEmojiService emojiService, ILogger<EmojisControll
     private readonly ILogger<EmojisController> _logger = logger;
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<EmojiResponseDto>>>> GetAllEmojis()
+    public async Task<
+        ActionResult<ApiResponse<PaginatedResponseDto<EmojiResponseDto>>>
+    > GetAllEmojis([FromQuery] PaginationDto pagination)
     {
-        var emojis = await _emojiService.GetAllEmojisAsync();
+        var emojis = await _emojiService.GetAllEmojisAsync(pagination);
 
         return this.ToApiResponse(emojis);
     }
