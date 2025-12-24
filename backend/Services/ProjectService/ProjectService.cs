@@ -3,23 +3,31 @@ using backend.DTOs.Common;
 using backend.DTOs.Project;
 using backend.Mappers;
 using backend.Models;
+using backend.Services.EmojiService;
 using FluentResults;
 using MongoDB.Driver;
 
 namespace backend.Services.ProjectService;
 
 [ScopedService]
-public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IProjectService
+public class ProjectService(
+    MongoDbContext context,
+    ProjectMapper mapper,
+    IEmojiService emojiService
+) : IProjectService
 {
     private readonly MongoDbContext _context = context;
     private readonly ProjectMapper _mapper = mapper;
+    private readonly IEmojiService _emojiService = emojiService;
 
     public async Task<Result<IEnumerable<ProjectResponseDto>>> GetAllProjectsAsync()
     {
         try
         {
             var project = await _context.Projects.Find(_ => true).ToListAsync();
-            var projectDtos = project.ConvertAll(proj => _mapper.ToDto(proj));
+
+            var projectDtos = await Task.WhenAll(project.Select(ToResponseAsync));
+
             return Result.Ok<IEnumerable<ProjectResponseDto>>(projectDtos);
         }
         catch (Exception ex)
@@ -54,7 +62,7 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
 
             await _context.Projects.InsertOneAsync(project);
 
-            return Result.Ok(_mapper.ToDto(project));
+            return Result.Ok(await ToResponseAsync(project));
         }
         catch (Exception ex)
         {
@@ -89,7 +97,7 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
                 return Result.Fail<ProjectResponseDto>("Project not found");
             }
 
-            return Result.Ok(_mapper.ToDto(project));
+            return Result.Ok(await ToResponseAsync(project));
         }
         catch (Exception ex)
         {
@@ -110,7 +118,9 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
                     proj.Members.Any(m => m.User != null && m.User.Email == emailDto.Email)
                 )
                 .ToListAsync();
-            var projectDtos = projects.ConvertAll(proj => _mapper.ToDto(proj));
+
+            var projectDtos = await Task.WhenAll(projects.Select(ToResponseAsync));
+
             return Result.Ok<IEnumerable<ProjectResponseDto>>(projectDtos);
         }
         catch (Exception ex)
@@ -138,7 +148,7 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
                 return Result.Fail<ProjectResponseDto>("Project not found");
             }
 
-            return Result.Ok(_mapper.ToDto(saveProject));
+            return Result.Ok(await ToResponseAsync(saveProject));
         }
         catch (Exception ex)
         {
@@ -175,7 +185,7 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
                 return Result.Fail<ProjectResponseDto>("Project not found");
             }
 
-            return Result.Ok(_mapper.ToDto(updatedProject));
+            return Result.Ok(await ToResponseAsync(updatedProject));
         }
         catch (Exception ex)
         {
@@ -183,5 +193,17 @@ public class ProjectService(MongoDbContext context, ProjectMapper mapper) : IPro
                 .Fail<ProjectResponseDto>("Failed to update project")
                 .WithError(ex.Message);
         }
+    }
+
+    // =======================
+    // Helpers
+    // =======================
+    private async Task<ProjectResponseDto> ToResponseAsync(Project project)
+    {
+        var emoji = await _emojiService.GetEmojiByHexcodeAsync(project.Icon);
+
+        return emoji.IsSuccess && emoji.Value != null
+            ? _mapper.ToDto(project, emoji.Value)
+            : _mapper.ToDto(project);
     }
 }
