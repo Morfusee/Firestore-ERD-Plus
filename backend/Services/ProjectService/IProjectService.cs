@@ -6,8 +6,13 @@ namespace backend.Services.ProjectService;
 
 public interface IProjectService
 {
-    Task<Result<IEnumerable<ProjectResponseDto>>> GetAllProjectsAsync();
-    Task<Result<IEnumerable<ProjectResponseDto>>> GetProjectsByEmailAsync(EmailDto emailDto);
+    Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetAllProjectsAsync(
+        PaginationDto pagination
+    );
+    Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetProjectsByEmailAsync(
+        EmailDto emailDto,
+        PaginationDto pagination
+    );
     Task<Result<ProjectResponseDto>> GetProjectByIdAsync(string id);
     Task<Result<ProjectResponseDto>> CreateProjectAsync(CreateProjectDto createProjectDto);
     Task<Result<ProjectResponseDto>> UpdateProjectAsync(UpdateProjectDto updateProjectDto);

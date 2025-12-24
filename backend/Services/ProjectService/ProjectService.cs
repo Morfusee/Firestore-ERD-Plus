@@ -1,4 +1,5 @@
 using backend.Common.Attributes;
+using backend.Common.Extensions;
 using backend.DTOs.Common;
 using backend.DTOs.Project;
 using backend.Mappers;
@@ -20,20 +21,22 @@ public class ProjectService(
     private readonly ProjectMapper _mapper = mapper;
     private readonly IEmojiService _emojiService = emojiService;
 
-    public async Task<Result<IEnumerable<ProjectResponseDto>>> GetAllProjectsAsync()
+    public async Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetAllProjectsAsync(
+        PaginationDto pagination
+    )
     {
         try
         {
-            var project = await _context.Projects.Find(_ => true).ToListAsync();
+            var project = await _context
+                .Projects.Find(_ => true)
+                .ToPaginatedListAsync(pagination, ToResponseAsync);
 
-            var projectDtos = await Task.WhenAll(project.Select(ToResponseAsync));
-
-            return Result.Ok<IEnumerable<ProjectResponseDto>>(projectDtos);
+            return Result.Ok(project);
         }
         catch (Exception ex)
         {
             return Result
-                .Fail<IEnumerable<ProjectResponseDto>>("Failed to retrieve projects")
+                .Fail<PaginatedResponseDto<ProjectResponseDto>>("Failed to retrieve projects")
                 .WithError(ex.Message);
         }
     }
@@ -107,8 +110,9 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<IEnumerable<ProjectResponseDto>>> GetProjectsByEmailAsync(
-        EmailDto emailDto
+    public async Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetProjectsByEmailAsync(
+        EmailDto emailDto,
+        PaginationDto pagination
     )
     {
         try
@@ -117,16 +121,14 @@ public class ProjectService(
                 .Projects.Find(proj =>
                     proj.Members.Any(m => m.User != null && m.User.Email == emailDto.Email)
                 )
-                .ToListAsync();
+                .ToPaginatedListAsync(pagination, ToResponseAsync);
 
-            var projectDtos = await Task.WhenAll(projects.Select(ToResponseAsync));
-
-            return Result.Ok<IEnumerable<ProjectResponseDto>>(projectDtos);
+            return Result.Ok(projects);
         }
         catch (Exception ex)
         {
             return Result
-                .Fail<IEnumerable<ProjectResponseDto>>("Failed to retrieve project")
+                .Fail<PaginatedResponseDto<ProjectResponseDto>>("Failed to retrieve project")
                 .WithError(ex.Message);
         }
     }

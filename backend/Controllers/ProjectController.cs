@@ -15,13 +15,15 @@ public class ProjectController(IProjectService projectService) : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(
-        typeof(ApiResponse<IEnumerable<ProjectResponseDto>>),
+        typeof(ApiResponse<PaginatedResponseDto<ProjectResponseDto>>),
         StatusCodes.Status200OK
     )]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProjectResponseDto>>>> GetAllProjects()
+    public async Task<
+        ActionResult<ApiResponse<PaginatedResponseDto<ProjectResponseDto>>>
+    > GetAllProjects([FromQuery] PaginationDto pagination)
     {
-        var projects = await _projectService.GetAllProjectsAsync();
+        var projects = await _projectService.GetAllProjectsAsync(pagination);
 
         return this.ToApiResponse(projects);
     }
@@ -40,15 +42,15 @@ public class ProjectController(IProjectService projectService) : ControllerBase
 
     [HttpGet("by-email")]
     [ProducesResponseType(
-        typeof(ApiResponse<IEnumerable<ProjectResponseDto>>),
+        typeof(ApiResponse<PaginatedResponseDto<ProjectResponseDto>>),
         StatusCodes.Status200OK
     )]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<
-        ActionResult<ApiResponse<IEnumerable<ProjectResponseDto>>>
-    > GetProjectsByEmail([FromQuery] EmailDto email)
+        ActionResult<ApiResponse<PaginatedResponseDto<ProjectResponseDto>>>
+    > GetProjectsByEmail([FromQuery] EmailDto email, [FromQuery] PaginationDto pagination)
     {
-        var project = await _projectService.GetProjectsByEmailAsync(email);
+        var project = await _projectService.GetProjectsByEmailAsync(email, pagination);
 
         return this.ToApiResponse(project);
     }
