@@ -1,4 +1,6 @@
 using backend.Common.Attributes;
+using backend.Common.Extensions;
+using backend.DTOs.Common;
 using backend.DTOs.Settings;
 using backend.DTOs.User;
 using backend.Mappers;
@@ -20,18 +22,22 @@ public class UserService(
     private readonly ISettingsService _settingsService = settingsService;
     private readonly UserMapper _mapper = mapper;
 
-    public async Task<Result<IEnumerable<UserResponseDto>>> GetAllUsersAsync()
+    public async Task<Result<PaginatedResponseDto<UserResponseDto>>> GetAllUsersAsync(
+        PaginationDto pagination
+    )
     {
         try
         {
-            var users = await _context.Users.Find(_ => true).ToListAsync();
-            var userDtos = users.ConvertAll(user => _mapper.ToDto(user));
-            return Result.Ok<IEnumerable<UserResponseDto>>(userDtos);
+            var users = await _context
+                .Users.Find(_ => true)
+                .ToPaginatedListAsync(pagination, user => _mapper.ToDto(user));
+
+            return Result.Ok(users);
         }
         catch (Exception ex)
         {
             return Result
-                .Fail<IEnumerable<UserResponseDto>>("Failed to retrieve users")
+                .Fail<PaginatedResponseDto<UserResponseDto>>("Failed to retrieve users")
                 .WithError(ex.Message);
         }
     }

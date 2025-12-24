@@ -1,5 +1,6 @@
 using backend.Common.Extensions;
 using backend.Common.Models;
+using backend.DTOs.Common;
 using backend.DTOs.User;
 using backend.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
@@ -18,13 +19,15 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     [HttpGet]
     [Authorize]
     [ProducesResponseType(
-        typeof(ApiResponse<IEnumerable<UserResponseDto>>),
+        typeof(ApiResponse<PaginatedResponseDto<UserResponseDto>>),
         StatusCodes.Status200OK
     )]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetUsers()
+    public async Task<ActionResult<ApiResponse<PaginatedResponseDto<UserResponseDto>>>> GetUsers(
+        [FromQuery] PaginationDto pagination
+    )
     {
-        var users = await _userService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync(pagination);
 
         return this.ToApiResponse(users);
     }
