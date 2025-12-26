@@ -47,6 +47,13 @@ public class ProjectService(
     {
         try
         {
+            var emoji = await _emojiService.GetEmojiByHexcodeAsync(createProjectDto.Icon);
+
+            if (!emoji.IsSuccess || emoji.Value == null)
+            {
+                return Result.Fail<ProjectResponseDto>("Invalid emoji icon");
+            }
+
             var user = await _context
                 .Users.Find(u =>
                     u.Email.Equals(
