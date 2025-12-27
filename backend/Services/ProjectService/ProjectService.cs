@@ -124,10 +124,19 @@ public class ProjectService(
     {
         try
         {
-            var projects = await _context
-                .Projects.Find(proj =>
-                    proj.Members.Any(m => m.User != null && m.User.Email == emailDto.Email)
+            var user = await _context
+                .Users.Find(u =>
+                    u.Email.Equals(emailDto.Email, StringComparison.CurrentCultureIgnoreCase)
                 )
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return Result.Fail<PaginatedResponseDto<ProjectResponseDto>>("User not found");
+            }
+
+            var projects = await _context
+                .Projects.Find(proj => proj.Members.Any(m => m.UserId == user.Id))
                 .ToPaginatedListAsync(pagination, ToResponseAsync);
 
             return Result.Ok(projects);

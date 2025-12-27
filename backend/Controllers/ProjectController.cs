@@ -48,7 +48,10 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<
         ActionResult<ApiResponse<PaginatedResponseDto<ProjectResponseDto>>>
-    > GetProjectsByEmail([FromQuery] EmailDto email, [FromQuery] PaginationDto pagination)
+    > GetProjectsByEmail(
+        [FromQuery(Name = "")] EmailDto email,
+        [FromQuery(Name = "")] PaginationDto pagination
+    )
     {
         var project = await _projectService.GetProjectsByEmailAsync(email, pagination);
 
