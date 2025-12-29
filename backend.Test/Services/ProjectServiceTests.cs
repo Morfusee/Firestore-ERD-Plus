@@ -1,28 +1,22 @@
-using backend.Config;
 using backend.DTOs.Common;
-using backend.DTOs.Emoji;
 using backend.DTOs.Project;
 using backend.Mappers;
 using backend.Models;
 using backend.Services;
 using backend.Services.EmojiService;
 using backend.Services.ProjectService;
-using FluentResults;
-using Microsoft.Extensions.Options;
-using Mongo2Go;
 using MongoDB.Driver;
-using Moq;
 
-namespace backend.Test;
+namespace backend.Test.Services;
 
-public class ProjectServiceIntegrationTests : TestDBContext
+public class ProjectServiceTests : TestDBContext
 {
     private readonly MongoDbContext _context;
     private readonly ProjectMapper _mapper;
     private readonly IEmojiService _emojiService;
     private readonly IProjectService _projectService;
 
-    public ProjectServiceIntegrationTests()
+    public ProjectServiceTests()
     {
         _context = _mongoDbContext;
 
