@@ -51,6 +51,7 @@ public class TestDBContext : IDisposable
         await SeedEmojis();
         await SeedUser();
         await SeedProjects();
+        await SeedSettings();
     }
 
     public async Task SeedEmojis()
@@ -131,6 +132,19 @@ public class TestDBContext : IDisposable
         };
 
         await _mongoDbContext.Projects.InsertManyAsync(projects);
+    }
+
+    public async Task SeedSettings()
+    {
+        var settings = new Settings
+        {
+            UserId = MockUser.Id,
+            Theme = ThemeOptions.Dark,
+            CanvasBackground = CanvasBackgroundOptions.Dots,
+            AutoSaveInterval = 0,
+        };
+
+        await _mongoDbContext.Settings.InsertOneAsync(settings);
     }
 
     public void Dispose()
