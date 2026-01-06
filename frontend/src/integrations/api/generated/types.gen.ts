@@ -26,6 +26,11 @@ export type BooleanApiResponse = {
 
 export type CanvasBackgroundOptions = 'Dots' | 'Lines' | 'Cross';
 
+export type CreateHistoryDto = {
+    data: string;
+    members?: Array<Member> | null;
+};
+
 export type CreateProjectDto = {
     email: string;
     name: string | null;
@@ -45,6 +50,54 @@ export type CreateUserDto = {
     displayName?: string | null;
 };
 
+export type CreateVersionDto = {
+    name: string;
+    description?: string | null;
+};
+
+export type EmojiResponseDto = {
+    _id?: string | null;
+    emoji: string | null;
+    hexcode: string | null;
+    group: string | null;
+    subgroup: string | null;
+    annotation: string | null;
+    tags: Array<string> | null;
+    shortcodes: Array<string> | null;
+    emoticons: Array<string> | null;
+    directional: boolean;
+    variation: boolean;
+    variationBase?: string | null;
+    unicode: number;
+    order: number;
+};
+
+export type EmojiResponseDtoApiResponse = {
+    data?: EmojiResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type EmojiResponseDtoPaginatedResponseDto = {
+    items: Array<EmojiResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+    readonly totalPages?: number;
+    readonly hasNextPage?: boolean;
+    readonly hasPreviousPage?: boolean;
+};
+
+export type EmojiResponseDtoPaginatedResponseDtoApiResponse = {
+    data?: EmojiResponseDtoPaginatedResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
 export type GeneralAccess = {
     accessType: GeneralAccessType;
     role: MemberRole;
@@ -54,6 +107,42 @@ export type GeneralAccessType = 'Restricted' | 'Link';
 
 export type GoogleAuthDto = {
     idToken: string;
+};
+
+export type HistoryResponseDto = {
+    id?: string | null;
+    versionId?: string | null;
+    data?: string | null;
+    members?: Array<Member> | null;
+    isRollback?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type HistoryResponseDtoApiResponse = {
+    data?: HistoryResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type HistoryResponseDtoPaginatedResponseDto = {
+    items: Array<HistoryResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+    readonly totalPages?: number;
+    readonly hasNextPage?: boolean;
+    readonly hasPreviousPage?: boolean;
+};
+
+export type HistoryResponseDtoPaginatedResponseDtoApiResponse = {
+    data?: HistoryResponseDtoPaginatedResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
 };
 
 export type LoginDto = {
@@ -103,8 +192,18 @@ export type ProjectResponseDtoApiResponse = {
     errors?: unknown;
 };
 
-export type ProjectResponseDtoIEnumerableApiResponse = {
-    data?: Array<ProjectResponseDto> | null;
+export type ProjectResponseDtoPaginatedResponseDto = {
+    items: Array<ProjectResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+    readonly totalPages?: number;
+    readonly hasNextPage?: boolean;
+    readonly hasPreviousPage?: boolean;
+};
+
+export type ProjectResponseDtoPaginatedResponseDtoApiResponse = {
+    data?: ProjectResponseDtoPaginatedResponseDto;
     message?: string | null;
     status?: number;
     isSuccess?: boolean;
@@ -141,7 +240,20 @@ export type SettingsResponseDtoApiResponse = {
     errors?: unknown;
 };
 
+export type StringApiResponse = {
+    data?: string | null;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
 export type ThemeOptions = 'Light' | 'Dark';
+
+export type UpdateHistoryDto = {
+    data?: string | null;
+    members?: Array<Member> | null;
+};
 
 export type UpdateProjectDto = {
     id: string;
@@ -161,6 +273,11 @@ export type UpdateUserDto = {
     email: string | null;
     displayName?: string | null;
     profilePicture?: string | null;
+};
+
+export type UpdateVersionDto = {
+    name?: string | null;
+    description?: string | null;
 };
 
 export type UserResponseDto = {
@@ -183,8 +300,129 @@ export type UserResponseDtoApiResponse = {
     errors?: unknown;
 };
 
-export type UserResponseDtoIEnumerableApiResponse = {
-    data?: Array<UserResponseDto> | null;
+export type UserResponseDtoPaginatedResponseDto = {
+    items: Array<UserResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+    readonly totalPages?: number;
+    readonly hasNextPage?: boolean;
+    readonly hasPreviousPage?: boolean;
+};
+
+export type UserResponseDtoPaginatedResponseDtoApiResponse = {
+    data?: UserResponseDtoPaginatedResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type VersionResponseDto = {
+    id?: string | null;
+    name?: string | null;
+    description?: string | null;
+    projectId?: string | null;
+    currentHistoryId?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type VersionResponseDtoApiResponse = {
+    data?: VersionResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type VersionResponseDtoPaginatedResponseDto = {
+    items: Array<VersionResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+    readonly totalPages?: number;
+    readonly hasNextPage?: boolean;
+    readonly hasPreviousPage?: boolean;
+};
+
+export type VersionResponseDtoPaginatedResponseDtoApiResponse = {
+    data?: VersionResponseDtoPaginatedResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type EmojiResponseDtoPaginatedResponseDtoWritable = {
+    items: Array<EmojiResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+};
+
+export type EmojiResponseDtoPaginatedResponseDtoApiResponseWritable = {
+    data?: EmojiResponseDtoPaginatedResponseDtoWritable;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type HistoryResponseDtoPaginatedResponseDtoWritable = {
+    items: Array<HistoryResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+};
+
+export type HistoryResponseDtoPaginatedResponseDtoApiResponseWritable = {
+    data?: HistoryResponseDtoPaginatedResponseDtoWritable;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type ProjectResponseDtoPaginatedResponseDtoWritable = {
+    items: Array<ProjectResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+};
+
+export type ProjectResponseDtoPaginatedResponseDtoApiResponseWritable = {
+    data?: ProjectResponseDtoPaginatedResponseDtoWritable;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type UserResponseDtoPaginatedResponseDtoWritable = {
+    items: Array<UserResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+};
+
+export type UserResponseDtoPaginatedResponseDtoApiResponseWritable = {
+    data?: UserResponseDtoPaginatedResponseDtoWritable;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type VersionResponseDtoPaginatedResponseDtoWritable = {
+    items: Array<VersionResponseDto> | null;
+    totalCount?: number;
+    page?: number;
+    limit?: number;
+};
+
+export type VersionResponseDtoPaginatedResponseDtoApiResponseWritable = {
+    data?: VersionResponseDtoPaginatedResponseDtoWritable;
     message?: string | null;
     status?: number;
     isSuccess?: boolean;
@@ -328,10 +566,386 @@ export type GetApiAuthMeResponses = {
 
 export type GetApiAuthMeResponse = GetApiAuthMeResponses[keyof GetApiAuthMeResponses];
 
-export type GetApiProjectData = {
+export type DeleteApiEmojisData = {
     body?: never;
     path?: never;
     query?: never;
+    url: '/api/Emojis';
+};
+
+export type DeleteApiEmojisResponses = {
+    /**
+     * OK
+     */
+    200: BooleanApiResponse;
+};
+
+export type DeleteApiEmojisResponse = DeleteApiEmojisResponses[keyof DeleteApiEmojisResponses];
+
+export type GetApiEmojisData = {
+    body?: never;
+    path?: never;
+    query?: {
+        Page?: number;
+        Limit?: number;
+        Skip?: number;
+    };
+    url: '/api/Emojis';
+};
+
+export type GetApiEmojisResponses = {
+    /**
+     * OK
+     */
+    200: EmojiResponseDtoPaginatedResponseDtoApiResponse;
+};
+
+export type GetApiEmojisResponse = GetApiEmojisResponses[keyof GetApiEmojisResponses];
+
+export type GetApiEmojisByHexcodeData = {
+    body?: never;
+    path: {
+        hexcode: string;
+    };
+    query?: never;
+    url: '/api/Emojis/{hexcode}';
+};
+
+export type GetApiEmojisByHexcodeResponses = {
+    /**
+     * OK
+     */
+    200: EmojiResponseDtoApiResponse;
+};
+
+export type GetApiEmojisByHexcodeResponse = GetApiEmojisByHexcodeResponses[keyof GetApiEmojisByHexcodeResponses];
+
+export type GetApiHistoryProjectsByProjectIdVersionsData = {
+    body?: never;
+    path: {
+        projectId: string;
+    };
+    query?: {
+        Page?: number;
+        Limit?: number;
+        Skip?: number;
+    };
+    url: '/api/history/projects/{projectId}/versions';
+};
+
+export type GetApiHistoryProjectsByProjectIdVersionsErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiHistoryProjectsByProjectIdVersionsError = GetApiHistoryProjectsByProjectIdVersionsErrors[keyof GetApiHistoryProjectsByProjectIdVersionsErrors];
+
+export type GetApiHistoryProjectsByProjectIdVersionsResponses = {
+    /**
+     * OK
+     */
+    200: VersionResponseDtoPaginatedResponseDtoApiResponse;
+};
+
+export type GetApiHistoryProjectsByProjectIdVersionsResponse = GetApiHistoryProjectsByProjectIdVersionsResponses[keyof GetApiHistoryProjectsByProjectIdVersionsResponses];
+
+export type PostApiHistoryProjectsByProjectIdVersionsData = {
+    body?: CreateVersionDto;
+    path: {
+        projectId: string;
+    };
+    query?: never;
+    url: '/api/history/projects/{projectId}/versions';
+};
+
+export type PostApiHistoryProjectsByProjectIdVersionsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiHistoryProjectsByProjectIdVersionsError = PostApiHistoryProjectsByProjectIdVersionsErrors[keyof PostApiHistoryProjectsByProjectIdVersionsErrors];
+
+export type PostApiHistoryProjectsByProjectIdVersionsResponses = {
+    /**
+     * OK
+     */
+    200: VersionResponseDtoApiResponse;
+};
+
+export type PostApiHistoryProjectsByProjectIdVersionsResponse = PostApiHistoryProjectsByProjectIdVersionsResponses[keyof PostApiHistoryProjectsByProjectIdVersionsResponses];
+
+export type DeleteApiHistoryVersionsByVersionIdData = {
+    body?: never;
+    path: {
+        versionId: string;
+    };
+    query?: never;
+    url: '/api/history/versions/{versionId}';
+};
+
+export type DeleteApiHistoryVersionsByVersionIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteApiHistoryVersionsByVersionIdError = DeleteApiHistoryVersionsByVersionIdErrors[keyof DeleteApiHistoryVersionsByVersionIdErrors];
+
+export type DeleteApiHistoryVersionsByVersionIdResponses = {
+    /**
+     * OK
+     */
+    200: StringApiResponse;
+};
+
+export type DeleteApiHistoryVersionsByVersionIdResponse = DeleteApiHistoryVersionsByVersionIdResponses[keyof DeleteApiHistoryVersionsByVersionIdResponses];
+
+export type GetApiHistoryVersionsByVersionIdData = {
+    body?: never;
+    path: {
+        versionId: string;
+    };
+    query?: {
+        projectId?: string;
+    };
+    url: '/api/history/versions/{versionId}';
+};
+
+export type GetApiHistoryVersionsByVersionIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiHistoryVersionsByVersionIdError = GetApiHistoryVersionsByVersionIdErrors[keyof GetApiHistoryVersionsByVersionIdErrors];
+
+export type GetApiHistoryVersionsByVersionIdResponses = {
+    /**
+     * OK
+     */
+    200: VersionResponseDtoApiResponse;
+};
+
+export type GetApiHistoryVersionsByVersionIdResponse = GetApiHistoryVersionsByVersionIdResponses[keyof GetApiHistoryVersionsByVersionIdResponses];
+
+export type PatchApiHistoryVersionsByVersionIdData = {
+    body?: UpdateVersionDto;
+    path: {
+        versionId: string;
+    };
+    query?: never;
+    url: '/api/history/versions/{versionId}';
+};
+
+export type PatchApiHistoryVersionsByVersionIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PatchApiHistoryVersionsByVersionIdError = PatchApiHistoryVersionsByVersionIdErrors[keyof PatchApiHistoryVersionsByVersionIdErrors];
+
+export type PatchApiHistoryVersionsByVersionIdResponses = {
+    /**
+     * OK
+     */
+    200: VersionResponseDtoApiResponse;
+};
+
+export type PatchApiHistoryVersionsByVersionIdResponse = PatchApiHistoryVersionsByVersionIdResponses[keyof PatchApiHistoryVersionsByVersionIdResponses];
+
+export type GetApiHistoryVersionsByVersionIdHistoriesData = {
+    body?: never;
+    path: {
+        versionId: string;
+    };
+    query?: {
+        Page?: number;
+        Limit?: number;
+        Skip?: number;
+    };
+    url: '/api/history/versions/{versionId}/histories';
+};
+
+export type GetApiHistoryVersionsByVersionIdHistoriesErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiHistoryVersionsByVersionIdHistoriesError = GetApiHistoryVersionsByVersionIdHistoriesErrors[keyof GetApiHistoryVersionsByVersionIdHistoriesErrors];
+
+export type GetApiHistoryVersionsByVersionIdHistoriesResponses = {
+    /**
+     * OK
+     */
+    200: HistoryResponseDtoPaginatedResponseDtoApiResponse;
+};
+
+export type GetApiHistoryVersionsByVersionIdHistoriesResponse = GetApiHistoryVersionsByVersionIdHistoriesResponses[keyof GetApiHistoryVersionsByVersionIdHistoriesResponses];
+
+export type PostApiHistoryVersionsByVersionIdHistoriesData = {
+    body?: CreateHistoryDto;
+    path: {
+        versionId: string;
+    };
+    query?: never;
+    url: '/api/history/versions/{versionId}/histories';
+};
+
+export type PostApiHistoryVersionsByVersionIdHistoriesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiHistoryVersionsByVersionIdHistoriesError = PostApiHistoryVersionsByVersionIdHistoriesErrors[keyof PostApiHistoryVersionsByVersionIdHistoriesErrors];
+
+export type PostApiHistoryVersionsByVersionIdHistoriesResponses = {
+    /**
+     * OK
+     */
+    200: HistoryResponseDtoApiResponse;
+};
+
+export type PostApiHistoryVersionsByVersionIdHistoriesResponse = PostApiHistoryVersionsByVersionIdHistoriesResponses[keyof PostApiHistoryVersionsByVersionIdHistoriesResponses];
+
+export type DeleteApiHistoryHistoriesByHistoryIdData = {
+    body?: never;
+    path: {
+        historyId: string;
+    };
+    query?: never;
+    url: '/api/history/histories/{historyId}';
+};
+
+export type DeleteApiHistoryHistoriesByHistoryIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteApiHistoryHistoriesByHistoryIdError = DeleteApiHistoryHistoriesByHistoryIdErrors[keyof DeleteApiHistoryHistoriesByHistoryIdErrors];
+
+export type DeleteApiHistoryHistoriesByHistoryIdResponses = {
+    /**
+     * OK
+     */
+    200: StringApiResponse;
+};
+
+export type DeleteApiHistoryHistoriesByHistoryIdResponse = DeleteApiHistoryHistoriesByHistoryIdResponses[keyof DeleteApiHistoryHistoriesByHistoryIdResponses];
+
+export type GetApiHistoryHistoriesByHistoryIdData = {
+    body?: never;
+    path: {
+        historyId: string;
+    };
+    query?: {
+        versionId?: string;
+    };
+    url: '/api/history/histories/{historyId}';
+};
+
+export type GetApiHistoryHistoriesByHistoryIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiHistoryHistoriesByHistoryIdError = GetApiHistoryHistoriesByHistoryIdErrors[keyof GetApiHistoryHistoriesByHistoryIdErrors];
+
+export type GetApiHistoryHistoriesByHistoryIdResponses = {
+    /**
+     * OK
+     */
+    200: HistoryResponseDtoApiResponse;
+};
+
+export type GetApiHistoryHistoriesByHistoryIdResponse = GetApiHistoryHistoriesByHistoryIdResponses[keyof GetApiHistoryHistoriesByHistoryIdResponses];
+
+export type PatchApiHistoryHistoriesByHistoryIdData = {
+    body?: UpdateHistoryDto;
+    path: {
+        historyId: string;
+    };
+    query?: never;
+    url: '/api/history/histories/{historyId}';
+};
+
+export type PatchApiHistoryHistoriesByHistoryIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PatchApiHistoryHistoriesByHistoryIdError = PatchApiHistoryHistoriesByHistoryIdErrors[keyof PatchApiHistoryHistoriesByHistoryIdErrors];
+
+export type PatchApiHistoryHistoriesByHistoryIdResponses = {
+    /**
+     * OK
+     */
+    200: HistoryResponseDtoApiResponse;
+};
+
+export type PatchApiHistoryHistoriesByHistoryIdResponse = PatchApiHistoryHistoriesByHistoryIdResponses[keyof PatchApiHistoryHistoriesByHistoryIdResponses];
+
+export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData = {
+    body?: never;
+    path: {
+        versionId: string;
+        historyId: string;
+    };
+    query?: never;
+    url: '/api/history/versions/{versionId}/rollback/{historyId}';
+};
+
+export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdError = PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors[keyof PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors];
+
+export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses = {
+    /**
+     * OK
+     */
+    200: VersionResponseDtoApiResponse;
+};
+
+export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse = PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses[keyof PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses];
+
+export type GetApiProjectData = {
+    body?: never;
+    path?: never;
+    query?: {
+        Page?: number;
+        Limit?: number;
+        Skip?: number;
+    };
     url: '/api/Project';
 };
 
@@ -348,7 +962,7 @@ export type GetApiProjectResponses = {
     /**
      * OK
      */
-    200: ProjectResponseDtoIEnumerableApiResponse;
+    200: ProjectResponseDtoPaginatedResponseDtoApiResponse;
 };
 
 export type GetApiProjectResponse = GetApiProjectResponses[keyof GetApiProjectResponses];
@@ -462,6 +1076,9 @@ export type GetApiProjectByEmailData = {
     path?: never;
     query: {
         Email: string;
+        Page?: number;
+        Limit?: number;
+        Skip?: number;
     };
     url: '/api/Project/by-email';
 };
@@ -479,7 +1096,7 @@ export type GetApiProjectByEmailResponses = {
     /**
      * OK
      */
-    200: ProjectResponseDtoIEnumerableApiResponse;
+    200: ProjectResponseDtoPaginatedResponseDtoApiResponse;
 };
 
 export type GetApiProjectByEmailResponse = GetApiProjectByEmailResponses[keyof GetApiProjectByEmailResponses];
@@ -589,7 +1206,11 @@ export type PutApiSettingsResponse = PutApiSettingsResponses[keyof PutApiSetting
 export type GetApiUsersData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        Page?: number;
+        Limit?: number;
+        Skip?: number;
+    };
     url: '/api/Users';
 };
 
@@ -606,7 +1227,7 @@ export type GetApiUsersResponses = {
     /**
      * OK
      */
-    200: UserResponseDtoIEnumerableApiResponse;
+    200: UserResponseDtoPaginatedResponseDtoApiResponse;
 };
 
 export type GetApiUsersResponse = GetApiUsersResponses[keyof GetApiUsersResponses];

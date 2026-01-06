@@ -40,6 +40,96 @@ export const zCreateUserDto = z.object({
     ]))
 });
 
+export const zCreateVersionDto = z.object({
+    name: z.string().min(1),
+    description: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
+});
+
+export const zEmojiResponseDto = z.object({
+    _id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    emoji: z.union([
+        z.string(),
+        z.null()
+    ]),
+    hexcode: z.union([
+        z.string(),
+        z.null()
+    ]),
+    group: z.union([
+        z.string(),
+        z.null()
+    ]),
+    subgroup: z.union([
+        z.string(),
+        z.null()
+    ]),
+    annotation: z.union([
+        z.string(),
+        z.null()
+    ]),
+    tags: z.union([
+        z.array(z.string()),
+        z.null()
+    ]),
+    shortcodes: z.union([
+        z.array(z.string()),
+        z.null()
+    ]),
+    emoticons: z.union([
+        z.array(z.string()),
+        z.null()
+    ]),
+    directional: z.boolean(),
+    variation: z.boolean(),
+    variationBase: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    unicode: z.number(),
+    order: z.int()
+});
+
+export const zEmojiResponseDtoApiResponse = z.object({
+    data: z.optional(zEmojiResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zEmojiResponseDtoPaginatedResponseDto = z.object({
+    items: z.union([
+        z.array(zEmojiResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int()),
+    totalPages: z.optional(z.int().readonly()),
+    hasNextPage: z.optional(z.boolean().readonly()),
+    hasPreviousPage: z.optional(z.boolean().readonly())
+});
+
+export const zEmojiResponseDtoPaginatedResponseDtoApiResponse = z.object({
+    data: z.optional(zEmojiResponseDtoPaginatedResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
 export const zGeneralAccessType = z.enum(['Restricted', 'Link']);
 
 export const zGoogleAuthDto = z.object({
@@ -68,6 +158,71 @@ export const zMember = z.object({
         z.null()
     ])),
     role: zMemberRole
+});
+
+export const zCreateHistoryDto = z.object({
+    data: z.string().min(1),
+    members: z.optional(z.union([
+        z.array(zMember),
+        z.null()
+    ]))
+});
+
+export const zHistoryResponseDto = z.object({
+    id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    versionId: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    data: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    members: z.optional(z.union([
+        z.array(zMember),
+        z.null()
+    ])),
+    isRollback: z.optional(z.boolean()),
+    createdAt: z.optional(z.iso.datetime()),
+    updatedAt: z.optional(z.iso.datetime())
+});
+
+export const zHistoryResponseDtoApiResponse = z.object({
+    data: z.optional(zHistoryResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zHistoryResponseDtoPaginatedResponseDto = z.object({
+    items: z.union([
+        z.array(zHistoryResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int()),
+    totalPages: z.optional(z.int().readonly()),
+    hasNextPage: z.optional(z.boolean().readonly()),
+    hasPreviousPage: z.optional(z.boolean().readonly())
+});
+
+export const zHistoryResponseDtoPaginatedResponseDtoApiResponse = z.object({
+    data: z.optional(zHistoryResponseDtoPaginatedResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
 });
 
 export const zObjectApiResponse = z.object({
@@ -135,11 +290,21 @@ export const zProjectResponseDtoApiResponse = z.object({
     errors: z.optional(z.unknown())
 });
 
-export const zProjectResponseDtoIEnumerableApiResponse = z.object({
-    data: z.optional(z.union([
+export const zProjectResponseDtoPaginatedResponseDto = z.object({
+    items: z.union([
         z.array(zProjectResponseDto),
         z.null()
-    ])),
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int()),
+    totalPages: z.optional(z.int().readonly()),
+    hasNextPage: z.optional(z.boolean().readonly()),
+    hasPreviousPage: z.optional(z.boolean().readonly())
+});
+
+export const zProjectResponseDtoPaginatedResponseDtoApiResponse = z.object({
+    data: z.optional(zProjectResponseDtoPaginatedResponseDto),
     message: z.optional(z.union([
         z.string(),
         z.null()
@@ -168,6 +333,20 @@ export const zSaveProjectDto = z.object({
         z.array(zMember),
         z.null()
     ]))
+});
+
+export const zStringApiResponse = z.object({
+    data: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
 });
 
 export const zThemeOptions = z.enum(['Light', 'Dark']);
@@ -203,6 +382,17 @@ export const zSettingsResponseDtoApiResponse = z.object({
     errors: z.optional(z.unknown())
 });
 
+export const zUpdateHistoryDto = z.object({
+    data: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    members: z.optional(z.union([
+        z.array(zMember),
+        z.null()
+    ]))
+});
+
 export const zUpdateProjectDto = z.object({
     id: z.string().min(1),
     name: z.optional(z.union([
@@ -218,7 +408,7 @@ export const zUpdateProjectDto = z.object({
 export const zUpdateSettingsDto = z.object({
     email: z.email().min(1),
     autoSaveInterval: z.optional(z.union([
-        z.int(),
+        z.int().gte(0).lte(50),
         z.null()
     ])),
     canvasBackground: z.optional(zCanvasBackgroundOptions),
@@ -239,6 +429,17 @@ export const zUpdateUserDto = z.object({
         z.null()
     ])),
     profilePicture: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
+});
+
+export const zUpdateVersionDto = z.object({
+    name: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    description: z.optional(z.union([
         z.string(),
         z.null()
     ]))
@@ -297,11 +498,186 @@ export const zUserResponseDtoApiResponse = z.object({
     errors: z.optional(z.unknown())
 });
 
-export const zUserResponseDtoIEnumerableApiResponse = z.object({
-    data: z.optional(z.union([
+export const zUserResponseDtoPaginatedResponseDto = z.object({
+    items: z.union([
         z.array(zUserResponseDto),
         z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int()),
+    totalPages: z.optional(z.int().readonly()),
+    hasNextPage: z.optional(z.boolean().readonly()),
+    hasPreviousPage: z.optional(z.boolean().readonly())
+});
+
+export const zUserResponseDtoPaginatedResponseDtoApiResponse = z.object({
+    data: z.optional(zUserResponseDtoPaginatedResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
     ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zVersionResponseDto = z.object({
+    id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    name: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    description: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    projectId: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    currentHistoryId: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    createdAt: z.optional(z.iso.datetime()),
+    updatedAt: z.optional(z.iso.datetime())
+});
+
+export const zVersionResponseDtoApiResponse = z.object({
+    data: z.optional(zVersionResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zVersionResponseDtoPaginatedResponseDto = z.object({
+    items: z.union([
+        z.array(zVersionResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int()),
+    totalPages: z.optional(z.int().readonly()),
+    hasNextPage: z.optional(z.boolean().readonly()),
+    hasPreviousPage: z.optional(z.boolean().readonly())
+});
+
+export const zVersionResponseDtoPaginatedResponseDtoApiResponse = z.object({
+    data: z.optional(zVersionResponseDtoPaginatedResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zEmojiResponseDtoPaginatedResponseDtoWritable = z.object({
+    items: z.union([
+        z.array(zEmojiResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int())
+});
+
+export const zEmojiResponseDtoPaginatedResponseDtoApiResponseWritable = z.object({
+    data: z.optional(zEmojiResponseDtoPaginatedResponseDtoWritable),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zHistoryResponseDtoPaginatedResponseDtoWritable = z.object({
+    items: z.union([
+        z.array(zHistoryResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int())
+});
+
+export const zHistoryResponseDtoPaginatedResponseDtoApiResponseWritable = z.object({
+    data: z.optional(zHistoryResponseDtoPaginatedResponseDtoWritable),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zProjectResponseDtoPaginatedResponseDtoWritable = z.object({
+    items: z.union([
+        z.array(zProjectResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int())
+});
+
+export const zProjectResponseDtoPaginatedResponseDtoApiResponseWritable = z.object({
+    data: z.optional(zProjectResponseDtoPaginatedResponseDtoWritable),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zUserResponseDtoPaginatedResponseDtoWritable = z.object({
+    items: z.union([
+        z.array(zUserResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int())
+});
+
+export const zUserResponseDtoPaginatedResponseDtoApiResponseWritable = z.object({
+    data: z.optional(zUserResponseDtoPaginatedResponseDtoWritable),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
+export const zVersionResponseDtoPaginatedResponseDtoWritable = z.object({
+    items: z.union([
+        z.array(zVersionResponseDto),
+        z.null()
+    ]),
+    totalCount: z.optional(z.coerce.bigint()),
+    page: z.optional(z.int()),
+    limit: z.optional(z.int())
+});
+
+export const zVersionResponseDtoPaginatedResponseDtoApiResponseWritable = z.object({
+    data: z.optional(zVersionResponseDtoPaginatedResponseDtoWritable),
     message: z.optional(z.union([
         z.string(),
         z.null()
@@ -366,7 +742,7 @@ export const zGetApiAuthMeData = z.object({
  */
 export const zGetApiAuthMeResponse = zObjectApiResponse;
 
-export const zGetApiProjectData = z.object({
+export const zDeleteApiEmojisData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.optional(z.never())
@@ -375,7 +751,206 @@ export const zGetApiProjectData = z.object({
 /**
  * OK
  */
-export const zGetApiProjectResponse = zProjectResponseDtoIEnumerableApiResponse;
+export const zDeleteApiEmojisResponse = zBooleanApiResponse;
+
+export const zGetApiEmojisData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        Page: z.optional(z.int().gte(1).lte(2147483647)),
+        Limit: z.optional(z.int().gte(1).lte(50)),
+        Skip: z.optional(z.int())
+    }))
+});
+
+/**
+ * OK
+ */
+export const zGetApiEmojisResponse = zEmojiResponseDtoPaginatedResponseDtoApiResponse;
+
+export const zGetApiEmojisByHexcodeData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        hexcode: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zGetApiEmojisByHexcodeResponse = zEmojiResponseDtoApiResponse;
+
+export const zGetApiHistoryProjectsByProjectIdVersionsData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        projectId: z.string()
+    }),
+    query: z.optional(z.object({
+        Page: z.optional(z.int().gte(1).lte(2147483647)),
+        Limit: z.optional(z.int().gte(1).lte(50)),
+        Skip: z.optional(z.int())
+    }))
+});
+
+/**
+ * OK
+ */
+export const zGetApiHistoryProjectsByProjectIdVersionsResponse = zVersionResponseDtoPaginatedResponseDtoApiResponse;
+
+export const zPostApiHistoryProjectsByProjectIdVersionsData = z.object({
+    body: z.optional(zCreateVersionDto),
+    path: z.object({
+        projectId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPostApiHistoryProjectsByProjectIdVersionsResponse = zVersionResponseDtoApiResponse;
+
+export const zDeleteApiHistoryVersionsByVersionIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        versionId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zDeleteApiHistoryVersionsByVersionIdResponse = zStringApiResponse;
+
+export const zGetApiHistoryVersionsByVersionIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        versionId: z.string()
+    }),
+    query: z.optional(z.object({
+        projectId: z.optional(z.string())
+    }))
+});
+
+/**
+ * OK
+ */
+export const zGetApiHistoryVersionsByVersionIdResponse = zVersionResponseDtoApiResponse;
+
+export const zPatchApiHistoryVersionsByVersionIdData = z.object({
+    body: z.optional(zUpdateVersionDto),
+    path: z.object({
+        versionId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPatchApiHistoryVersionsByVersionIdResponse = zVersionResponseDtoApiResponse;
+
+export const zGetApiHistoryVersionsByVersionIdHistoriesData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        versionId: z.string()
+    }),
+    query: z.optional(z.object({
+        Page: z.optional(z.int().gte(1).lte(2147483647)),
+        Limit: z.optional(z.int().gte(1).lte(50)),
+        Skip: z.optional(z.int())
+    }))
+});
+
+/**
+ * OK
+ */
+export const zGetApiHistoryVersionsByVersionIdHistoriesResponse = zHistoryResponseDtoPaginatedResponseDtoApiResponse;
+
+export const zPostApiHistoryVersionsByVersionIdHistoriesData = z.object({
+    body: z.optional(zCreateHistoryDto),
+    path: z.object({
+        versionId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPostApiHistoryVersionsByVersionIdHistoriesResponse = zHistoryResponseDtoApiResponse;
+
+export const zDeleteApiHistoryHistoriesByHistoryIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        historyId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zDeleteApiHistoryHistoriesByHistoryIdResponse = zStringApiResponse;
+
+export const zGetApiHistoryHistoriesByHistoryIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        historyId: z.string()
+    }),
+    query: z.optional(z.object({
+        versionId: z.optional(z.string())
+    }))
+});
+
+/**
+ * OK
+ */
+export const zGetApiHistoryHistoriesByHistoryIdResponse = zHistoryResponseDtoApiResponse;
+
+export const zPatchApiHistoryHistoriesByHistoryIdData = z.object({
+    body: z.optional(zUpdateHistoryDto),
+    path: z.object({
+        historyId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPatchApiHistoryHistoriesByHistoryIdResponse = zHistoryResponseDtoApiResponse;
+
+export const zPostApiHistoryVersionsByVersionIdRollbackByHistoryIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        versionId: z.string(),
+        historyId: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse = zVersionResponseDtoApiResponse;
+
+export const zGetApiProjectData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        Page: z.optional(z.int().gte(1).lte(2147483647)),
+        Limit: z.optional(z.int().gte(1).lte(50)),
+        Skip: z.optional(z.int())
+    }))
+});
+
+/**
+ * OK
+ */
+export const zGetApiProjectResponse = zProjectResponseDtoPaginatedResponseDtoApiResponse;
 
 export const zPatchApiProjectData = z.object({
     body: z.optional(zSaveProjectDto),
@@ -429,14 +1004,17 @@ export const zGetApiProjectByEmailData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.object({
-        Email: z.email()
+        Email: z.email(),
+        Page: z.optional(z.int().gte(1).lte(2147483647)),
+        Limit: z.optional(z.int().gte(1).lte(50)),
+        Skip: z.optional(z.int())
     })
 });
 
 /**
  * OK
  */
-export const zGetApiProjectByEmailResponse = zProjectResponseDtoIEnumerableApiResponse;
+export const zGetApiProjectByEmailResponse = zProjectResponseDtoPaginatedResponseDtoApiResponse;
 
 export const zPatchApiProjectDetailsData = z.object({
     body: z.optional(zUpdateProjectDto),
@@ -487,13 +1065,17 @@ export const zPutApiSettingsResponse = zSettingsResponseDtoApiResponse;
 export const zGetApiUsersData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.object({
+        Page: z.optional(z.int().gte(1).lte(2147483647)),
+        Limit: z.optional(z.int().gte(1).lte(50)),
+        Skip: z.optional(z.int())
+    }))
 });
 
 /**
  * OK
  */
-export const zGetApiUsersResponse = zUserResponseDtoIEnumerableApiResponse;
+export const zGetApiUsersResponse = zUserResponseDtoPaginatedResponseDtoApiResponse;
 
 export const zPostApiUsersData = z.object({
     body: z.optional(zCreateUserDto),
