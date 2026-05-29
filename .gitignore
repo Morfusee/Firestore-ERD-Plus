@@ -35,3 +35,5 @@ backend/letsencrypt
 
 # Markdown Documentation
 documentation/.obsidian
+
+.worktrees/
