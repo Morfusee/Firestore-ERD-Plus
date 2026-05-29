@@ -49,6 +49,11 @@ public static class ResultExtensions
             return StatusCodes.Status404NotFound;
         }
 
+        if (result.Errors.Any(e => e.Metadata != null && e.Metadata.ContainsKey("Conflict")))
+        {
+            return StatusCodes.Status409Conflict;
+        }
+
         if (result.Errors.Any(e => e.Metadata != null && e.Metadata.ContainsKey("ValidationError")))
         {
             return StatusCodes.Status400BadRequest;
