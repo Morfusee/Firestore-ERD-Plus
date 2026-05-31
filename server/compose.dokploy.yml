@@ -1,0 +1,15 @@
+services:
+  server:
+    image: ghcr.io/morfusee/ferd-server:latest
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      SESSION_KEY: ${SESSION_KEY}
+      SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      CLIENT_URL: ${CLIENT_URL}
+      BASE_URL: ${BASE_URL}
+      MONGO_DOCKER_URI: ${MONGO_DOCKER_URI}
+      IS_DOCKERIZED: "true"
