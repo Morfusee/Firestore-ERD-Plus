@@ -68,6 +68,7 @@ public class SettingsServiceTests : TestDBContext
         // Assert
         Assert.True(result.IsFailed);
         Assert.Contains("User not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
     }
 
     [Fact]
@@ -99,6 +100,7 @@ public class SettingsServiceTests : TestDBContext
         // Assert
         Assert.True(result.IsFailed);
         Assert.Contains("User not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
     }
 
     [Fact]
@@ -142,6 +144,7 @@ public class SettingsServiceTests : TestDBContext
         // Assert
         Assert.True(result.IsFailed);
         Assert.Contains("User not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
     }
 
     [Fact]
@@ -155,6 +158,7 @@ public class SettingsServiceTests : TestDBContext
 
         Assert.True(result.IsFailed);
         Assert.Contains("Settings not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
     }
 
     [Fact]
@@ -168,6 +172,7 @@ public class SettingsServiceTests : TestDBContext
 
         Assert.True(result.IsFailed);
         Assert.Contains("Settings not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
     }
 
     [Fact]

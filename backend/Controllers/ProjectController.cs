@@ -61,6 +61,7 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> CreateProject(
         [FromBody] CreateProjectDto createProjectDto
     )
@@ -73,6 +74,7 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     [HttpPatch]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> SaveProject(
         [FromBody] SaveProjectDto saveProjectDto
     )
@@ -85,6 +87,7 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     [HttpPatch("details")]
     [ProducesResponseType(typeof(ApiResponse<ProjectResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<ProjectResponseDto>>> UpdateProject(
         [FromBody] UpdateProjectDto updateProjectDto
     )
@@ -97,6 +100,7 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteProject(
         [FromRoute(Name = "id")] string id
     )

@@ -48,7 +48,7 @@ public class UserService(
         {
             var user = await _context.Users.Find(user => user.Id == id).FirstOrDefaultAsync();
             return user == null
-                ? Result.Fail<UserResponseDto>("User not found")
+                ? NotFound<UserResponseDto>("User not found")
                 : Result.Ok(_mapper.ToDto(user));
         }
         catch (Exception ex)
@@ -64,7 +64,7 @@ public class UserService(
             var user = await _context.Users.Find(user => user.Email == email).FirstOrDefaultAsync();
 
             return user == null
-                ? Result.Fail<UserResponseDto>("User not found")
+                ? NotFound<UserResponseDto>("User not found")
                 : Result.Ok(_mapper.ToDto(user));
         }
         catch (Exception ex)
@@ -118,7 +118,7 @@ public class UserService(
 
             if (result.MatchedCount == 0)
             {
-                return Result.Fail<UserResponseDto>("User not found");
+                return NotFound<UserResponseDto>("User not found");
             }
 
             var user = await _context.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
@@ -139,7 +139,7 @@ public class UserService(
 
             if (result.DeletedCount == 0)
             {
-                return Result.Fail<bool>("User not found");
+                return NotFound<bool>("User not found");
             }
 
             // Also delete associated settings
@@ -151,5 +151,10 @@ public class UserService(
         {
             return Result.Fail<bool>("Failed to delete user").WithError(ex.Message);
         }
+    }
+
+    private static Result<T> NotFound<T>(string message)
+    {
+        return Result.Fail<T>(new Error(message).WithMetadata("NotFound", true));
     }
 }

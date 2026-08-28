@@ -65,7 +65,7 @@ public class ProjectService(
 
             if (user == null)
             {
-                return Result.Fail<ProjectResponseDto>("User not found");
+                return NotFound<ProjectResponseDto>("User not found");
             }
 
             var project = _mapper.ToProject(createProjectDto, user.Id);
@@ -90,7 +90,7 @@ public class ProjectService(
 
             if (deleteProject.DeletedCount == 0)
             {
-                return Result.Fail<bool>("Project not found");
+                return NotFound<bool>("Project not found");
             }
 
             return Result.Ok(true);
@@ -109,7 +109,7 @@ public class ProjectService(
 
             if (project == null)
             {
-                return Result.Fail<ProjectResponseDto>("Project not found");
+                return NotFound<ProjectResponseDto>("Project not found");
             }
 
             return Result.Ok(await ToResponseAsync(project));
@@ -137,7 +137,7 @@ public class ProjectService(
 
             if (user == null)
             {
-                return Result.Fail<PaginatedResponseDto<ProjectResponseDto>>("User not found");
+                return NotFound<PaginatedResponseDto<ProjectResponseDto>>("User not found");
             }
 
             var projects = await _context
@@ -168,7 +168,7 @@ public class ProjectService(
 
             if (saveProject == null)
             {
-                return Result.Fail<ProjectResponseDto>("Project not found");
+                return NotFound<ProjectResponseDto>("Project not found");
             }
 
             return Result.Ok(await ToResponseAsync(saveProject));
@@ -205,7 +205,7 @@ public class ProjectService(
 
             if (updatedProject == null)
             {
-                return Result.Fail<ProjectResponseDto>("Project not found");
+                return NotFound<ProjectResponseDto>("Project not found");
             }
 
             return Result.Ok(await ToResponseAsync(updatedProject));
@@ -228,5 +228,10 @@ public class ProjectService(
         return emoji.IsSuccess && emoji.Value != null
             ? _mapper.ToDto(project, emoji.Value)
             : _mapper.ToDto(project);
+    }
+
+    private static Result<T> NotFound<T>(string message)
+    {
+        return Result.Fail<T>(new Error(message).WithMetadata("NotFound", true));
     }
 }

@@ -35,6 +35,7 @@ public class SettingsController(
     [HttpPost]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<SettingsResponseDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse<SettingsResponseDto>>> CreateSettings(
         [FromBody] CreateSettingsDto createSettingsDto
@@ -48,6 +49,7 @@ public class SettingsController(
     [HttpPut]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<SettingsResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse<SettingsResponseDto>>> UpdateSettings(
         [FromBody] UpdateSettingsDto updateSettingsDto
