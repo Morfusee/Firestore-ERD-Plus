@@ -3,6 +3,7 @@ using backend.DTOs.History;
 using backend.Mappers;
 using backend.Services;
 using backend.Services.HistoryService;
+using FluentResults;
 using MongoDB.Driver;
 
 namespace backend.Test.Services;
@@ -67,10 +68,7 @@ public class HistoryServiceTests : TestDBContext
         var result = await _historyService.CreateProjectVersionAsync(projectId, dto);
 
         Assert.True(result.IsFailed);
-        Assert.Contains(
-            result.Errors.Select(e => e.Message),
-            e => e.Contains("already exists")
-        );
+        Assert.Contains(result.Errors.Select(e => e.Message), e => e.Contains("already exists"));
         Assert.True(result.Errors.Any(e => e.Metadata.ContainsKey("Conflict")));
     }
 
@@ -287,9 +285,7 @@ public class HistoryServiceTests : TestDBContext
         Assert.True(deleteResult.IsSuccess);
         Assert.True(deleteResult.Value);
 
-        var remaining = await _context
-            .Histories.Find(h => h.VersionId == versionId)
-            .ToListAsync();
+        var remaining = await _context.Histories.Find(h => h.VersionId == versionId).ToListAsync();
         Assert.Single(remaining);
         Assert.Equal(h1.Value.Id, remaining[0].Id);
 
@@ -317,9 +313,7 @@ public class HistoryServiceTests : TestDBContext
         var version = await _context.Versions.Find(v => v.Id == versionId).FirstOrDefaultAsync();
         Assert.Null(version!.CurrentHistoryId);
 
-        var remaining = await _context
-            .Histories.Find(h => h.VersionId == versionId)
-            .ToListAsync();
+        var remaining = await _context.Histories.Find(h => h.VersionId == versionId).ToListAsync();
         Assert.Empty(remaining);
     }
 
@@ -386,5 +380,86 @@ public class HistoryServiceTests : TestDBContext
             "History entry not found or does not belong to this version",
             result.Errors.Select(e => e.Message)
         );
+    }
+
+    [Fact]
+    public async Task GetVersionById_WithDifferentProjectScope_ReturnsNotFound()
+    {
+        var projectId = await GetSeededProjectId();
+        var version = await _historyService.CreateProjectVersionAsync(
+            projectId,
+            new CreateVersionDto { Name = "scoped-version" }
+        );
+
+        var result = await _historyService.GetVersionByIdAsync(
+            version.Value.Id!,
+            "507f1f77bcf86cd799439012"
+        );
+
+        Assert.True(result.IsFailed);
+        Assert.Contains("Version not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
+    }
+
+    [Fact]
+    public async Task GetHistoryById_WithDifferentVersionScope_ReturnsNotFound()
+    {
+        var projectId = await GetSeededProjectId();
+        var version = await _historyService.CreateProjectVersionAsync(
+            projectId,
+            new CreateVersionDto { Name = "history-scope" }
+        );
+        var history = await _historyService.CreateVersionHistoryAsync(
+            version.Value.Id!,
+            new CreateHistoryDto { Data = "{}" }
+        );
+
+        var result = await _historyService.GetHistoryByIdAsync(
+            history.Value.Id!,
+            "507f1f77bcf86cd799439012"
+        );
+
+        Assert.True(result.IsFailed);
+        Assert.Contains("History entry not found", result.Errors.Select(e => e.Message));
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
+    }
+
+    [Theory]
+    [InlineData("get-project-versions")]
+    [InlineData("get-version-histories")]
+    [InlineData("update-version")]
+    [InlineData("delete-version")]
+    [InlineData("update-history")]
+    [InlineData("delete-history")]
+    [InlineData("rollback-version")]
+    public async Task MissingResource_ReturnsNotFoundMetadata(string operation)
+    {
+        const string missingId = "507f1f77bcf86cd799439012";
+
+        var result = operation switch
+        {
+            "get-project-versions" => (IResultBase)
+                await _historyService.GetProjectVersionsAsync(missingId, DefaultPagination),
+            "get-version-histories" => (IResultBase)
+                await _historyService.GetVersionHistoriesAsync(missingId, DefaultPagination),
+            "update-version" => (IResultBase)
+                await _historyService.UpdateVersionAsync(
+                    missingId,
+                    new UpdateVersionDto { Name = "missing" }
+                ),
+            "delete-version" => (IResultBase)await _historyService.DeleteVersionAsync(missingId),
+            "update-history" => (IResultBase)
+                await _historyService.UpdateHistoryAsync(
+                    missingId,
+                    new UpdateHistoryDto { Data = "{}" }
+                ),
+            "delete-history" => (IResultBase)await _historyService.DeleteHistoryAsync(missingId),
+            "rollback-version" => (IResultBase)
+                await _historyService.RollbackVersionToHistoryAsync(missingId, missingId),
+            _ => throw new ArgumentOutOfRangeException(nameof(operation)),
+        };
+
+        Assert.True(result.IsFailed);
+        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
     }
 }

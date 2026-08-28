@@ -3,6 +3,7 @@ using backend.DTOs.Settings;
 using backend.Mappers;
 using backend.Models;
 using backend.Services.SettingsService;
+using MongoDB.Driver;
 
 namespace backend.Test.Services;
 
@@ -141,5 +142,44 @@ public class SettingsServiceTests : TestDBContext
         // Assert
         Assert.True(result.IsFailed);
         Assert.Contains("User not found", result.Errors.Select(e => e.Message));
+    }
+
+    [Fact]
+    public async Task GetSettingsByEmailAsync_UserWithoutSettings_ReturnsSettingsNotFound()
+    {
+        await _mongoDbContext.Settings.DeleteManyAsync(s => s.UserId == MockUser.Id);
+
+        var result = await _settingsService.GetSettingsByEmailAsync(
+            new EmailDto { Email = MockUser.Email }
+        );
+
+        Assert.True(result.IsFailed);
+        Assert.Contains("Settings not found", result.Errors.Select(e => e.Message));
+    }
+
+    [Fact]
+    public async Task UpdateSettingsAsync_UserWithoutSettings_ReturnsSettingsNotFound()
+    {
+        await _mongoDbContext.Settings.DeleteManyAsync(s => s.UserId == MockUser.Id);
+
+        var result = await _settingsService.UpdateSettingsAsync(
+            new UpdateSettingsDto { Email = MockUser.Email, Theme = ThemeOptions.Light }
+        );
+
+        Assert.True(result.IsFailed);
+        Assert.Contains("Settings not found", result.Errors.Select(e => e.Message));
+    }
+
+    [Fact]
+    public async Task UpdateSettingsAsync_PartialUpdate_PreservesUnspecifiedValues()
+    {
+        var result = await _settingsService.UpdateSettingsAsync(
+            new UpdateSettingsDto { Email = MockUser.Email, AutoSaveInterval = 12 }
+        );
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(12, result.Value.AutoSaveInterval);
+        Assert.Equal(ThemeOptions.Dark, result.Value.Theme);
+        Assert.Equal(CanvasBackgroundOptions.Dots, result.Value.CanvasBackground);
     }
 }

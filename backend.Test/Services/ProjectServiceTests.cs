@@ -355,4 +355,35 @@ public class ProjectServiceTests : TestDBContext
         Assert.True(result.IsFailed);
         Assert.Contains("User not found", result.Errors.Select(e => e.Message));
     }
+
+    [Fact]
+    public async Task DeleteProjectAsync_WithNonExistentProject_ReturnsSuccess()
+    {
+        var result = await _projectService.DeleteProjectAsync("507f1f77bcf86cd799439012");
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+    }
+
+    [Fact]
+    public async Task UpdateProjectAsync_WithOnlyName_PreservesIconAndData()
+    {
+        var project = await _context.Projects.Find(_ => true).FirstOrDefaultAsync();
+        await _context.Projects.UpdateOneAsync(
+            p => p.Id == project!.Id,
+            Builders<Project>.Update.Set(p => p.Data, "{\"tables\":[]}")
+        );
+
+        var result = await _projectService.UpdateProjectAsync(
+            new UpdateProjectDto { Id = project!.Id!, Name = "Renamed" }
+        );
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Renamed", result.Value.Name);
+        Assert.Equal(
+            project.Icon,
+            (await _context.Projects.Find(p => p.Id == project.Id).SingleAsync()).Icon
+        );
+        Assert.Equal("{\"tables\":[]}", result.Value.Data);
+    }
 }

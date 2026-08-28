@@ -90,4 +90,27 @@ public class EmojiServiceTests : TestDBContext
         );
         Assert.Equal(0, emojisCount);
     }
+
+    [Fact]
+    public async Task DeleteAllEmojisAsync_WhenCollectionAlreadyEmpty_ReturnsFalse()
+    {
+        await _emojiService.DeleteAllEmojisAsync();
+
+        var result = await _emojiService.DeleteAllEmojisAsync();
+
+        Assert.True(result.IsSuccess);
+        Assert.False(result.Value);
+    }
+
+    [Fact]
+    public async Task GetEmojiByHexcodeAsync_UsesExactCaseSensitiveLookup()
+    {
+        var exact = await _emojiService.GetEmojiByHexcodeAsync("1F600");
+        var differentCase = await _emojiService.GetEmojiByHexcodeAsync("1f600");
+
+        Assert.True(exact.IsSuccess);
+        Assert.NotNull(exact.Value);
+        Assert.True(differentCase.IsSuccess);
+        Assert.Null(differentCase.Value);
+    }
 }
