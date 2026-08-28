@@ -16,19 +16,14 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     [HttpGet("projects/{projectId}/versions")]
     public async Task<
         ActionResult<ApiResponse<PaginatedResponseDto<VersionResponseDto>>>
-    > GetProjectVersions(
-        [FromRoute] string projectId,
-        [FromQuery] PaginationDto pagination
-    )
+    > GetProjectVersions([FromRoute] string projectId, [FromQuery] PaginationDto pagination)
     {
         var result = await _historyService.GetProjectVersionsAsync(projectId, pagination);
         return this.ToApiResponse(result);
     }
 
     [HttpPost("projects/{projectId}/versions")]
-    public async Task<
-        ActionResult<ApiResponse<VersionResponseDto>>
-    > CreateProjectVersion(
+    public async Task<ActionResult<ApiResponse<VersionResponseDto>>> CreateProjectVersion(
         [FromRoute] string projectId,
         [FromBody] CreateVersionDto dto
     )
@@ -38,9 +33,7 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     }
 
     [HttpGet("versions/{versionId}")]
-    public async Task<
-        ActionResult<ApiResponse<VersionResponseDto>>
-    > GetVersionById(
+    public async Task<ActionResult<ApiResponse<VersionResponseDto>>> GetVersionById(
         [FromRoute] string versionId,
         [FromQuery] string? projectId
     )
@@ -50,9 +43,7 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     }
 
     [HttpPatch("versions/{versionId}")]
-    public async Task<
-        ActionResult<ApiResponse<VersionResponseDto>>
-    > UpdateVersion(
+    public async Task<ActionResult<ApiResponse<VersionResponseDto>>> UpdateVersion(
         [FromRoute] string versionId,
         [FromBody] UpdateVersionDto dto
     )
@@ -62,9 +53,7 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     }
 
     [HttpDelete("versions/{versionId}")]
-    public async Task<
-        ActionResult<ApiResponse<bool>>
-    > DeleteVersion([FromRoute] string versionId)
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteVersion([FromRoute] string versionId)
     {
         var result = await _historyService.DeleteVersionAsync(versionId);
         return this.ToApiResponse(result);
@@ -73,19 +62,14 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     [HttpGet("versions/{versionId}/histories")]
     public async Task<
         ActionResult<ApiResponse<PaginatedResponseDto<HistoryResponseDto>>>
-    > GetVersionHistories(
-        [FromRoute] string versionId,
-        [FromQuery] PaginationDto pagination
-    )
+    > GetVersionHistories([FromRoute] string versionId, [FromQuery] PaginationDto pagination)
     {
         var result = await _historyService.GetVersionHistoriesAsync(versionId, pagination);
         return this.ToApiResponse(result);
     }
 
     [HttpPost("versions/{versionId}/histories")]
-    public async Task<
-        ActionResult<ApiResponse<HistoryResponseDto>>
-    > CreateVersionHistory(
+    public async Task<ActionResult<ApiResponse<HistoryResponseDto>>> CreateVersionHistory(
         [FromRoute] string versionId,
         [FromBody] CreateHistoryDto dto
     )
@@ -95,9 +79,7 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     }
 
     [HttpGet("histories/{historyId}")]
-    public async Task<
-        ActionResult<ApiResponse<HistoryResponseDto>>
-    > GetHistoryById(
+    public async Task<ActionResult<ApiResponse<HistoryResponseDto>>> GetHistoryById(
         [FromRoute] string historyId,
         [FromQuery] string? versionId
     )
@@ -107,9 +89,7 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     }
 
     [HttpPatch("histories/{historyId}")]
-    public async Task<
-        ActionResult<ApiResponse<HistoryResponseDto>>
-    > UpdateHistory(
+    public async Task<ActionResult<ApiResponse<HistoryResponseDto>>> UpdateHistory(
         [FromRoute] string historyId,
         [FromBody] UpdateHistoryDto dto
     )
@@ -119,18 +99,14 @@ public class HistoryController(IHistoryService historyService) : ControllerBase
     }
 
     [HttpDelete("histories/{historyId}")]
-    public async Task<
-        ActionResult<ApiResponse<bool>>
-    > DeleteHistory([FromRoute] string historyId)
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteHistory([FromRoute] string historyId)
     {
         var result = await _historyService.DeleteHistoryAsync(historyId);
         return this.ToApiResponse(result);
     }
 
     [HttpPost("versions/{versionId}/rollback/{historyId}")]
-    public async Task<
-        ActionResult<ApiResponse<VersionResponseDto>>
-    > RollbackVersion(
+    public async Task<ActionResult<ApiResponse<VersionResponseDto>>> RollbackVersion(
         [FromRoute] string versionId,
         [FromRoute] string historyId
     )

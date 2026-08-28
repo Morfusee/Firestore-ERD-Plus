@@ -137,13 +137,13 @@ public class UserService(
         {
             var result = await _context.Users.DeleteOneAsync(user => user.Id == id);
 
-            // Also delete associated settings
-            var settings = await _context.Settings.DeleteManyAsync(s => s.UserId == id);
-
             if (result.DeletedCount == 0)
             {
                 return Result.Fail<bool>("User not found");
             }
+
+            // Also delete associated settings
+            await _context.Settings.DeleteManyAsync(s => s.UserId == id);
 
             return Result.Ok(true);
         }

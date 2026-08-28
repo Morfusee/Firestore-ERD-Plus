@@ -5,9 +5,18 @@ namespace backend.Common.Extensions;
 
 public static class AttributeServiceExtension
 {
-    public static IServiceCollection RegisterServicesWithAttributes(this IServiceCollection serviceCollection, Assembly assembly)
+    public static IServiceCollection RegisterServicesWithAttributes(
+        this IServiceCollection serviceCollection,
+        Assembly assembly
+    )
     {
-        var targetServices = assembly.GetTypes().Where(type => type.GetCustomAttribute<ScopedServiceAttribute>() != null || type.GetCustomAttribute<TransientServiceAttribute>() != null || type.GetCustomAttribute<SingletonServiceAttribute>() != null);
+        var targetServices = assembly
+            .GetTypes()
+            .Where(type =>
+                type.GetCustomAttribute<ScopedServiceAttribute>() != null
+                || type.GetCustomAttribute<TransientServiceAttribute>() != null
+                || type.GetCustomAttribute<SingletonServiceAttribute>() != null
+            );
 
         foreach (var serviceType in targetServices)
         {
@@ -31,22 +40,27 @@ public static class AttributeServiceExtension
         return serviceCollection;
     }
 
-    private static IServiceCollection RegisterService(IServiceCollection serviceCollection, Type? @interface, Type serviceType, ServiceLifetime lifetime)
+    private static IServiceCollection RegisterService(
+        IServiceCollection serviceCollection,
+        Type? @interface,
+        Type serviceType,
+        ServiceLifetime lifetime
+    )
     {
         _ = lifetime switch
         {
-            ServiceLifetime.Singleton => @interface != null ?
-                serviceCollection.AddSingleton(@interface, serviceType) :
-                serviceCollection.AddSingleton(serviceType),
-            ServiceLifetime.Scoped => @interface != null ?
-                serviceCollection.AddScoped(@interface, serviceType) :
-                serviceCollection.AddScoped(serviceType),
-            ServiceLifetime.Transient => @interface != null ?
-                serviceCollection.AddTransient(@interface, serviceType) :
-                serviceCollection.AddTransient(serviceType),
-            _ => @interface != null ?
-                serviceCollection.AddScoped(@interface, serviceType) :
-                serviceCollection.AddScoped(serviceType),
+            ServiceLifetime.Singleton => @interface != null
+                ? serviceCollection.AddSingleton(@interface, serviceType)
+                : serviceCollection.AddSingleton(serviceType),
+            ServiceLifetime.Scoped => @interface != null
+                ? serviceCollection.AddScoped(@interface, serviceType)
+                : serviceCollection.AddScoped(serviceType),
+            ServiceLifetime.Transient => @interface != null
+                ? serviceCollection.AddTransient(@interface, serviceType)
+                : serviceCollection.AddTransient(serviceType),
+            _ => @interface != null
+                ? serviceCollection.AddScoped(@interface, serviceType)
+                : serviceCollection.AddScoped(serviceType),
         };
 
         return serviceCollection;

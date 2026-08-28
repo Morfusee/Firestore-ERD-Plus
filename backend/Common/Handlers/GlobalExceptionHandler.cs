@@ -6,9 +6,14 @@ namespace backend.Common.Handlers;
 // Note: IProblemDetailsService is used for the modern approach to writing Problem Details JSON
 internal sealed class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,
-    ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+    ILogger<GlobalExceptionHandler> logger
+) : IExceptionHandler
 {
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext,
+        Exception exception,
+        CancellationToken cancellationToken
+    )
     {
         logger.LogError(exception, "An unhandled, exceptional error occurred.");
 
@@ -19,7 +24,7 @@ internal sealed class GlobalExceptionHandler(
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
 
             // Default to 500 for all other unexpected errors/crashes
-            _ => httpContext.Response.StatusCode
+            _ => httpContext.Response.StatusCode,
         };
 
         var context = new ProblemDetailsContext
@@ -29,18 +34,19 @@ internal sealed class GlobalExceptionHandler(
             ProblemDetails = new ProblemDetails
             {
                 // Set the Title and Detail based on the error type
-                Title = httpContext.Response.StatusCode == StatusCodes.Status500InternalServerError
-                    ? "Internal Server Error"
-                    : exception.GetType().Name.Replace("Exception", string.Empty),
+                Title =
+                    httpContext.Response.StatusCode == StatusCodes.Status500InternalServerError
+                        ? "Internal Server Error"
+                        : exception.GetType().Name.Replace("Exception", string.Empty),
 
-                Detail = httpContext.Response.StatusCode == StatusCodes.Status500InternalServerError
-                    ? "An unexpected error occurred. Please try again later."
-                    : exception.Message,
+                Detail =
+                    httpContext.Response.StatusCode == StatusCodes.Status500InternalServerError
+                        ? "An unexpected error occurred. Please try again later."
+                        : exception.Message,
 
                 Status = httpContext.Response.StatusCode,
-            }
+            },
         };
         return await problemDetailsService.TryWriteAsync(context);
     }
-
 }

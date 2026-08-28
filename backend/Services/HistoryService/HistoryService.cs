@@ -22,7 +22,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
     {
         try
         {
-            var project = await _context.Projects.Find(p => p.Id == projectId).FirstOrDefaultAsync();
+            var project = await _context
+                .Projects.Find(p => p.Id == projectId)
+                .FirstOrDefaultAsync();
             if (project == null)
                 return NotFound<PaginatedResponseDto<VersionResponseDto>>("Project not found");
 
@@ -47,7 +49,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
     {
         try
         {
-            var project = await _context.Projects.Find(p => p.Id == projectId).FirstOrDefaultAsync();
+            var project = await _context
+                .Projects.Find(p => p.Id == projectId)
+                .FirstOrDefaultAsync();
             if (project == null)
                 return NotFound<VersionResponseDto>("Project not found");
 
@@ -56,10 +60,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .FirstOrDefaultAsync();
             if (existing != null)
                 return Result.Fail<VersionResponseDto>(
-                    new Error("Version with this name already exists for this project").WithMetadata(
-                        "Conflict",
-                        true
-                    )
+                    new Error(
+                        "Version with this name already exists for this project"
+                    ).WithMetadata("Conflict", true)
                 );
 
             var version = new Models.Version
@@ -126,7 +129,10 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
             var updated = await _context.Versions.FindOneAndUpdateAsync(
                 v => v.Id == versionId,
                 updateDefinition,
-                new FindOneAndUpdateOptions<Models.Version> { ReturnDocument = ReturnDocument.After }
+                new FindOneAndUpdateOptions<Models.Version>
+                {
+                    ReturnDocument = ReturnDocument.After,
+                }
             );
 
             if (updated == null)
@@ -146,7 +152,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
     {
         try
         {
-            var version = await _context.Versions.Find(v => v.Id == versionId).FirstOrDefaultAsync();
+            var version = await _context
+                .Versions.Find(v => v.Id == versionId)
+                .FirstOrDefaultAsync();
             if (version == null)
                 return NotFound<bool>("Version not found");
 
@@ -259,10 +267,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
     {
         try
         {
-            var updateDefinition = Builders<History>.Update.Set(
-                h => h.UpdatedAt,
-                DateTime.UtcNow
-            );
+            var updateDefinition = Builders<History>.Update.Set(h => h.UpdatedAt, DateTime.UtcNow);
 
             if (dto.Data != null)
                 updateDefinition = updateDefinition.Set(h => h.Data, dto.Data);
@@ -292,7 +297,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
     {
         try
         {
-            var history = await _context.Histories.Find(h => h.Id == historyId).FirstOrDefaultAsync();
+            var history = await _context
+                .Histories.Find(h => h.Id == historyId)
+                .FirstOrDefaultAsync();
             if (history == null)
                 return NotFound<bool>("History entry not found");
 
@@ -325,7 +332,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
             if (version == null)
                 return NotFound<VersionResponseDto>("Version not found");
 
-            var target = await _context.Histories.Find(h => h.Id == historyId).FirstOrDefaultAsync();
+            var target = await _context
+                .Histories.Find(h => h.Id == historyId)
+                .FirstOrDefaultAsync();
             if (target == null || target.VersionId != versionId)
                 return NotFound<VersionResponseDto>(
                     "History entry not found or does not belong to this version"
@@ -373,10 +382,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
 
         await _context.Versions.UpdateOneAsync(
             v => v.Id == versionId,
-            Builders<Models.Version>.Update.Set(
-                v => v.CurrentHistoryId,
-                latestHistory?.Id
-            )
+            Builders<Models.Version>.Update.Set(v => v.CurrentHistoryId, latestHistory?.Id)
         );
     }
 

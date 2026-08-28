@@ -357,12 +357,12 @@ public class ProjectServiceTests : TestDBContext
     }
 
     [Fact]
-    public async Task DeleteProjectAsync_WithNonExistentProject_ReturnsSuccess()
+    public async Task DeleteProjectAsync_WithNonExistentProject_ReturnsFailure()
     {
         var result = await _projectService.DeleteProjectAsync("507f1f77bcf86cd799439012");
 
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value);
+        Assert.True(result.IsFailed);
+        Assert.Contains("Project not found", result.Errors.Select(e => e.Message));
     }
 
     [Fact]

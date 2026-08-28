@@ -163,4 +163,21 @@ public class UserServiceTests : TestDBContext
         Assert.True(result.IsFailed);
         Assert.Contains("User not found", result.Errors.Select(e => e.Message));
     }
+
+    [Fact]
+    public async Task DeleteUserAsync_MissingUser_PreservesSettings()
+    {
+        await _mongoDbContext.Settings.InsertOneAsync(
+            new Settings { UserId = "507f1f77bcf86cd799439012" }
+        );
+
+        var result = await CreateService().DeleteUserAsync("507f1f77bcf86cd799439012");
+
+        Assert.True(result.IsFailed);
+        Assert.NotEmpty(
+            await _mongoDbContext
+                .Settings.Find(s => s.UserId == "507f1f77bcf86cd799439012")
+                .ToListAsync()
+        );
+    }
 }

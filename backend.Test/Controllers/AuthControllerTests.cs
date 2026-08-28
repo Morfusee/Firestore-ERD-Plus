@@ -131,4 +131,18 @@ public class AuthControllerTests
         );
         _authService.Verify(s => s.VerifyTokenAsync("cookie-token"), Times.Once);
     }
+
+    [Fact]
+    public async Task GetCurrentUser_WithInvalidToken_ReturnsUnauthorized()
+    {
+        _authService
+            .Setup(s => s.VerifyTokenAsync("bad-token"))
+            .ReturnsAsync(Result.Fail<string>("invalid token"));
+
+        var action = await CreateController("access_token=bad-token").GetCurrentUser();
+
+        var unauthorized = Assert.IsType<UnauthorizedObjectResult>(action.Result);
+        var body = Assert.IsType<ApiResponse<object>>(unauthorized.Value);
+        Assert.Equal(StatusCodes.Status401Unauthorized, body.Status);
+    }
 }

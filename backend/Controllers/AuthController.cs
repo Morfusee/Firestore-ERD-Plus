@@ -86,6 +86,18 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
 
         var result = await _authService.VerifyTokenAsync(token);
 
+        if (result.IsFailed)
+        {
+            return Unauthorized(
+                new ApiResponse<object>(
+                    new object(),
+                    "Invalid access token.",
+                    StatusCodes.Status401Unauthorized,
+                    IsSuccess: false
+                )
+            );
+        }
+
         return this.ToApiResponse<object>(new { UserId = result.Value });
     }
 }

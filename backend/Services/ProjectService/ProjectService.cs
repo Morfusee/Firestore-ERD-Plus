@@ -86,7 +86,12 @@ public class ProjectService(
     {
         try
         {
-            var deleteProject = _context.Projects.DeleteOneAsync(proj => proj.Id == id);
+            var deleteProject = await _context.Projects.DeleteOneAsync(proj => proj.Id == id);
+
+            if (deleteProject.DeletedCount == 0)
+            {
+                return Result.Fail<bool>("Project not found");
+            }
 
             return Result.Ok(true);
         }
