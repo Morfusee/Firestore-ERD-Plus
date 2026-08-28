@@ -1,4 +1,5 @@
 using backend.Common.Attributes;
+using backend.Common.Extensions;
 using backend.DTOs.Common;
 using backend.DTOs.Settings;
 using backend.DTOs.User;
@@ -27,7 +28,7 @@ public class SettingsService(MongoDbContext context, SettingsMapper mapper) : IS
 
             if (user == null)
             {
-                return NotFound<SettingsResponseDto>("User not found");
+                return ResultExtensions.NotFound<SettingsResponseDto>("User not found");
             }
 
             var settings = _mapper.ToSettings(createSettingsDto, user.Id);
@@ -56,7 +57,7 @@ public class SettingsService(MongoDbContext context, SettingsMapper mapper) : IS
 
             if (user == null)
             {
-                return NotFound<SettingsResponseDto>("User not found");
+                return ResultExtensions.NotFound<SettingsResponseDto>("User not found");
             }
 
             var settings = await _context
@@ -64,7 +65,7 @@ public class SettingsService(MongoDbContext context, SettingsMapper mapper) : IS
                 .FirstOrDefaultAsync();
 
             return settings == null
-                ? NotFound<SettingsResponseDto>("Settings not found")
+                ? ResultExtensions.NotFound<SettingsResponseDto>("Settings not found")
                 : Result.Ok(_mapper.ToDto(settings));
         }
         catch (Exception ex)
@@ -87,7 +88,7 @@ public class SettingsService(MongoDbContext context, SettingsMapper mapper) : IS
 
             if (user == null)
             {
-                return NotFound<SettingsResponseDto>("User not found");
+                return ResultExtensions.NotFound<SettingsResponseDto>("User not found");
             }
 
             var settings = await _context
@@ -96,7 +97,7 @@ public class SettingsService(MongoDbContext context, SettingsMapper mapper) : IS
 
             if (settings == null)
             {
-                return NotFound<SettingsResponseDto>("Settings not found");
+                return ResultExtensions.NotFound<SettingsResponseDto>("Settings not found");
             }
 
             settings.UpdatedAt = DateTime.UtcNow;
@@ -115,10 +116,5 @@ public class SettingsService(MongoDbContext context, SettingsMapper mapper) : IS
                 .Fail<SettingsResponseDto>("Failed to update settings")
                 .WithError(ex.Message);
         }
-    }
-
-    private static Result<T> NotFound<T>(string message)
-    {
-        return Result.Fail<T>(new Error(message).WithMetadata("NotFound", true));
     }
 }

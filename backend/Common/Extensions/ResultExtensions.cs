@@ -6,6 +6,11 @@ namespace backend.Common.Extensions;
 
 public static class ResultExtensions
 {
+    public static Result<T> NotFound<T>(string message)
+    {
+        return Result.Fail<T>(new Error(message).WithMetadata("NotFound", true));
+    }
+
     public static ActionResult<ApiResponse<T>> ToApiResponse<T>(
         this ControllerBase controller,
         Result<T> result

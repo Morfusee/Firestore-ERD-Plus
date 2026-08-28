@@ -26,7 +26,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Projects.Find(p => p.Id == projectId)
                 .FirstOrDefaultAsync();
             if (project == null)
-                return NotFound<PaginatedResponseDto<VersionResponseDto>>("Project not found");
+                return ResultExtensions.NotFound<PaginatedResponseDto<VersionResponseDto>>(
+                    "Project not found"
+                );
 
             var versions = await _context
                 .Versions.Find(v => v.ProjectId == projectId)
@@ -53,7 +55,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Projects.Find(p => p.Id == projectId)
                 .FirstOrDefaultAsync();
             if (project == null)
-                return NotFound<VersionResponseDto>("Project not found");
+                return ResultExtensions.NotFound<VersionResponseDto>("Project not found");
 
             var existing = await _context
                 .Versions.Find(v => v.ProjectId == projectId && v.Name == dto.Name)
@@ -97,7 +99,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
 
             var version = await _context.Versions.Find(filter).FirstOrDefaultAsync();
             if (version == null)
-                return NotFound<VersionResponseDto>("Version not found");
+                return ResultExtensions.NotFound<VersionResponseDto>("Version not found");
 
             return Result.Ok(_mapper.ToDto(version));
         }
@@ -136,7 +138,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
             );
 
             if (updated == null)
-                return NotFound<VersionResponseDto>("Version not found");
+                return ResultExtensions.NotFound<VersionResponseDto>("Version not found");
 
             return Result.Ok(_mapper.ToDto(updated));
         }
@@ -156,7 +158,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Versions.Find(v => v.Id == versionId)
                 .FirstOrDefaultAsync();
             if (version == null)
-                return NotFound<bool>("Version not found");
+                return ResultExtensions.NotFound<bool>("Version not found");
 
             await _context.Histories.DeleteManyAsync(h => h.VersionId == versionId);
             await _context.Versions.DeleteOneAsync(v => v.Id == versionId);
@@ -180,7 +182,9 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Versions.Find(v => v.Id == versionId)
                 .FirstOrDefaultAsync();
             if (version == null)
-                return NotFound<PaginatedResponseDto<HistoryResponseDto>>("Version not found");
+                return ResultExtensions.NotFound<PaginatedResponseDto<HistoryResponseDto>>(
+                    "Version not found"
+                );
 
             var histories = await _context
                 .Histories.Find(h => h.VersionId == versionId)
@@ -208,7 +212,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Versions.Find(v => v.Id == versionId)
                 .FirstOrDefaultAsync();
             if (version == null)
-                return NotFound<HistoryResponseDto>("Version not found");
+                return ResultExtensions.NotFound<HistoryResponseDto>("Version not found");
 
             var history = new History
             {
@@ -248,7 +252,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
 
             var history = await _context.Histories.Find(filter).FirstOrDefaultAsync();
             if (history == null)
-                return NotFound<HistoryResponseDto>("History entry not found");
+                return ResultExtensions.NotFound<HistoryResponseDto>("History entry not found");
 
             return Result.Ok(_mapper.ToDto(history));
         }
@@ -281,7 +285,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
             );
 
             if (updated == null)
-                return NotFound<HistoryResponseDto>("History entry not found");
+                return ResultExtensions.NotFound<HistoryResponseDto>("History entry not found");
 
             return Result.Ok(_mapper.ToDto(updated));
         }
@@ -301,7 +305,7 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Histories.Find(h => h.Id == historyId)
                 .FirstOrDefaultAsync();
             if (history == null)
-                return NotFound<bool>("History entry not found");
+                return ResultExtensions.NotFound<bool>("History entry not found");
 
             await _context.Histories.DeleteManyAsync(h =>
                 h.VersionId == history.VersionId && h.CreatedAt > history.CreatedAt
@@ -330,13 +334,13 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
                 .Versions.Find(v => v.Id == versionId)
                 .FirstOrDefaultAsync();
             if (version == null)
-                return NotFound<VersionResponseDto>("Version not found");
+                return ResultExtensions.NotFound<VersionResponseDto>("Version not found");
 
             var target = await _context
                 .Histories.Find(h => h.Id == historyId)
                 .FirstOrDefaultAsync();
             if (target == null || target.VersionId != versionId)
-                return NotFound<VersionResponseDto>(
+                return ResultExtensions.NotFound<VersionResponseDto>(
                     "History entry not found or does not belong to this version"
                 );
 
@@ -384,10 +388,5 @@ public class HistoryService(MongoDbContext context, HistoryMapper mapper) : IHis
             v => v.Id == versionId,
             Builders<Models.Version>.Update.Set(v => v.CurrentHistoryId, latestHistory?.Id)
         );
-    }
-
-    private static Result<T> NotFound<T>(string message)
-    {
-        return Result.Fail<T>(new Error(message).WithMetadata("NotFound", true));
     }
 }
