@@ -1,0 +1,29 @@
+name: firestore-erd-plus-aspnet-local
+
+services:
+  aspnet-mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27018:27017"
+    environment:
+      MONGO_INITDB_DATABASE: firestore_erd_plus_aspnet_local
+    volumes:
+      - aspnet-mongo-data:/data/db
+    networks:
+      - aspnet-mongo-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  aspnet-mongo-data:
+    name: firestore-erd-plus-aspnet-local-mongo-data
+
+networks:
+  aspnet-mongo-network:
+    name: firestore-erd-plus-aspnet-local-network
+    driver: bridge
