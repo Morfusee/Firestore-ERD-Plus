@@ -55,3 +55,8 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_OWNER_LC }}/ferd-server:${{ needs.commit-hash.outputs.commit_hash }}
             ghcr.io/${{ env.REPO_OWNER_LC }}/ferd-server:latest
+
+      - name: Trigger Dokploy deployment
+        env:
+          DOKPLOY_DEPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK_URL }}
+        run: curl --fail-with-body --silent --show-error --request POST "$DOKPLOY_DEPLOY_WEBHOOK_URL"
