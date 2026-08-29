@@ -1,0 +1,14 @@
+.git
+.github
+.worktrees
+**/.env
+**/.env.*
+**/bin
+**/obj
+**/node_modules
+**/dist
+backend.Test
+documentation
+frontend
+old_backend
+server
