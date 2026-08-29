@@ -49,8 +49,8 @@ jobs:
       - name: Build and Push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./server
-          file: ./server/Dockerfile
+          context: .
+          file: ./backend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ env.REPO_OWNER_LC }}/ferd-server:${{ needs.commit-hash.outputs.commit_hash }}

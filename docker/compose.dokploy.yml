@@ -1,0 +1,15 @@
+services:
+  api:
+    image: ghcr.io/morfusee/ferd-server:latest
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      Frontend__Origin: ${FRONTEND_ORIGIN:?FRONTEND_ORIGIN is required}
+      MongoDbSettings__ConnectionString: ${MONGODB_CONNECTION_STRING:?MONGODB_CONNECTION_STRING is required}
+      MongoDbSettings__DatabaseName: ${MONGODB_DATABASE_NAME:?MONGODB_DATABASE_NAME is required}
+      FirebaseSettings__ApiKey: ${FIREBASE_API_KEY:?FIREBASE_API_KEY is required}
+      FirebaseSettings__ProjectId: ${FIREBASE_PROJECT_ID:?FIREBASE_PROJECT_ID is required}
+      FirebaseSettings__ServiceAccountJson: ${FIREBASE_SERVICE_ACCOUNT_JSON:?FIREBASE_SERVICE_ACCOUNT_JSON is required}
