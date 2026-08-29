@@ -69,15 +69,29 @@ just build
 
 `just build` verifies both the .NET solution and the frontend production build. `just old-backend` runs the legacy Express implementation for migration comparison only.
 
+## Deployment
+
+The ASP.NET API is published as `ghcr.io/morfusee/ferd-server` from `backend/Dockerfile`. Pushes to `main` publish both the short commit tag and `latest`, then call the configured Dokploy deployment webhook.
+
+Dokploy uses [`docker/compose.dokploy.yml`](docker/compose.dokploy.yml) to run the API. Configure these variables in Dokploy:
+
+- `FRONTEND_ORIGIN`
+- `MONGODB_CONNECTION_STRING`
+- `MONGODB_DATABASE_NAME`
+- `FIREBASE_API_KEY`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_SERVICE_ACCOUNT_JSON`
+
+MongoDB and the frontend are deployed separately. See [`docker/README.md`](docker/README.md) for Compose validation and service details.
+
 ## Project structure
 
 ```text
 backend/       Active ASP.NET Core API
 backend.Test/  Active xUnit/Mongo2Go test suite
 frontend/      React/Vite application
-docker/        Active local Docker infrastructure and documentation
+docker/        Local MongoDB and Dokploy Compose infrastructure
 documentation/ Product documentation
-server/        Legacy migration reference
 old_backend/   Legacy Express and Docker migration reference
 ```
 
