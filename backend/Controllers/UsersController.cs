@@ -77,7 +77,7 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
     {
         var createdUser = await _userService.CreateUserAsync(user);
 
-        return this.ToApiResponse(createdUser);
+        return this.ToApiResponse(createdUser, StatusCodes.Status201Created);
     }
 
     [HttpPut("{id}")]
@@ -96,7 +96,7 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
 
     [HttpDelete("{id}")]
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)

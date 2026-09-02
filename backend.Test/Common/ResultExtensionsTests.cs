@@ -25,6 +25,21 @@ public class ResultExtensionsTests
     }
 
     [Theory]
+    [InlineData(StatusCodes.Status200OK)]
+    [InlineData(StatusCodes.Status201Created)]
+    [InlineData(StatusCodes.Status204NoContent)]
+    public void ToApiResponse_Success_WithExplicitStatus_UsesThatStatus(int statusCode)
+    {
+        var action = new TestController().ToApiResponse(Result.Ok("value"), statusCode);
+
+        var response = Assert.IsType<ObjectResult>(action.Result);
+        var body = Assert.IsType<ApiResponse<string>>(response.Value);
+        Assert.Equal(statusCode, response.StatusCode);
+        Assert.Equal(statusCode, body.Status);
+        Assert.True(body.IsSuccess);
+    }
+
+    [Theory]
     [InlineData("NotFound", StatusCodes.Status404NotFound)]
     [InlineData("Conflict", StatusCodes.Status409Conflict)]
     [InlineData("ValidationError", StatusCodes.Status400BadRequest)]

@@ -269,7 +269,7 @@ public class AuthorizationControllerTests
         var action = await controller.CreateProject(dto);
 
         var result = Assert.IsType<ObjectResult>(action.Result);
-        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+        Assert.Equal(StatusCodes.Status201Created, result.StatusCode);
         _projectService.Verify(s => s.CreateProjectAsync(dto), Times.Once);
     }
 
@@ -443,7 +443,7 @@ public class AuthorizationControllerTests
         var action = await controller.CreateProjectVersion(projectId, dto);
 
         var result = Assert.IsType<ObjectResult>(action.Result);
-        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+        Assert.Equal(StatusCodes.Status201Created, result.StatusCode);
         _historyService.Verify(s => s.CreateProjectVersionAsync(projectId, dto), Times.Once);
     }
 
@@ -647,7 +647,7 @@ public class AuthorizationControllerTests
         var action = await controller.CreateVersionHistory(versionId, dto);
 
         var result = Assert.IsType<ObjectResult>(action.Result);
-        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+        Assert.Equal(StatusCodes.Status201Created, result.StatusCode);
         _historyService.Verify(s => s.CreateVersionHistoryAsync(versionId, dto), Times.Once);
     }
 

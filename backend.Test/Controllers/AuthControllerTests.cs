@@ -46,10 +46,9 @@ public class AuthControllerTests
 
         var action = await CreateController().Register(dto);
 
-        Assert.Equal(
-            StatusCodes.Status200OK,
-            Assert.IsType<ObjectResult>(action.Result).StatusCode
-        );
+        var response = Assert.IsType<ObjectResult>(action.Result);
+        Assert.Equal(StatusCodes.Status201Created, response.StatusCode);
+        Assert.Equal(StatusCodes.Status201Created, Assert.IsType<ApiResponse<AuthResponseDto>>(response.Value).Status);
         _authService.Verify(s => s.RegisterAsync(dto), Times.Once);
     }
 

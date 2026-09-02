@@ -48,6 +48,8 @@ public class HistoryController(
 
     [HttpPost("projects/{projectId}/versions")]
     [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<VersionResponseDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<VersionResponseDto>>> CreateProjectVersion(
         [FromRoute] string projectId,
         [FromBody] CreateVersionDto dto
@@ -68,7 +70,7 @@ public class HistoryController(
         }
 
         var result = await _historyService.CreateProjectVersionAsync(projectId, dto);
-        return this.ToApiResponse(result);
+        return this.ToApiResponse(result, StatusCodes.Status201Created);
     }
 
     [HttpGet("versions/{versionId}")]
@@ -123,6 +125,8 @@ public class HistoryController(
 
     [HttpDelete("versions/{versionId}")]
     [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteVersion([FromRoute] string versionId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -169,6 +173,8 @@ public class HistoryController(
 
     [HttpPost("versions/{versionId}/histories")]
     [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<HistoryResponseDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<HistoryResponseDto>>> CreateVersionHistory(
         [FromRoute] string versionId,
         [FromBody] CreateHistoryDto dto
@@ -189,7 +195,7 @@ public class HistoryController(
         }
 
         var result = await _historyService.CreateVersionHistoryAsync(versionId, dto);
-        return this.ToApiResponse(result);
+        return this.ToApiResponse(result, StatusCodes.Status201Created);
     }
 
     [HttpGet("histories/{historyId}")]
@@ -244,6 +250,8 @@ public class HistoryController(
 
     [HttpDelete("histories/{historyId}")]
     [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteHistory([FromRoute] string historyId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

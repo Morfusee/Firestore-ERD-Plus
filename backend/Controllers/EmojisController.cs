@@ -36,6 +36,7 @@ public class EmojisController(IEmojiService emojiService, ILogger<EmojisControll
     }
 
     [HttpDelete]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteAllEmojis()
     {
         var result = await _emojiService.DeleteAllEmojisAsync();

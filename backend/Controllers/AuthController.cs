@@ -24,7 +24,7 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     {
         var result = await _authService.RegisterAsync(registerDto);
 
-        return this.ToApiResponse(result);
+        return this.ToApiResponse(result, StatusCodes.Status201Created);
     }
 
     [HttpPost("login")]

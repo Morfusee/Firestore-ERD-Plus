@@ -13,7 +13,8 @@ public static class ResultExtensions
 
     public static ActionResult<ApiResponse<T>> ToApiResponse<T>(
         this ControllerBase controller,
-        Result<T> result
+        Result<T> result,
+        int successStatusCode = StatusCodes.Status200OK
     )
     {
         if (result.IsFailed)
@@ -36,11 +37,11 @@ public static class ResultExtensions
         }
 
         return controller.StatusCode(
-            StatusCodes.Status200OK,
+            successStatusCode,
             new ApiResponse<T>(
                 Data: result.Value!,
                 Message: "Operation successful",
-                Status: StatusCodes.Status200OK,
+                Status: successStatusCode,
                 IsSuccess: true
             )
         );

@@ -43,7 +43,7 @@ public class SettingsController(
     {
         var settings = await _settingsService.CreateSettingsAsync(createSettingsDto);
 
-        return this.ToApiResponse(settings);
+        return this.ToApiResponse(settings, StatusCodes.Status201Created);
     }
 
     [HttpPut]

@@ -108,7 +108,7 @@ public class ProjectController(
 
         var project = await _projectService.CreateProjectAsync(createProjectDto);
 
-        return this.ToApiResponse(project);
+        return this.ToApiResponse(project, StatusCodes.Status201Created);
     }
 
     [HttpPatch]
