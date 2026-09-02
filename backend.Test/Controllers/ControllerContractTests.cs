@@ -6,6 +6,7 @@ using backend.DTOs.Common;
 using backend.DTOs.Project;
 using backend.DTOs.Settings;
 using backend.DTOs.User;
+using backend.Models;
 using backend.Services.ProjectAuthorizationService;
 using backend.Services.ProjectService;
 using backend.Services.SettingsService;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Moq;
 
 namespace backend.Test.Controllers;
@@ -378,11 +380,12 @@ public class ControllerContractTests
     public async Task ProjectController_MissingResourceOperations_ReturnNotFound()
     {
         var service = new Mock<IProjectService>();
+        var accessFilter = Builders<Project>.Filter.Empty;
         service
             .Setup(s => s.GetProjectByIdAsync(It.IsAny<string>()))
             .ReturnsAsync(NotFound<ProjectResponseDto>("Project not found"));
         service
-            .Setup(s => s.GetProjectsByEmailAsync(It.IsAny<EmailDto>(), It.IsAny<PaginationDto>()))
+            .Setup(s => s.GetAllProjectsAsync(It.IsAny<PaginationDto>(), accessFilter))
             .ReturnsAsync(NotFound<PaginatedResponseDto<ProjectResponseDto>>("User not found"));
         service
             .Setup(s => s.CreateProjectAsync(It.IsAny<CreateProjectDto>()))
@@ -409,6 +412,7 @@ public class ControllerContractTests
         authService
             .Setup(a => a.MatchesUserEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(true);
+        authService.Setup(a => a.GetAccessibleProjectsFilter("user-123")).Returns(accessFilter);
         var controller = new ProjectController(service.Object, authService.Object)
         {
             ControllerContext = new ControllerContext

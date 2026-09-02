@@ -412,39 +412,6 @@ public class ProjectServiceTests : TestDBContext
     }
 
     [Fact]
-    public async Task GetProjectsByEmailAsync_WithExistingUser_ReturnsUserProjects()
-    {
-        // Arrange
-        var emailDto = new EmailDto { Email = MockUser.Email };
-        var pagination = new PaginationDto { Page = 1, Limit = 10 };
-
-        // Act
-        var result = await _projectService.GetProjectsByEmailAsync(emailDto, pagination);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.TotalCount >= 2);
-        Assert.True(result.Value.Items.Count() >= 2);
-        Assert.NotNull(result.Value);
-    }
-
-    [Fact]
-    public async Task GetProjectsByEmailAsync_WithNoProjects()
-    {
-        // Arrange
-        var emailDto = new EmailDto { Email = "noprojects@example.com" };
-        var pagination = new PaginationDto { Page = 1, Limit = 10 };
-
-        // Act
-        var result = await _projectService.GetProjectsByEmailAsync(emailDto, pagination);
-
-        // Assert
-        Assert.True(result.IsFailed);
-        Assert.Contains("User not found", result.Errors.Select(e => e.Message));
-        Assert.Contains(result.Errors, e => e.Metadata.ContainsKey("NotFound"));
-    }
-
-    [Fact]
     public async Task DeleteProjectAsync_WithNonExistentProject_ReturnsFailure()
     {
         var result = await _projectService.DeleteProjectAsync("507f1f77bcf86cd799439012");

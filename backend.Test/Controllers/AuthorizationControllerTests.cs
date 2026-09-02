@@ -288,16 +288,25 @@ public class AuthorizationControllerTests
         var result = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
         _projectService.Verify(
-            s => s.GetProjectsByEmailAsync(It.IsAny<EmailDto>(), It.IsAny<PaginationDto>()),
+            s =>
+                s.GetAllProjectsAsync(
+                    It.IsAny<PaginationDto>(),
+                    It.IsAny<FilterDefinition<Project>>()
+                ),
+            Times.Never
+        );
+        _authorizationService.Verify(
+            a => a.GetAccessibleProjectsFilter(It.IsAny<string>()),
             Times.Never
         );
     }
 
     [Fact]
-    public async Task GetProjectsByEmail_WhenEmailMatchesUser_CallsServiceAndReturnsResult()
+    public async Task GetProjectsByEmail_WhenEmailMatchesUser_UsesCallerAccessFilter()
     {
         var emailDto = new EmailDto { Email = "user@example.com" };
         var pagination = new PaginationDto();
+        var filter = Builders<Project>.Filter.Empty;
         var paginatedResponse = new PaginatedResponseDto<ProjectResponseDto>
         {
             Items = [],
@@ -308,8 +317,9 @@ public class AuthorizationControllerTests
         _authorizationService
             .Setup(a => a.MatchesUserEmailAsync(UserId, emailDto.Email))
             .ReturnsAsync(true);
+        _authorizationService.Setup(a => a.GetAccessibleProjectsFilter(UserId)).Returns(filter);
         _projectService
-            .Setup(s => s.GetProjectsByEmailAsync(emailDto, pagination))
+            .Setup(s => s.GetAllProjectsAsync(pagination, filter))
             .ReturnsAsync(Result.Ok(paginatedResponse));
 
         var controller = CreateController();
@@ -317,7 +327,8 @@ public class AuthorizationControllerTests
 
         var result = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
-        _projectService.Verify(s => s.GetProjectsByEmailAsync(emailDto, pagination), Times.Once);
+        _authorizationService.Verify(a => a.GetAccessibleProjectsFilter(UserId), Times.Once);
+        _projectService.Verify(s => s.GetAllProjectsAsync(pagination, filter), Times.Once);
     }
 
     [Fact]
