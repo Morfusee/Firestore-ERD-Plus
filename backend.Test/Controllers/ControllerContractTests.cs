@@ -1,10 +1,12 @@
 using System.Reflection;
+using System.Security.Claims;
 using backend.Common.Models;
 using backend.Controllers;
 using backend.DTOs.Common;
 using backend.DTOs.Project;
 using backend.DTOs.Settings;
 using backend.DTOs.User;
+using backend.Services.ProjectAuthorizationService;
 using backend.Services.ProjectService;
 using backend.Services.SettingsService;
 using backend.Services.UserService;
@@ -127,7 +129,7 @@ public class ControllerContractTests
                 "GetAllProjects",
                 typeof(HttpGetAttribute),
                 null,
-                false,
+                true,
                 [typeof(FromQueryAttribute)]
             },
             {
@@ -135,7 +137,7 @@ public class ControllerContractTests
                 "GetProjectById",
                 typeof(HttpGetAttribute),
                 "{id}",
-                false,
+                true,
                 [typeof(FromRouteAttribute)]
             },
             {
@@ -143,7 +145,7 @@ public class ControllerContractTests
                 "GetProjectsByEmail",
                 typeof(HttpGetAttribute),
                 "by-email",
-                false,
+                true,
                 [typeof(FromQueryAttribute), typeof(FromQueryAttribute)]
             },
             {
@@ -151,7 +153,7 @@ public class ControllerContractTests
                 "CreateProject",
                 typeof(HttpPostAttribute),
                 null,
-                false,
+                true,
                 [typeof(FromBodyAttribute)]
             },
             {
@@ -159,7 +161,7 @@ public class ControllerContractTests
                 "SaveProject",
                 typeof(HttpPatchAttribute),
                 null,
-                false,
+                true,
                 [typeof(FromBodyAttribute)]
             },
             {
@@ -167,7 +169,7 @@ public class ControllerContractTests
                 "UpdateProject",
                 typeof(HttpPatchAttribute),
                 "details",
-                false,
+                true,
                 [typeof(FromBodyAttribute)]
             },
             {
@@ -175,7 +177,7 @@ public class ControllerContractTests
                 "DeleteProject",
                 typeof(HttpDeleteAttribute),
                 "{id}",
-                false,
+                true,
                 [typeof(FromRouteAttribute)]
             },
             {
@@ -402,7 +404,25 @@ public class ControllerContractTests
         service
             .Setup(s => s.DeleteProjectAsync(It.IsAny<string>()))
             .ReturnsAsync(NotFound<bool>("Project not found"));
-        var controller = new ProjectController(service.Object);
+        var authService = new Mock<IProjectAuthorizationService>();
+        authService
+            .Setup(a => a.CanAccessProjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ProjectPermission>()))
+            .ReturnsAsync(true);
+        authService
+            .Setup(a => a.MatchesUserEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(true);
+        var controller = new ProjectController(service.Object, authService.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(
+                        new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "user-123")], "TestAuth")
+                    )
+                }
+            }
+        };
 
         AssertNotFound(await controller.GetProjectById("missing"));
         AssertNotFound(
