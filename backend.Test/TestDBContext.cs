@@ -62,7 +62,7 @@ public class TestDBContext : IDisposable
             {
                 Emoji = "😀",
                 Hexcode = "1F600",
-                Group = "Smileys & Emotion",
+                Group = "smileys-emotion",
                 Subgroup = "face-smiling",
                 Annotation = "grinning face",
                 Tags = ["happy", "smile"],
@@ -77,7 +77,7 @@ public class TestDBContext : IDisposable
             {
                 Emoji = "😁",
                 Hexcode = "1F601",
-                Group = "Smileys & Emotion",
+                Group = "smileys-emotion",
                 Subgroup = "face-smiling",
                 Annotation = "beaming face with smiling eyes",
                 Tags = ["happy", "smile", "eyes"],
@@ -92,7 +92,7 @@ public class TestDBContext : IDisposable
             {
                 Emoji = "🚀",
                 Hexcode = "1F680",
-                Group = "Travel & Places",
+                Group = "travel-places",
                 Subgroup = "transport-air",
                 Annotation = "rocket",
                 Tags = ["launch", "space"],

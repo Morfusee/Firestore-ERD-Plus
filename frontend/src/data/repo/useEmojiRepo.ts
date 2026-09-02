@@ -54,10 +54,10 @@ const useEmojiRepo = () => {
       props.setLoading(true);
 
       // Fetch data from the server
-      const getEmojiGroupResponse = await emojiGroupApi(group);
+      const emojis = await emojiGroupApi(group);
 
       // Set the emoji data to return
-      props.setEmojiData(getEmojiGroupResponse.data.emojisByGroup);
+      props.setEmojiData(emojis);
 
       // Reset the error state
       props.setError(null);

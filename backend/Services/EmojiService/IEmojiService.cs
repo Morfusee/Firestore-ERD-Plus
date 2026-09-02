@@ -7,7 +7,8 @@ namespace backend.Services.EmojiService;
 public interface IEmojiService
 {
     Task<Result<PaginatedResponseDto<EmojiResponseDto>>> GetAllEmojisAsync(
-        PaginationDto pagination
+        PaginationDto pagination,
+        string? group = null
     );
     Task<Result<EmojiResponseDto?>> GetEmojiByHexcodeAsync(string hexcode);
     Task<Result<bool>> DeleteAllEmojisAsync();

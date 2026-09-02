@@ -92,5 +92,6 @@ export interface FetchedChangelog {
 
 // Emojis
 export interface FetchedEmojiGroup {
-  emojisByGroup: EmojiData[];
+  items: EmojiData[];
+  hasNextPage?: boolean;
 }

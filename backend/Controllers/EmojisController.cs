@@ -18,9 +18,9 @@ public class EmojisController(IEmojiService emojiService, ILogger<EmojisControll
     [HttpGet]
     public async Task<
         ActionResult<ApiResponse<PaginatedResponseDto<EmojiResponseDto>>>
-    > GetAllEmojis([FromQuery] PaginationDto pagination)
+    > GetAllEmojis([FromQuery] PaginationDto pagination, [FromQuery] string? group)
     {
-        var emojis = await _emojiService.GetAllEmojisAsync(pagination);
+        var emojis = await _emojiService.GetAllEmojisAsync(pagination, group);
 
         return this.ToApiResponse(emojis);
     }

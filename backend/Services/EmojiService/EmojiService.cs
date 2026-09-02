@@ -12,17 +12,45 @@ namespace backend.Services.EmojiService;
 [ScopedService]
 public class EmojiService(MongoDbContext context, EmojiMapper mapper) : IEmojiService
 {
+    private static readonly HashSet<string> KnownGroups =
+    [
+        "smileys-emotion",
+        "people-body",
+        "animals-nature",
+        "food-drink",
+        "travel-places",
+        "activities",
+        "objects",
+        "symbols",
+        "component",
+    ];
+
     private readonly MongoDbContext _context = context;
     private readonly EmojiMapper _mapper = mapper;
 
     public async Task<Result<PaginatedResponseDto<EmojiResponseDto>>> GetAllEmojisAsync(
-        PaginationDto pagination
+        PaginationDto pagination,
+        string? group = null
     )
     {
         try
         {
+            if (!string.IsNullOrWhiteSpace(group) && !KnownGroups.Contains(group))
+            {
+                return Result.Fail<PaginatedResponseDto<EmojiResponseDto>>(
+                    new Error($"Unknown emoji group '{group}'").WithMetadata(
+                        "ValidationError",
+                        true
+                    )
+                );
+            }
+
+            var filter = string.IsNullOrWhiteSpace(group)
+                ? FilterDefinition<Emoji>.Empty
+                : Builders<Emoji>.Filter.Eq(e => e.Group, group);
+
             var emojis = await _context
-                .Emojis.Find(_ => true)
+                .Emojis.Find(filter)
                 .ToPaginatedListAsync(pagination, emoji => _mapper.ToDto(emoji));
 
             return Result.Ok(emojis);

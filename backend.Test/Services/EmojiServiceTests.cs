@@ -46,6 +46,72 @@ public class EmojiServiceTests : TestDBContext
     }
 
     [Fact]
+    public async Task GetAllEmojisAsync_WithGroup_ShouldReturnOnlyMatchingEmojis()
+    {
+        // Arrange
+        var pagination = new PaginationDto { Page = 1, Limit = 50 };
+
+        // Act
+        var result = await _emojiService.GetAllEmojisAsync(pagination, "smileys-emotion");
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value.TotalCount);
+        Assert.All(result.Value.Items, e => Assert.Equal("smileys-emotion", e.Group));
+    }
+
+    [Fact]
+    public async Task GetAllEmojisAsync_WithUnknownGroup_ShouldReturnValidationFailure()
+    {
+        // Act
+        var result = await _emojiService.GetAllEmojisAsync(new PaginationDto(), "space-travel");
+
+        // Assert
+        Assert.True(result.IsFailed);
+        Assert.Contains(
+            result.Errors,
+            e => e.Metadata != null && e.Metadata.ContainsKey("ValidationError")
+        );
+    }
+
+    [Fact]
+    public async Task GetAllEmojisAsync_WithKnownGroupAndNoMatchingData_ShouldReturnEmptySuccess()
+    {
+        // Act
+        var result = await _emojiService.GetAllEmojisAsync(new PaginationDto(), "component");
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Empty(result.Value.Items);
+    }
+
+    [Fact]
+    public async Task GetAllEmojisAsync_WithGroupAndPaginationBoundaries_ShouldReturnCorrectPages()
+    {
+        // Act
+        var firstPage = await _emojiService.GetAllEmojisAsync(
+            new PaginationDto { Page = 1, Limit = 1 },
+            "smileys-emotion"
+        );
+        var secondPage = await _emojiService.GetAllEmojisAsync(
+            new PaginationDto { Page = 2, Limit = 1 },
+            "smileys-emotion"
+        );
+
+        // Assert
+        Assert.True(firstPage.IsSuccess);
+        Assert.True(secondPage.IsSuccess);
+        Assert.Single(firstPage.Value.Items);
+        Assert.True(firstPage.Value.HasNextPage);
+        Assert.Single(secondPage.Value.Items);
+        Assert.False(secondPage.Value.HasNextPage);
+        Assert.NotEqual(
+            Assert.Single(firstPage.Value.Items).Hexcode,
+            Assert.Single(secondPage.Value.Items).Hexcode
+        );
+    }
+
+    [Fact]
     public async Task GetEmojiByHexcodeAsync_WithValidHexcode_ShouldReturnEmoji()
     {
         // Arrange

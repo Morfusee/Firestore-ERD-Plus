@@ -188,7 +188,7 @@ public class ControllerContractTests
                 typeof(HttpGetAttribute),
                 null,
                 false,
-                [typeof(FromQueryAttribute)]
+                [typeof(FromQueryAttribute), typeof(FromQueryAttribute)]
             },
             {
                 typeof(EmojisController),
