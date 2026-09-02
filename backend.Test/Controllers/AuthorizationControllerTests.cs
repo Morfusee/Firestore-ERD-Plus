@@ -33,7 +33,10 @@ public class AuthorizationControllerTests
                 HttpContext = new DefaultHttpContext
                 {
                     User = new ClaimsPrincipal(
-                        new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, userId)], "TestAuth")
+                        new ClaimsIdentity(
+                            [new Claim(ClaimTypes.NameIdentifier, userId)],
+                            "TestAuth"
+                        )
                     ),
                 },
             },
@@ -49,7 +52,10 @@ public class AuthorizationControllerTests
                 HttpContext = new DefaultHttpContext
                 {
                     User = new ClaimsPrincipal(
-                        new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, userId)], "TestAuth")
+                        new ClaimsIdentity(
+                            [new Claim(ClaimTypes.NameIdentifier, userId)],
+                            "TestAuth"
+                        )
                     ),
                 },
             },
@@ -76,7 +82,12 @@ public class AuthorizationControllerTests
     public async Task GetProjectById_WhenAccessAllowed_CallsServiceAndReturnsResult()
     {
         const string projectId = "507f1f77bcf86cd799439012";
-        var projectDto = new ProjectResponseDto { Id = projectId, Name = "Test Project", Icon = "1F600" };
+        var projectDto = new ProjectResponseDto
+        {
+            Id = projectId,
+            Name = "Test Project",
+            Icon = "1F600",
+        };
         _authorizationService
             .Setup(a => a.CanAccessProjectAsync(projectId, UserId, ProjectPermission.Read))
             .ReturnsAsync(true);
@@ -114,13 +125,16 @@ public class AuthorizationControllerTests
     {
         const string projectId = "507f1f77bcf86cd799439012";
         var dto = new SaveProjectDto { Id = projectId, Data = "{}" };
-        var projectDto = new ProjectResponseDto { Id = projectId, Name = "Test Project", Icon = "1F600" };
+        var projectDto = new ProjectResponseDto
+        {
+            Id = projectId,
+            Name = "Test Project",
+            Icon = "1F600",
+        };
         _authorizationService
             .Setup(a => a.CanAccessProjectAsync(projectId, UserId, ProjectPermission.Write))
             .ReturnsAsync(true);
-        _projectService
-            .Setup(s => s.SaveProjectAsync(dto))
-            .ReturnsAsync(Result.Ok(projectDto));
+        _projectService.Setup(s => s.SaveProjectAsync(dto)).ReturnsAsync(Result.Ok(projectDto));
 
         var controller = CreateController();
         var action = await controller.SaveProject(dto);
@@ -144,7 +158,10 @@ public class AuthorizationControllerTests
 
         var result = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
-        _projectService.Verify(s => s.UpdateProjectAsync(It.IsAny<UpdateProjectDto>()), Times.Never);
+        _projectService.Verify(
+            s => s.UpdateProjectAsync(It.IsAny<UpdateProjectDto>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -152,13 +169,16 @@ public class AuthorizationControllerTests
     {
         const string projectId = "507f1f77bcf86cd799439012";
         var dto = new UpdateProjectDto { Id = projectId, Name = "Updated" };
-        var projectDto = new ProjectResponseDto { Id = projectId, Name = "Updated", Icon = "1F600" };
+        var projectDto = new ProjectResponseDto
+        {
+            Id = projectId,
+            Name = "Updated",
+            Icon = "1F600",
+        };
         _authorizationService
             .Setup(a => a.CanAccessProjectAsync(projectId, UserId, ProjectPermission.Admin))
             .ReturnsAsync(true);
-        _projectService
-            .Setup(s => s.UpdateProjectAsync(dto))
-            .ReturnsAsync(Result.Ok(projectDto));
+        _projectService.Setup(s => s.UpdateProjectAsync(dto)).ReturnsAsync(Result.Ok(projectDto));
 
         var controller = CreateController();
         var action = await controller.UpdateProject(dto);
@@ -191,9 +211,7 @@ public class AuthorizationControllerTests
         _authorizationService
             .Setup(a => a.CanAccessProjectAsync(projectId, UserId, ProjectPermission.Admin))
             .ReturnsAsync(true);
-        _projectService
-            .Setup(s => s.DeleteProjectAsync(projectId))
-            .ReturnsAsync(Result.Ok(true));
+        _projectService.Setup(s => s.DeleteProjectAsync(projectId)).ReturnsAsync(Result.Ok(true));
 
         var controller = CreateController();
         var action = await controller.DeleteProject(projectId);
@@ -221,7 +239,10 @@ public class AuthorizationControllerTests
 
         var result = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
-        _projectService.Verify(s => s.CreateProjectAsync(It.IsAny<CreateProjectDto>()), Times.Never);
+        _projectService.Verify(
+            s => s.CreateProjectAsync(It.IsAny<CreateProjectDto>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -233,13 +254,16 @@ public class AuthorizationControllerTests
             Name = "New Project",
             Icon = "1F600",
         };
-        var projectDto = new ProjectResponseDto { Id = "507f1f77bcf86cd799439012", Name = "New Project", Icon = "1F600" };
+        var projectDto = new ProjectResponseDto
+        {
+            Id = "507f1f77bcf86cd799439012",
+            Name = "New Project",
+            Icon = "1F600",
+        };
         _authorizationService
             .Setup(a => a.MatchesUserEmailAsync(UserId, dto.Email))
             .ReturnsAsync(true);
-        _projectService
-            .Setup(s => s.CreateProjectAsync(dto))
-            .ReturnsAsync(Result.Ok(projectDto));
+        _projectService.Setup(s => s.CreateProjectAsync(dto)).ReturnsAsync(Result.Ok(projectDto));
 
         var controller = CreateController();
         var action = await controller.CreateProject(dto);
@@ -263,7 +287,10 @@ public class AuthorizationControllerTests
 
         var result = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
-        _projectService.Verify(s => s.GetProjectsByEmailAsync(It.IsAny<EmailDto>(), It.IsAny<PaginationDto>()), Times.Never);
+        _projectService.Verify(
+            s => s.GetProjectsByEmailAsync(It.IsAny<EmailDto>(), It.IsAny<PaginationDto>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -305,9 +332,7 @@ public class AuthorizationControllerTests
             Page = 1,
             Limit = 10,
         };
-        _authorizationService
-            .Setup(a => a.GetAccessibleProjectsFilter(UserId))
-            .Returns(filter);
+        _authorizationService.Setup(a => a.GetAccessibleProjectsFilter(UserId)).Returns(filter);
         _projectService
             .Setup(s => s.GetAllProjectsAsync(pagination, filter))
             .ReturnsAsync(Result.Ok(paginatedResponse));
@@ -391,7 +416,11 @@ public class AuthorizationControllerTests
     {
         const string projectId = "507f1f77bcf86cd799439012";
         var dto = new CreateVersionDto { Name = "v1" };
-        var versionDto = new VersionResponseDto { Id = "507f1f77bcf86cd799439013", ProjectId = projectId };
+        var versionDto = new VersionResponseDto
+        {
+            Id = "507f1f77bcf86cd799439013",
+            ProjectId = projectId,
+        };
         _authorizationService
             .Setup(a => a.CanAccessProjectAsync(projectId, UserId, ProjectPermission.Write))
             .ReturnsAsync(true);
@@ -510,9 +539,7 @@ public class AuthorizationControllerTests
         _authorizationService
             .Setup(a => a.CanAccessVersionAsync(versionId, UserId, ProjectPermission.Admin))
             .ReturnsAsync(true);
-        _historyService
-            .Setup(s => s.DeleteVersionAsync(versionId))
-            .ReturnsAsync(Result.Ok(true));
+        _historyService.Setup(s => s.DeleteVersionAsync(versionId)).ReturnsAsync(Result.Ok(true));
 
         var controller = CreateHistoryController();
         var action = await controller.DeleteVersion(versionId);
@@ -593,7 +620,11 @@ public class AuthorizationControllerTests
     {
         const string versionId = "507f1f77bcf86cd799439013";
         var dto = new CreateHistoryDto { Data = "{}" };
-        var historyDto = new HistoryResponseDto { Id = "507f1f77bcf86cd799439014", VersionId = versionId };
+        var historyDto = new HistoryResponseDto
+        {
+            Id = "507f1f77bcf86cd799439014",
+            VersionId = versionId,
+        };
         _authorizationService
             .Setup(a => a.CanAccessVersionAsync(versionId, UserId, ProjectPermission.Write))
             .ReturnsAsync(true);
@@ -712,9 +743,7 @@ public class AuthorizationControllerTests
         _authorizationService
             .Setup(a => a.CanAccessHistoryAsync(historyId, UserId, ProjectPermission.Admin))
             .ReturnsAsync(true);
-        _historyService
-            .Setup(s => s.DeleteHistoryAsync(historyId))
-            .ReturnsAsync(Result.Ok(true));
+        _historyService.Setup(s => s.DeleteHistoryAsync(historyId)).ReturnsAsync(Result.Ok(true));
 
         var controller = CreateHistoryController();
         var action = await controller.DeleteHistory(historyId);

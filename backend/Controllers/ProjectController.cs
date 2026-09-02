@@ -49,7 +49,9 @@ public class ProjectController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         if (!await _authorizationService.CanAccessProjectAsync(id, userId, ProjectPermission.Read))
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<ProjectResponseDto>("Project not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<ProjectResponseDto>("Project not found")
+            );
         }
 
         var project = await _projectService.GetProjectByIdAsync(id);
@@ -74,7 +76,11 @@ public class ProjectController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         if (!await _authorizationService.MatchesUserEmailAsync(userId, email.Email))
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<PaginatedResponseDto<ProjectResponseDto>>("Project not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<PaginatedResponseDto<ProjectResponseDto>>(
+                    "Project not found"
+                )
+            );
         }
 
         var project = await _projectService.GetProjectsByEmailAsync(email, pagination);
@@ -94,7 +100,9 @@ public class ProjectController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         if (!await _authorizationService.MatchesUserEmailAsync(userId, createProjectDto.Email))
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<ProjectResponseDto>("Project not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<ProjectResponseDto>("Project not found")
+            );
         }
 
         var project = await _projectService.CreateProjectAsync(createProjectDto);
@@ -112,9 +120,17 @@ public class ProjectController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessProjectAsync(saveProjectDto.Id, userId, ProjectPermission.Write))
+        if (
+            !await _authorizationService.CanAccessProjectAsync(
+                saveProjectDto.Id,
+                userId,
+                ProjectPermission.Write
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<ProjectResponseDto>("Project not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<ProjectResponseDto>("Project not found")
+            );
         }
 
         var project = await _projectService.SaveProjectAsync(saveProjectDto);
@@ -132,9 +148,17 @@ public class ProjectController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessProjectAsync(updateProjectDto.Id, userId, ProjectPermission.Admin))
+        if (
+            !await _authorizationService.CanAccessProjectAsync(
+                updateProjectDto.Id,
+                userId,
+                ProjectPermission.Admin
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<ProjectResponseDto>("Project not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<ProjectResponseDto>("Project not found")
+            );
         }
 
         var project = await _projectService.UpdateProjectAsync(updateProjectDto);

@@ -27,10 +27,18 @@ public class HistoryController(
     > GetProjectVersions([FromRoute] string projectId, [FromQuery] PaginationDto pagination)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessProjectAsync(projectId, userId, ProjectPermission.Read))
+        if (
+            !await _authorizationService.CanAccessProjectAsync(
+                projectId,
+                userId,
+                ProjectPermission.Read
+            )
+        )
         {
             return this.ToApiResponse(
-                ResultExtensions.NotFound<PaginatedResponseDto<VersionResponseDto>>("Resource not found")
+                ResultExtensions.NotFound<PaginatedResponseDto<VersionResponseDto>>(
+                    "Resource not found"
+                )
             );
         }
 
@@ -46,9 +54,17 @@ public class HistoryController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessProjectAsync(projectId, userId, ProjectPermission.Write))
+        if (
+            !await _authorizationService.CanAccessProjectAsync(
+                projectId,
+                userId,
+                ProjectPermission.Write
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<VersionResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<VersionResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.CreateProjectVersionAsync(projectId, dto);
@@ -63,9 +79,17 @@ public class HistoryController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessVersionAsync(versionId, userId, ProjectPermission.Read))
+        if (
+            !await _authorizationService.CanAccessVersionAsync(
+                versionId,
+                userId,
+                ProjectPermission.Read
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<VersionResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<VersionResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.GetVersionByIdAsync(versionId, projectId);
@@ -80,9 +104,17 @@ public class HistoryController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessVersionAsync(versionId, userId, ProjectPermission.Write))
+        if (
+            !await _authorizationService.CanAccessVersionAsync(
+                versionId,
+                userId,
+                ProjectPermission.Write
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<VersionResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<VersionResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.UpdateVersionAsync(versionId, dto);
@@ -94,7 +126,13 @@ public class HistoryController(
     public async Task<ActionResult<ApiResponse<bool>>> DeleteVersion([FromRoute] string versionId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessVersionAsync(versionId, userId, ProjectPermission.Admin))
+        if (
+            !await _authorizationService.CanAccessVersionAsync(
+                versionId,
+                userId,
+                ProjectPermission.Admin
+            )
+        )
         {
             return this.ToApiResponse(ResultExtensions.NotFound<bool>("Resource not found"));
         }
@@ -110,10 +148,18 @@ public class HistoryController(
     > GetVersionHistories([FromRoute] string versionId, [FromQuery] PaginationDto pagination)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessVersionAsync(versionId, userId, ProjectPermission.Read))
+        if (
+            !await _authorizationService.CanAccessVersionAsync(
+                versionId,
+                userId,
+                ProjectPermission.Read
+            )
+        )
         {
             return this.ToApiResponse(
-                ResultExtensions.NotFound<PaginatedResponseDto<HistoryResponseDto>>("Resource not found")
+                ResultExtensions.NotFound<PaginatedResponseDto<HistoryResponseDto>>(
+                    "Resource not found"
+                )
             );
         }
 
@@ -129,9 +175,17 @@ public class HistoryController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessVersionAsync(versionId, userId, ProjectPermission.Write))
+        if (
+            !await _authorizationService.CanAccessVersionAsync(
+                versionId,
+                userId,
+                ProjectPermission.Write
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<HistoryResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<HistoryResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.CreateVersionHistoryAsync(versionId, dto);
@@ -146,9 +200,17 @@ public class HistoryController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessHistoryAsync(historyId, userId, ProjectPermission.Read))
+        if (
+            !await _authorizationService.CanAccessHistoryAsync(
+                historyId,
+                userId,
+                ProjectPermission.Read
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<HistoryResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<HistoryResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.GetHistoryByIdAsync(historyId, versionId);
@@ -163,9 +225,17 @@ public class HistoryController(
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessHistoryAsync(historyId, userId, ProjectPermission.Write))
+        if (
+            !await _authorizationService.CanAccessHistoryAsync(
+                historyId,
+                userId,
+                ProjectPermission.Write
+            )
+        )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<HistoryResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<HistoryResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.UpdateHistoryAsync(historyId, dto);
@@ -177,7 +247,13 @@ public class HistoryController(
     public async Task<ActionResult<ApiResponse<bool>>> DeleteHistory([FromRoute] string historyId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (!await _authorizationService.CanAccessHistoryAsync(historyId, userId, ProjectPermission.Admin))
+        if (
+            !await _authorizationService.CanAccessHistoryAsync(
+                historyId,
+                userId,
+                ProjectPermission.Admin
+            )
+        )
         {
             return this.ToApiResponse(ResultExtensions.NotFound<bool>("Resource not found"));
         }
@@ -195,11 +271,21 @@ public class HistoryController(
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         if (
-            !await _authorizationService.CanAccessVersionAsync(versionId, userId, ProjectPermission.Admin)
-            || !await _authorizationService.CanAccessHistoryAsync(historyId, userId, ProjectPermission.Admin)
+            !await _authorizationService.CanAccessVersionAsync(
+                versionId,
+                userId,
+                ProjectPermission.Admin
+            )
+            || !await _authorizationService.CanAccessHistoryAsync(
+                historyId,
+                userId,
+                ProjectPermission.Admin
+            )
         )
         {
-            return this.ToApiResponse(ResultExtensions.NotFound<VersionResponseDto>("Resource not found"));
+            return this.ToApiResponse(
+                ResultExtensions.NotFound<VersionResponseDto>("Resource not found")
+            );
         }
 
         var result = await _historyService.RollbackVersionToHistoryAsync(versionId, historyId);

@@ -398,7 +398,13 @@ public class ControllerContractTests
             .ReturnsAsync(NotFound<bool>("Project not found"));
         var authService = new Mock<IProjectAuthorizationService>();
         authService
-            .Setup(a => a.CanAccessProjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ProjectPermission>()))
+            .Setup(a =>
+                a.CanAccessProjectAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ProjectPermission>()
+                )
+            )
             .ReturnsAsync(true);
         authService
             .Setup(a => a.MatchesUserEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -410,10 +416,13 @@ public class ControllerContractTests
                 HttpContext = new DefaultHttpContext
                 {
                     User = new ClaimsPrincipal(
-                        new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "user-123")], "TestAuth")
-                    )
-                }
-            }
+                        new ClaimsIdentity(
+                            [new Claim(ClaimTypes.NameIdentifier, "user-123")],
+                            "TestAuth"
+                        )
+                    ),
+                },
+            },
         };
 
         AssertNotFound(await controller.GetProjectById("missing"));

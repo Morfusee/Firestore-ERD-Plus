@@ -392,16 +392,16 @@ public class ProjectServiceTests : TestDBContext
         Assert.NotNull(page2Result.Value);
         Assert.Single(page2Result.Value.Items);
 
-        var allFetchedIds = result.Value.Items
-            .Concat(page2Result.Value.Items)
+        var allFetchedIds = result
+            .Value.Items.Concat(page2Result.Value.Items)
             .Select(p => p.Id)
             .ToHashSet();
 
         Assert.Contains(linkProject.Id, allFetchedIds);
         Assert.DoesNotContain(restrictedProject.Id, allFetchedIds);
 
-        var allFetchedNames = result.Value.Items
-            .Concat(page2Result.Value.Items)
+        var allFetchedNames = result
+            .Value.Items.Concat(page2Result.Value.Items)
             .Select(p => p.Name)
             .ToHashSet();
 

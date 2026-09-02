@@ -29,11 +29,11 @@ public class ProjectService(
         try
         {
             var filter = accessFilter ?? Builders<Project>.Filter.Empty;
-            var project = await _context
+            var projects = await _context
                 .Projects.Find(filter)
                 .ToPaginatedListAsync(pagination, ToResponseAsync);
 
-            return Result.Ok(project);
+            return Result.Ok(projects);
         }
         catch (Exception ex)
         {

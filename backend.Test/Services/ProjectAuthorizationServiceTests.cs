@@ -25,7 +25,11 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Viewer Project",
             Icon = "1F600",
             Members = [new Member { UserId = userId, Role = MemberRole.Viewer }],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
         };
 
         var editorProject = new Project
@@ -33,7 +37,11 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Editor Project",
             Icon = "1F600",
             Members = [new Member { UserId = userId, Role = MemberRole.Editor }],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
         };
 
         var adminProject = new Project
@@ -41,7 +49,11 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Admin Project",
             Icon = "1F600",
             Members = [new Member { UserId = userId, Role = MemberRole.Admin }],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
         };
 
         var ownerProject = new Project
@@ -49,7 +61,11 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Owner Project",
             Icon = "1F600",
             Members = [new Member { UserId = userId, Role = MemberRole.Owner }],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
         };
 
         var linkProject = new Project
@@ -57,7 +73,11 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Link Project",
             Icon = "1F600",
             Members = [],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Link, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Link,
+                Role = MemberRole.Viewer,
+            },
         };
 
         var restrictedProject = new Project
@@ -65,7 +85,11 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Restricted Project",
             Icon = "1F600",
             Members = [],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
         };
 
         await _mongoDbContext.Projects.InsertManyAsync([
@@ -85,19 +109,45 @@ public class ProjectAuthorizationServiceTests : TestDBContext
         var restrictedProjectId = restrictedProject.Id!;
 
         // Exact assertions from Step 1 brief
-        Assert.True(await _service.CanAccessProjectAsync(projectId, userId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessProjectAsync(projectId, userId, ProjectPermission.Write));
-        Assert.True(await _service.CanAccessProjectAsync(editorProjectId, userId, ProjectPermission.Write));
-        Assert.False(await _service.CanAccessProjectAsync(editorProjectId, userId, ProjectPermission.Admin));
-        Assert.True(await _service.CanAccessProjectAsync(linkProjectId, nonMemberId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessProjectAsync(restrictedProjectId, nonMemberId, ProjectPermission.Read));
+        Assert.True(
+            await _service.CanAccessProjectAsync(projectId, userId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessProjectAsync(projectId, userId, ProjectPermission.Write)
+        );
+        Assert.True(
+            await _service.CanAccessProjectAsync(editorProjectId, userId, ProjectPermission.Write)
+        );
+        Assert.False(
+            await _service.CanAccessProjectAsync(editorProjectId, userId, ProjectPermission.Admin)
+        );
+        Assert.True(
+            await _service.CanAccessProjectAsync(linkProjectId, nonMemberId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessProjectAsync(
+                restrictedProjectId,
+                nonMemberId,
+                ProjectPermission.Read
+            )
+        );
 
         // Additional role assertions for admin and owner
-        Assert.True(await _service.CanAccessProjectAsync(adminProjectId, userId, ProjectPermission.Admin));
-        Assert.True(await _service.CanAccessProjectAsync(ownerProjectId, userId, ProjectPermission.Admin));
+        Assert.True(
+            await _service.CanAccessProjectAsync(adminProjectId, userId, ProjectPermission.Admin)
+        );
+        Assert.True(
+            await _service.CanAccessProjectAsync(ownerProjectId, userId, ProjectPermission.Admin)
+        );
 
         // Missing project check
-        Assert.False(await _service.CanAccessProjectAsync(ObjectId.GenerateNewId().ToString(), userId, ProjectPermission.Read));
+        Assert.False(
+            await _service.CanAccessProjectAsync(
+                ObjectId.GenerateNewId().ToString(),
+                userId,
+                ProjectPermission.Read
+            )
+        );
 
         // Filter assertion
         var filter = _service.GetAccessibleProjectsFilter(userId);
@@ -123,7 +173,9 @@ public class ProjectAuthorizationServiceTests : TestDBContext
         Assert.True(await _service.MatchesUserEmailAsync(validUserId, validEmail));
 
         // Case-insensitive match
-        Assert.True(await _service.MatchesUserEmailAsync(validUserId, validEmail.ToUpperInvariant()));
+        Assert.True(
+            await _service.MatchesUserEmailAsync(validUserId, validEmail.ToUpperInvariant())
+        );
 
         // Mismatched email
         Assert.False(await _service.MatchesUserEmailAsync(validUserId, "wrong@example.com"));
@@ -150,43 +202,59 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Versioned Project",
             Icon = "1F600",
             Members = [new Member { UserId = userId, Role = MemberRole.Viewer }],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Viewer },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
         };
         await _mongoDbContext.Projects.InsertOneAsync(project);
 
-        var version = new backend.Models.Version
-        {
-            Name = "v1.0",
-            ProjectId = project.Id!,
-        };
+        var version = new backend.Models.Version { Name = "v1.0", ProjectId = project.Id! };
         await _mongoDbContext.Versions.InsertOneAsync(version);
 
-        var history = new History
-        {
-            VersionId = version.Id!,
-            Data = "{}",
-        };
+        var history = new History { VersionId = version.Id!, Data = "{}" };
         await _mongoDbContext.Histories.InsertOneAsync(history);
 
         // Member access checks
-        Assert.True(await _service.CanAccessVersionAsync(version.Id!, userId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessVersionAsync(version.Id!, userId, ProjectPermission.Write));
-        Assert.True(await _service.CanAccessHistoryAsync(history.Id!, userId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessHistoryAsync(history.Id!, userId, ProjectPermission.Write));
+        Assert.True(
+            await _service.CanAccessVersionAsync(version.Id!, userId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessVersionAsync(version.Id!, userId, ProjectPermission.Write)
+        );
+        Assert.True(
+            await _service.CanAccessHistoryAsync(history.Id!, userId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessHistoryAsync(history.Id!, userId, ProjectPermission.Write)
+        );
 
         // Non-member access checks
-        Assert.False(await _service.CanAccessVersionAsync(version.Id!, nonMemberId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessHistoryAsync(history.Id!, nonMemberId, ProjectPermission.Read));
+        Assert.False(
+            await _service.CanAccessVersionAsync(version.Id!, nonMemberId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessHistoryAsync(history.Id!, nonMemberId, ProjectPermission.Read)
+        );
 
         // Missing resource checks
         var missingVersionId = ObjectId.GenerateNewId().ToString();
         var missingHistoryId = ObjectId.GenerateNewId().ToString();
-        Assert.False(await _service.CanAccessVersionAsync(missingVersionId, userId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessHistoryAsync(missingHistoryId, userId, ProjectPermission.Read));
+        Assert.False(
+            await _service.CanAccessVersionAsync(missingVersionId, userId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessHistoryAsync(missingHistoryId, userId, ProjectPermission.Read)
+        );
 
         // Invalid ID format checks
-        Assert.False(await _service.CanAccessVersionAsync("not-an-id", userId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessHistoryAsync("not-an-id", userId, ProjectPermission.Read));
+        Assert.False(
+            await _service.CanAccessVersionAsync("not-an-id", userId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessHistoryAsync("not-an-id", userId, ProjectPermission.Read)
+        );
 
         // Dangling references (version with non-existent project, history with non-existent version)
         var danglingVersion = new backend.Models.Version
@@ -195,7 +263,13 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             ProjectId = ObjectId.GenerateNewId().ToString(),
         };
         await _mongoDbContext.Versions.InsertOneAsync(danglingVersion);
-        Assert.False(await _service.CanAccessVersionAsync(danglingVersion.Id!, userId, ProjectPermission.Read));
+        Assert.False(
+            await _service.CanAccessVersionAsync(
+                danglingVersion.Id!,
+                userId,
+                ProjectPermission.Read
+            )
+        );
 
         var danglingHistory = new History
         {
@@ -203,7 +277,13 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Data = "{}",
         };
         await _mongoDbContext.Histories.InsertOneAsync(danglingHistory);
-        Assert.False(await _service.CanAccessHistoryAsync(danglingHistory.Id!, userId, ProjectPermission.Read));
+        Assert.False(
+            await _service.CanAccessHistoryAsync(
+                danglingHistory.Id!,
+                userId,
+                ProjectPermission.Read
+            )
+        );
     }
 
     [Fact]
@@ -218,20 +298,34 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Link Editor Project",
             Icon = "1F600",
             Members = [new Member { UserId = memberId, Role = MemberRole.Viewer }],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Link, Role = MemberRole.Editor },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Link,
+                Role = MemberRole.Editor,
+            },
         };
         await _mongoDbContext.Projects.InsertOneAsync(linkEditorProject);
 
         var projectId = linkEditorProject.Id!;
 
         // Non-member gets Editor permission via Link access
-        Assert.True(await _service.CanAccessProjectAsync(projectId, nonMemberId, ProjectPermission.Read));
-        Assert.True(await _service.CanAccessProjectAsync(projectId, nonMemberId, ProjectPermission.Write));
-        Assert.False(await _service.CanAccessProjectAsync(projectId, nonMemberId, ProjectPermission.Admin));
+        Assert.True(
+            await _service.CanAccessProjectAsync(projectId, nonMemberId, ProjectPermission.Read)
+        );
+        Assert.True(
+            await _service.CanAccessProjectAsync(projectId, nonMemberId, ProjectPermission.Write)
+        );
+        Assert.False(
+            await _service.CanAccessProjectAsync(projectId, nonMemberId, ProjectPermission.Admin)
+        );
 
         // Explicit member gets Viewer permission (explicit role takes precedence over link)
-        Assert.True(await _service.CanAccessProjectAsync(projectId, memberId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessProjectAsync(projectId, memberId, ProjectPermission.Write));
+        Assert.True(
+            await _service.CanAccessProjectAsync(projectId, memberId, ProjectPermission.Read)
+        );
+        Assert.False(
+            await _service.CanAccessProjectAsync(projectId, memberId, ProjectPermission.Write)
+        );
 
         // Inaccessible restricted project for non-member
         var restrictedProject = new Project
@@ -239,11 +333,27 @@ public class ProjectAuthorizationServiceTests : TestDBContext
             Name = "Restricted Project 2",
             Icon = "1F600",
             Members = [],
-            GeneralAccess = new GeneralAccess { AccessType = GeneralAccessType.Restricted, Role = MemberRole.Editor },
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Editor,
+            },
         };
         await _mongoDbContext.Projects.InsertOneAsync(restrictedProject);
-        Assert.False(await _service.CanAccessProjectAsync(restrictedProject.Id!, nonMemberId, ProjectPermission.Read));
-        Assert.False(await _service.CanAccessProjectAsync(restrictedProject.Id!, nonMemberId, ProjectPermission.Write));
+        Assert.False(
+            await _service.CanAccessProjectAsync(
+                restrictedProject.Id!,
+                nonMemberId,
+                ProjectPermission.Read
+            )
+        );
+        Assert.False(
+            await _service.CanAccessProjectAsync(
+                restrictedProject.Id!,
+                nonMemberId,
+                ProjectPermission.Write
+            )
+        );
 
         // Invalid filter user ID returns safe filter matching link projects
         var invalidFilter = _service.GetAccessibleProjectsFilter("invalid-id");
