@@ -191,7 +191,7 @@ function EmojiPickerTabs() {
         <Tabs.Panel
           value={tab.group}
           key={tab.group}
-          className="flex gap-1 py-1 flex-wrap overflow-y-auto min-h-48 max-h-48 beautifulScrollBar"
+          className="min-h-48 max-h-48"
         >
           <EmojiPickerTabContent group={tab.group} />
         </Tabs.Panel>
@@ -201,15 +201,7 @@ function EmojiPickerTabs() {
 }
 
 function EmojiPickerTabContent({ group }: { group: keyof EmojiAsyncGroup }) {
-  const { emojiData, loading, error } = useEmojiData(group);
-
-  if (loading) {
-    return (
-      <Box className="w-full min-h-full flex items-center justify-center ">
-        <Loader size={"sm"} />
-      </Box>
-    );
-  }
+  const { emojiData, loading, error, fetchNextPage } = useEmojiData(group);
 
   if (error) {
     return (
@@ -219,14 +211,32 @@ function EmojiPickerTabContent({ group }: { group: keyof EmojiAsyncGroup }) {
     );
   }
 
+  if (loading && emojiData.length === 0) {
+    return (
+      <Box className="w-full min-h-full flex items-center justify-center ">
+        <Loader size={"sm"} />
+      </Box>
+    );
+  }
+
   return (
-    <>
+    <div
+      className="w-full h-full flex gap-1 py-1 flex-wrap overflow-y-auto beautifulScrollBar content-start"
+      onScroll={(event) => {
+        const element = event.currentTarget;
+
+        if (element.scrollTop + element.clientHeight >= element.scrollHeight - 80) {
+          fetchNextPage();
+        }
+      }}
+    >
       {emojiData.map((data, index) => (
         <Combobox.Option value={data.emoji} key={index}>
           <EmojiPickerOptionContent optionValue={data.emoji} />
         </Combobox.Option>
       ))}
-    </>
+      {loading && <Loader size={"xs"} />}
+    </div>
   );
 }
 
