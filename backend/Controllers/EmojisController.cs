@@ -34,12 +34,4 @@ public class EmojisController(IEmojiService emojiService, ILogger<EmojisControll
 
         return this.ToApiResponse(emoji);
     }
-
-    [HttpDelete]
-    public async Task<ActionResult<ApiResponse<bool>>> DeleteAllEmojis()
-    {
-        var result = await _emojiService.DeleteAllEmojisAsync();
-
-        return this.ToApiResponse(result);
-    }
 }
