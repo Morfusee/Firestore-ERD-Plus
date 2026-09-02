@@ -28,6 +28,7 @@ public class AuthorizationHttpTests : IAsyncLifetime
     private readonly Mock<IProjectService> _projectService = new();
     private readonly Mock<IProjectAuthorizationService> _authorizationService = new();
     private readonly Mock<IHistoryService> _historyService = new();
+    private readonly Mock<IEmojiService> _emojiService = new();
     private WebApplication _app = null!;
     private HttpClient _client = null!;
 
@@ -46,7 +47,7 @@ public class AuthorizationHttpTests : IAsyncLifetime
         builder.Services.AddSingleton(_projectService.Object);
         builder.Services.AddSingleton(_authorizationService.Object);
         builder.Services.AddSingleton(_historyService.Object);
-        builder.Services.AddSingleton(Mock.Of<IEmojiService>());
+        builder.Services.AddSingleton(_emojiService.Object);
 
         _app = builder.Build();
         _app.UseAuthentication();
@@ -149,11 +150,14 @@ public class AuthorizationHttpTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task EmojiDeleteRoute_IsNotMapped()
+    public async Task EmojiDeleteRoute_DeletesAllEmojis()
     {
+        _emojiService.Setup(s => s.DeleteAllEmojisAsync()).ReturnsAsync(Result.Ok(true));
+
         var response = await _client.DeleteAsync("/api/Emojis");
 
-        Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        _emojiService.Verify(s => s.DeleteAllEmojisAsync(), Times.Once);
     }
 
     private static HttpRequestMessage AuthenticatedGet(string path)

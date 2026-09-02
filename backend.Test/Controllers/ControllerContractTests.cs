@@ -199,6 +199,14 @@ public class ControllerContractTests
                 [typeof(FromRouteAttribute)]
             },
             {
+                typeof(EmojisController),
+                "DeleteAllEmojis",
+                typeof(HttpDeleteAttribute),
+                null,
+                false,
+                []
+            },
+            {
                 typeof(HistoryController),
                 "GetProjectVersions",
                 typeof(HttpGetAttribute),
