@@ -124,40 +124,6 @@ public class ProjectService(
         }
     }
 
-    public async Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetProjectsByEmailAsync(
-        EmailDto emailDto,
-        PaginationDto pagination
-    )
-    {
-        try
-        {
-            var user = await _context
-                .Users.Find(u =>
-                    u.Email.Equals(emailDto.Email, StringComparison.CurrentCultureIgnoreCase)
-                )
-                .FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                return ResultExtensions.NotFound<PaginatedResponseDto<ProjectResponseDto>>(
-                    "User not found"
-                );
-            }
-
-            var projects = await _context
-                .Projects.Find(proj => proj.Members.Any(m => m.UserId == user.Id))
-                .ToPaginatedListAsync(pagination, ToResponseAsync);
-
-            return Result.Ok(projects);
-        }
-        catch (Exception ex)
-        {
-            return Result
-                .Fail<PaginatedResponseDto<ProjectResponseDto>>("Failed to retrieve project")
-                .WithError(ex.Message);
-        }
-    }
-
     public async Task<Result<ProjectResponseDto>> SaveProjectAsync(SaveProjectDto saveProjectDto)
     {
         try

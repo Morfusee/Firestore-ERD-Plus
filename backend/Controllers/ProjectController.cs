@@ -83,7 +83,8 @@ public class ProjectController(
             );
         }
 
-        var project = await _projectService.GetProjectsByEmailAsync(email, pagination);
+        var filter = _authorizationService.GetAccessibleProjectsFilter(userId);
+        var project = await _projectService.GetAllProjectsAsync(pagination, filter);
 
         return this.ToApiResponse(project);
     }

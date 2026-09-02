@@ -12,10 +12,6 @@ public interface IProjectService
         PaginationDto pagination,
         FilterDefinition<Project>? accessFilter = null
     );
-    Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetProjectsByEmailAsync(
-        EmailDto emailDto,
-        PaginationDto pagination
-    );
     Task<Result<ProjectResponseDto>> GetProjectByIdAsync(string id);
     Task<Result<ProjectResponseDto>> CreateProjectAsync(CreateProjectDto createProjectDto);
     Task<Result<ProjectResponseDto>> UpdateProjectAsync(UpdateProjectDto updateProjectDto);
