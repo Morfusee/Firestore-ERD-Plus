@@ -209,7 +209,7 @@ public class ControllerContractTests
                 "GetProjectVersions",
                 typeof(HttpGetAttribute),
                 "projects/{projectId}/versions",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromQueryAttribute)]
             },
             {
@@ -217,7 +217,7 @@ public class ControllerContractTests
                 "CreateProjectVersion",
                 typeof(HttpPostAttribute),
                 "projects/{projectId}/versions",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromBodyAttribute)]
             },
             {
@@ -225,7 +225,7 @@ public class ControllerContractTests
                 "GetVersionById",
                 typeof(HttpGetAttribute),
                 "versions/{versionId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromQueryAttribute)]
             },
             {
@@ -233,7 +233,7 @@ public class ControllerContractTests
                 "UpdateVersion",
                 typeof(HttpPatchAttribute),
                 "versions/{versionId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromBodyAttribute)]
             },
             {
@@ -241,7 +241,7 @@ public class ControllerContractTests
                 "DeleteVersion",
                 typeof(HttpDeleteAttribute),
                 "versions/{versionId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute)]
             },
             {
@@ -249,7 +249,7 @@ public class ControllerContractTests
                 "GetVersionHistories",
                 typeof(HttpGetAttribute),
                 "versions/{versionId}/histories",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromQueryAttribute)]
             },
             {
@@ -257,7 +257,7 @@ public class ControllerContractTests
                 "CreateVersionHistory",
                 typeof(HttpPostAttribute),
                 "versions/{versionId}/histories",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromBodyAttribute)]
             },
             {
@@ -265,7 +265,7 @@ public class ControllerContractTests
                 "GetHistoryById",
                 typeof(HttpGetAttribute),
                 "histories/{historyId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromQueryAttribute)]
             },
             {
@@ -273,7 +273,7 @@ public class ControllerContractTests
                 "UpdateHistory",
                 typeof(HttpPatchAttribute),
                 "histories/{historyId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromBodyAttribute)]
             },
             {
@@ -281,7 +281,7 @@ public class ControllerContractTests
                 "DeleteHistory",
                 typeof(HttpDeleteAttribute),
                 "histories/{historyId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute)]
             },
             {
@@ -289,7 +289,7 @@ public class ControllerContractTests
                 "RollbackVersion",
                 typeof(HttpPostAttribute),
                 "versions/{versionId}/rollback/{historyId}",
-                false,
+                true,
                 [typeof(FromRouteAttribute), typeof(FromRouteAttribute)]
             },
         };
