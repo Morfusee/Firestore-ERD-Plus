@@ -18,5 +18,13 @@ public partial class UserMapper
     [MapperIgnoreSource(nameof(User.Projects))]
     public partial UserResponseDto ToDto(User user);
 
+    [MapperIgnoreSource(nameof(User.Email))]
+    [MapperIgnoreSource(nameof(User.OwnedProjects))]
+    [MapperIgnoreSource(nameof(User.SharedProjects))]
+    [MapperIgnoreSource(nameof(User.CreatedAt))]
+    [MapperIgnoreSource(nameof(User.UpdatedAt))]
+    [MapperIgnoreSource(nameof(User.Projects))]
+    public partial UserSearchResultDto ToSearchResultDto(User user);
+
     public partial void UpdateUser(UpdateUserDto dto, UserResponseDto user);
 }

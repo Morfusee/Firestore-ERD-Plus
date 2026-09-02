@@ -7,7 +7,9 @@ using backend.Mappers;
 using backend.Models;
 using backend.Services.SettingsService;
 using FluentResults;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 
 namespace backend.Services.UserService;
 
@@ -70,6 +72,38 @@ public class UserService(
         catch (Exception ex)
         {
             return Result.Fail<UserResponseDto>("Failed to retrieve user").WithError(ex.Message);
+        }
+    }
+
+    public async Task<Result<UserSearchResponseDto>> SearchUsersAsync(UserSearchDto search)
+    {
+        try
+        {
+            // Escape the query so regex metacharacters are matched literally.
+            var pattern = new BsonRegularExpression(Regex.Escape(search.Username ?? ""), "i");
+            var filter = Builders<User>.Filter.Regex(u => u.Username, pattern);
+
+            if (search.ExcludedUsers is { Count: > 0 })
+            {
+                filter &= Builders<User>.Filter.Nin(u => u.Username, search.ExcludedUsers);
+            }
+
+            var users = await _context
+                .Users.Find(filter)
+                .SortBy(u => u.Username)
+                .Limit(search.Limit)
+                .ToListAsync();
+
+            return Result.Ok(
+                new UserSearchResponseDto
+                {
+                    Users = users.Select(_mapper.ToSearchResultDto).ToList(),
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<UserSearchResponseDto>("Failed to search users").WithError(ex.Message);
         }
     }
 

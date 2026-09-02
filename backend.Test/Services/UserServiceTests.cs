@@ -184,4 +184,105 @@ public class UserServiceTests : TestDBContext
                 .ToListAsync()
         );
     }
+
+    [Fact]
+    public async Task SearchUsersAsync_CaseInsensitiveSubstring_ReturnsMatches()
+    {
+        var result = await CreateService()
+            .SearchUsersAsync(new UserSearchDto { Username = "TESTUSER" });
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Users, u => u.Username == MockUser.Username);
+    }
+
+    [Fact]
+    public async Task SearchUsersAsync_MockUser_MapsOk()
+    {
+        var result = await CreateService()
+            .SearchUsersAsync(new UserSearchDto { Username = MockUser.Username });
+
+        var user = Assert.Single(result.Value.Users);
+
+        Assert.Equal(MockUser.Id, user.Id);
+        Assert.Equal(MockUser.Username, user.Username);
+    }
+
+    [Fact]
+    public async Task SearchUsersAsync_NoMatches_ReturnsEmpty()
+    {
+        var result = await CreateService()
+            .SearchUsersAsync(new UserSearchDto { Username = "user-does-not-exist" });
+
+        Assert.True(result.IsSuccess);
+        Assert.Empty(result.Value.Users);
+    }
+
+    [Fact]
+    public async Task SearchUsersAsync_ExcludedUsers_AreAbsent()
+    {
+        await _mongoDbContext.Users.InsertOneAsync(
+            new User { Username = "testexclude", Email = "excluded@example.com" }
+        );
+
+        var result = await CreateService()
+            .SearchUsersAsync(
+                new UserSearchDto
+                {
+                    Username = "test",
+                    ExcludedUsers = [MockUser.Username],
+                }
+            );
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Users, u => u.Username == "testexclude");
+        Assert.DoesNotContain(result.Value.Users, u => u.Username == MockUser.Username);
+    }
+
+    [Fact]
+    public async Task SearchUsersAsync_LimitIsEnforced()
+    {
+        await _mongoDbContext.Users.InsertManyAsync(
+            new[]
+            {
+                new User { Username = "limit-user-1", Email = "l1@example.com" },
+                new User { Username = "limit-user-2", Email = "l2@example.com" },
+                new User { Username = "limit-user-3", Email = "l3@example.com" },
+            }
+        );
+
+        var result = await CreateService()
+            .SearchUsersAsync(new UserSearchDto { Username = "limit-user", Limit = 2 });
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value.Users.Count);
+        Assert.True(result.Value.Users.All(u => u.Username.StartsWith("limit-user-")));
+    }
+
+    [Fact]
+    public async Task SearchUsersAsync_SpecialCharacters_MatchLiterally()
+    {
+        await _mongoDbContext.Users.InsertManyAsync(
+            new[]
+            {
+                new User { Username = "a.b", Email = "dot@example.com" },
+                new User { Username = "axb", Email = "axb@example.com" },
+            }
+        );
+
+        var result = await CreateService().SearchUsersAsync(new UserSearchDto { Username = "a.b" });
+
+        Assert.True(result.IsSuccess);
+        var usernames = result.Value.Users.Select(u => u.Username).ToList();
+        Assert.Contains("a.b", usernames);
+        Assert.DoesNotContain("axb", usernames);
+    }
+
+    [Fact]
+    public async Task SearchUsersAsync_EmptyQuery_ReturnsUsers()
+    {
+        var result = await CreateService().SearchUsersAsync(new UserSearchDto { Username = "" });
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Users, u => u.Username == MockUser.Username);
+    }
 }

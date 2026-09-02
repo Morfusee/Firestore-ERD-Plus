@@ -88,6 +88,14 @@ public class ControllerContractTests
             },
             {
                 typeof(UsersController),
+                "SearchUsers",
+                typeof(HttpPostAttribute),
+                "search",
+                true,
+                [typeof(FromBodyAttribute)]
+            },
+            {
+                typeof(UsersController),
                 "UpdateUser",
                 typeof(HttpPutAttribute),
                 "{id}",

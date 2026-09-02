@@ -1,15 +1,18 @@
 using System.Net;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Encodings.Web;
 using backend.Controllers;
 using backend.DTOs.Common;
 using backend.DTOs.History;
 using backend.DTOs.Project;
+using backend.DTOs.User;
 using backend.Models;
 using backend.Services.EmojiService;
 using backend.Services.HistoryService;
 using backend.Services.ProjectAuthorizationService;
 using backend.Services.ProjectService;
+using backend.Services.UserService;
 using FluentResults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -29,6 +32,7 @@ public class AuthorizationHttpTests : IAsyncLifetime
     private readonly Mock<IProjectAuthorizationService> _authorizationService = new();
     private readonly Mock<IHistoryService> _historyService = new();
     private readonly Mock<IEmojiService> _emojiService = new();
+    private readonly Mock<IUserService> _userService = new();
     private WebApplication _app = null!;
     private HttpClient _client = null!;
 
@@ -48,6 +52,7 @@ public class AuthorizationHttpTests : IAsyncLifetime
         builder.Services.AddSingleton(_authorizationService.Object);
         builder.Services.AddSingleton(_historyService.Object);
         builder.Services.AddSingleton(_emojiService.Object);
+        builder.Services.AddSingleton(_userService.Object);
 
         _app = builder.Build();
         _app.UseAuthentication();
@@ -158,6 +163,37 @@ public class AuthorizationHttpTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         _emojiService.Verify(s => s.DeleteAllEmojisAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task UserSearchRoute_WhenAnonymous_ReturnsUnauthorized()
+    {
+        var response = await _client.PostAsync(
+            "/api/Users/search",
+            new StringContent("{\"username\":\"\"}", Encoding.UTF8, "application/json")
+        );
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        _userService.Verify(s => s.SearchUsersAsync(It.IsAny<UserSearchDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UserSearchRoute_WhenAuthenticated_ReturnsUsers()
+    {
+        _userService
+            .Setup(s => s.SearchUsersAsync(It.IsAny<UserSearchDto>()))
+            .ReturnsAsync(Result.Ok(new UserSearchResponseDto { Users = [] }));
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/Users/search")
+        {
+            Content = new StringContent("{\"username\":\"\"}", Encoding.UTF8, "application/json"),
+        };
+        request.Headers.Add(TestAuthenticationHandler.UserHeader, UserId);
+
+        var response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        _userService.Verify(s => s.SearchUsersAsync(It.IsAny<UserSearchDto>()), Times.Once);
     }
 
     private static HttpRequestMessage AuthenticatedGet(string path)

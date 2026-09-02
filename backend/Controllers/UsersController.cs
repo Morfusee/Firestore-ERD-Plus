@@ -54,6 +54,19 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
         return this.ToApiResponse(user)!;
     }
 
+    [HttpPost("search")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<UserSearchResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<UserSearchResponseDto>>> SearchUsers(
+        [FromBody] UserSearchDto search
+    )
+    {
+        var result = await _userService.SearchUsersAsync(search);
+
+        return this.ToApiResponse(result);
+    }
+
     [HttpPost]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<UserResponseDto>), StatusCodes.Status201Created)]
