@@ -4,7 +4,9 @@ using backend.Mappers;
 using backend.Models;
 using backend.Services;
 using backend.Services.EmojiService;
+using backend.Services.ProjectAuthorizationService;
 using backend.Services.ProjectService;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace backend.Test.Services;
@@ -313,7 +315,10 @@ public class ProjectServiceTests : TestDBContext
         var pagination = new PaginationDto { Page = 1, Limit = 2 };
 
         // Act
-        var result = await _projectService.GetAllProjectsAsync(pagination);
+        var result = await _projectService.GetAllProjectsAsync(
+            pagination,
+            Builders<Project>.Filter.Empty
+        );
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -326,6 +331,84 @@ public class ProjectServiceTests : TestDBContext
             .FirstOrDefaultAsync();
         Assert.NotNull(project);
         Assert.Equal(createDtos[0].Name, project.Name);
+    }
+
+    [Fact]
+    public async Task GetAllProjectsAsync_FiltersBeforePagination()
+    {
+        // Arrange
+        var authService = new ProjectAuthorizationService(_context);
+        var otherUserId = ObjectId.GenerateNewId().ToString();
+
+        var restrictedProject = new Project
+        {
+            Name = "Other User Restricted Project",
+            Icon = "1F600",
+            Members = [new Member { UserId = otherUserId, Role = MemberRole.Owner }],
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Restricted,
+                Role = MemberRole.Viewer,
+            },
+        };
+
+        var linkProject = new Project
+        {
+            Name = "Public Link Project",
+            Icon = "1F601",
+            Members = [new Member { UserId = otherUserId, Role = MemberRole.Owner }],
+            GeneralAccess = new GeneralAccess
+            {
+                AccessType = GeneralAccessType.Link,
+                Role = MemberRole.Viewer,
+            },
+        };
+
+        await _context.Projects.InsertManyAsync([restrictedProject, linkProject]);
+
+        var accessFilter = authService.GetAccessibleProjectsFilter(MockUser.Id);
+
+        // MockUser has 2 seeded member projects ("Project Alpha", "Project Beta") + 1 link project = 3 accessible projects.
+        // 1 restricted project is inaccessible to MockUser. Total projects in DB = 4.
+        // Using Limit = 2 proves filtering occurs before pagination:
+        // TotalCount should be 3 (not 4), TotalPages should be 2, Page 1 should return 2 items.
+        var pagination = new PaginationDto { Page = 1, Limit = 2 };
+
+        // Act
+        var result = await _projectService.GetAllProjectsAsync(pagination, accessFilter);
+        var page2Result = await _projectService.GetAllProjectsAsync(
+            new PaginationDto { Page = 2, Limit = 2 },
+            accessFilter
+        );
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(3, result.Value.TotalCount);
+        Assert.Equal(2, result.Value.TotalPages);
+        Assert.Equal(2, result.Value.Items.Count());
+
+        Assert.True(page2Result.IsSuccess);
+        Assert.NotNull(page2Result.Value);
+        Assert.Single(page2Result.Value.Items);
+
+        var allFetchedIds = result.Value.Items
+            .Concat(page2Result.Value.Items)
+            .Select(p => p.Id)
+            .ToHashSet();
+
+        Assert.Contains(linkProject.Id, allFetchedIds);
+        Assert.DoesNotContain(restrictedProject.Id, allFetchedIds);
+
+        var allFetchedNames = result.Value.Items
+            .Concat(page2Result.Value.Items)
+            .Select(p => p.Name)
+            .ToHashSet();
+
+        Assert.Contains("Project Alpha", allFetchedNames);
+        Assert.Contains("Project Beta", allFetchedNames);
+        Assert.Contains("Public Link Project", allFetchedNames);
+        Assert.DoesNotContain("Other User Restricted Project", allFetchedNames);
     }
 
     [Fact]

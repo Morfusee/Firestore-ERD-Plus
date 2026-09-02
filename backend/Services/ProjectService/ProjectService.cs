@@ -22,13 +22,15 @@ public class ProjectService(
     private readonly IEmojiService _emojiService = emojiService;
 
     public async Task<Result<PaginatedResponseDto<ProjectResponseDto>>> GetAllProjectsAsync(
-        PaginationDto pagination
+        PaginationDto pagination,
+        FilterDefinition<Project>? accessFilter = null
     )
     {
         try
         {
+            var filter = accessFilter ?? Builders<Project>.Filter.Empty;
             var project = await _context
-                .Projects.Find(_ => true)
+                .Projects.Find(filter)
                 .ToPaginatedListAsync(pagination, ToResponseAsync);
 
             return Result.Ok(project);
