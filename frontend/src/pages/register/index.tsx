@@ -1,4 +1,5 @@
 import { useFirebaseAuth } from "@/integrations/firebase/firebase-auth-provider";
+import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 import {
   Anchor,
   Button,
@@ -17,7 +18,6 @@ import {
 import { useForm } from "@mantine/form";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { GoogleButton } from "../../components/ui/SocialButtons";
 
 function Register() {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -107,14 +107,6 @@ function Register() {
     setIsRegistering(false);
   };
 
-  const handleContinueWithGoogle = () => {
-    // Redirect to the Google OAuth route
-    window.open(
-      `${import.meta.env.VITE_SERVER_URL}/auth/google/callback`,
-      "_self"
-    );
-  };
-
   // Show nothing while fetching data
   if (loading) {
     return null;
@@ -169,9 +161,7 @@ function Register() {
             <Divider my="md" label="or" labelPosition="center" />
 
             <Stack>
-              <GoogleButton onClick={handleContinueWithGoogle}>
-                Continue with Google
-              </GoogleButton>
+              <GoogleSignInButton />
             </Stack>
 
             <Center mt="lg">

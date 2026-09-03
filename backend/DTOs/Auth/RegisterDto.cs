@@ -5,6 +5,9 @@ namespace backend.DTOs.Auth;
 public class RegisterDto
 {
     [Required]
+    public required string IdToken { get; set; }
+
+    [Required]
     [MinLength(3)]
     public required string Username { get; set; }
 

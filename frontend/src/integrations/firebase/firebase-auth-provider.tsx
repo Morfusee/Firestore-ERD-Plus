@@ -197,8 +197,12 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
         password
       );
 
+      // Prove Firebase identity to the backend; it derives identity from trusted claims
+      const idToken = await result.user.getIdToken();
+
       const response = await registerUserMutate({
         body: {
+          idToken,
           email,
           username,
           displayName: username,

@@ -42,7 +42,12 @@ public class AuthControllerTests
     [Fact]
     public async Task Register_ForwardsDtoAndMapsServiceResult()
     {
-        var dto = new RegisterDto { Email = "auth@example.com", Username = "auth-user" };
+        var dto = new RegisterDto
+        {
+            IdToken = "firebase-token",
+            Email = "auth@example.com",
+            Username = "auth-user",
+        };
         _authService.Setup(s => s.RegisterAsync(dto)).ReturnsAsync(Result.Ok(Response()));
 
         var action = await CreateController().Register(dto);
@@ -148,6 +153,27 @@ public class AuthControllerTests
             body.Data.GetType().GetProperty("UserId")!.GetValue(body.Data)
         );
         _authService.Verify(s => s.VerifyTokenAsync("cookie-token"), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetCurrentUser_WithAuthorizationHeader_ForwardsBearerToken()
+    {
+        _authService
+            .Setup(s => s.VerifyTokenAsync("header-token"))
+            .ReturnsAsync(Result.Ok("header-user-id"));
+        var controller = CreateController();
+        controller.Request.Headers.Authorization = "Bearer header-token";
+
+        var action = await controller.GetCurrentUser();
+
+        var response = Assert.IsType<ObjectResult>(action.Result);
+        var body = Assert.IsType<ApiResponse<object>>(response.Value);
+        Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+        Assert.Equal(
+            "header-user-id",
+            body.Data.GetType().GetProperty("UserId")!.GetValue(body.Data)
+        );
+        _authService.Verify(s => s.VerifyTokenAsync("header-token"), Times.Once);
     }
 
     [Fact]
