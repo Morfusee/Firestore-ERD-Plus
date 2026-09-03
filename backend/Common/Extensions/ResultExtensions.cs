@@ -65,6 +65,15 @@ public static class ResultExtensions
             return StatusCodes.Status400BadRequest;
         }
 
+        if (
+            result.Errors.Any(e =>
+                e.Metadata != null && e.Metadata.ContainsKey("ExternalServiceError")
+            )
+        )
+        {
+            return StatusCodes.Status503ServiceUnavailable;
+        }
+
         return StatusCodes.Status500InternalServerError;
     }
 }

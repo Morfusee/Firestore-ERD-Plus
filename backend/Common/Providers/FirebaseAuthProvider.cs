@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace backend.Common.Providers;
 
 [SingletonService]
-public class FirebaseAuthProvider
+public class FirebaseAuthProvider : IFirebaseAuthProvider
 {
     private readonly FirebaseAuth _auth;
 

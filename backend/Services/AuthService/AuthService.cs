@@ -3,6 +3,7 @@ using backend.Common.Attributes;
 using backend.Common.Providers;
 using backend.Config;
 using backend.DTOs.Auth;
+using backend.DTOs.Common;
 using backend.DTOs.User;
 using backend.Mappers;
 using backend.Models;
@@ -21,7 +22,9 @@ namespace backend.Services.AuthService;
 public class AuthService(
     MongoDbContext context,
     UserMapper userMapper,
-    FirebaseAuthProvider firebaseAuthProvider,
+    IFirebaseAuthProvider firebaseAuthProvider,
+    IFirebasePasswordResetProvider passwordResetProvider,
+    IConfiguration configuration,
     ILogger<AuthService> logger
 ) : IAuthService
 {
@@ -29,6 +32,9 @@ public class AuthService(
     private readonly UserMapper _userMapper = userMapper;
     private readonly ILogger<AuthService> _logger = logger;
     private readonly FirebaseAuth _firebaseAuth = firebaseAuthProvider.Auth;
+    private readonly IFirebasePasswordResetProvider _passwordResetProvider = passwordResetProvider;
+    private readonly string _frontendOrigin =
+        configuration.GetValue<string>("Frontend:Origin") ?? "http://localhost:5173";
 
     public async Task<Result<AuthResponseDto>> LoginAsync(LoginDto loginDto)
     {
@@ -227,5 +233,19 @@ public class AuthService(
                 .Fail<AuthResponseDto>("Google authentication failed.")
                 .WithError(ex.Message);
         }
+    }
+
+    public async Task<Result<bool>> ResetPasswordAsync(EmailDto emailDto)
+    {
+        var reset = await _passwordResetProvider.SendPasswordResetEmailAsync(
+            emailDto.Email,
+            _frontendOrigin
+        );
+
+        return
+            reset.IsSuccess
+            || reset.Errors.Any(error => error.Metadata?.ContainsKey("EmailNotFound") == true)
+            ? Result.Ok(true)
+            : Result.Fail<bool>(reset.Errors);
     }
 }

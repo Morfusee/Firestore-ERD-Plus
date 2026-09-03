@@ -53,6 +53,14 @@ public class ControllerContractTests
                 [typeof(FromBodyAttribute)]
             },
             { typeof(AuthController), "Logout", typeof(HttpPostAttribute), "logout", false, [] },
+            {
+                typeof(AuthController),
+                "ResetPassword",
+                typeof(HttpPostAttribute),
+                "reset-password",
+                false,
+                [typeof(FromBodyAttribute)]
+            },
             { typeof(AuthController), "GetCurrentUser", typeof(HttpGetAttribute), "me", false, [] },
             {
                 typeof(UsersController),

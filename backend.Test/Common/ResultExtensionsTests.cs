@@ -43,6 +43,7 @@ public class ResultExtensionsTests
     [InlineData("NotFound", StatusCodes.Status404NotFound)]
     [InlineData("Conflict", StatusCodes.Status409Conflict)]
     [InlineData("ValidationError", StatusCodes.Status400BadRequest)]
+    [InlineData("ExternalServiceError", StatusCodes.Status503ServiceUnavailable)]
     [InlineData(null, StatusCodes.Status500InternalServerError)]
     public void ToApiResponse_Failure_MapsMetadataToStatus(string? metadataKey, int expectedStatus)
     {

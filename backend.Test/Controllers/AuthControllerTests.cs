@@ -1,6 +1,7 @@
 using backend.Common.Models;
 using backend.Controllers;
 using backend.DTOs.Auth;
+using backend.DTOs.Common;
 using backend.DTOs.User;
 using backend.Services.AuthService;
 using FluentResults;
@@ -48,7 +49,10 @@ public class AuthControllerTests
 
         var response = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status201Created, response.StatusCode);
-        Assert.Equal(StatusCodes.Status201Created, Assert.IsType<ApiResponse<AuthResponseDto>>(response.Value).Status);
+        Assert.Equal(
+            StatusCodes.Status201Created,
+            Assert.IsType<ApiResponse<AuthResponseDto>>(response.Value).Status
+        );
         _authService.Verify(s => s.RegisterAsync(dto), Times.Once);
     }
 
@@ -80,6 +84,21 @@ public class AuthControllerTests
             Assert.IsType<ObjectResult>(action.Result).StatusCode
         );
         _authService.Verify(s => s.GoogleAuthAsync(dto), Times.Once);
+    }
+
+    [Fact]
+    public async Task ResetPassword_ForwardsEmailAndMapsServiceResult()
+    {
+        var dto = new EmailDto { Email = "auth@example.com" };
+        _authService.Setup(s => s.ResetPasswordAsync(dto)).ReturnsAsync(Result.Ok(true));
+
+        var action = await CreateController().ResetPassword(dto);
+
+        Assert.Equal(
+            StatusCodes.Status200OK,
+            Assert.IsType<ObjectResult>(action.Result).StatusCode
+        );
+        _authService.Verify(s => s.ResetPasswordAsync(dto), Times.Once);
     }
 
     [Fact]

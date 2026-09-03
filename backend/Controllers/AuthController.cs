@@ -1,6 +1,7 @@
 using backend.Common.Extensions;
 using backend.Common.Models;
 using backend.DTOs.Auth;
+using backend.DTOs.Common;
 using backend.Services.AuthService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,6 +55,15 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
         var result = await _authService.GoogleAuthAsync(googleAuthDto);
 
         return this.ToApiResponse(result);
+    }
+
+    [HttpPost("reset-password")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<ApiResponse<bool>>> ResetPassword([FromBody] EmailDto emailDto)
+    {
+        return this.ToApiResponse(await _authService.ResetPasswordAsync(emailDto));
     }
 
     [HttpPost("logout")]
