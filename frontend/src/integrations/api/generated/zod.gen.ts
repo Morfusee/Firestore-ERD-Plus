@@ -48,6 +48,10 @@ export const zCreateVersionDto = z.object({
     ]))
 });
 
+export const zEmailDto = z.object({
+    email: z.email().min(1)
+});
+
 export const zEmojiResponseDto = z.object({
     _id: z.optional(z.union([
         z.string(),
@@ -173,14 +177,8 @@ export const zHistoryResponseDto = z.object({
         z.string(),
         z.null()
     ])),
-    versionId: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    data: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
+    versionId: z.string().min(1),
+    data: z.string().min(1),
     members: z.optional(z.union([
         z.array(zMember),
         z.null()
@@ -333,20 +331,6 @@ export const zSaveProjectDto = z.object({
         z.array(zMember),
         z.null()
     ]))
-});
-
-export const zStringApiResponse = z.object({
-    data: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    message: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    status: z.optional(z.int()),
-    isSuccess: z.optional(z.boolean()),
-    errors: z.optional(z.unknown())
 });
 
 export const zThemeOptions = z.enum(['Light', 'Dark']);
@@ -522,23 +506,63 @@ export const zUserResponseDtoPaginatedResponseDtoApiResponse = z.object({
     errors: z.optional(z.unknown())
 });
 
+export const zUserSearchDto = z.object({
+    username: z.string(),
+    excludedUsers: z.optional(z.union([
+        z.array(z.string()),
+        z.null()
+    ])),
+    limit: z.optional(z.int().gte(1).lte(25))
+});
+
+export const zUserSearchResultDto = z.object({
+    id: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    username: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    displayName: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    profilePicture: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
+});
+
+export const zUserSearchResponseDto = z.object({
+    users: z.optional(z.union([
+        z.array(zUserSearchResultDto),
+        z.null()
+    ]))
+});
+
+export const zUserSearchResponseDtoApiResponse = z.object({
+    data: z.optional(zUserSearchResponseDto),
+    message: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    status: z.optional(z.int()),
+    isSuccess: z.optional(z.boolean()),
+    errors: z.optional(z.unknown())
+});
+
 export const zVersionResponseDto = z.object({
     id: z.optional(z.union([
         z.string(),
         z.null()
     ])),
-    name: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
+    name: z.string().min(1),
     description: z.optional(z.union([
         z.string(),
         z.null()
     ])),
-    projectId: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
+    projectId: z.string().min(1),
     currentHistoryId: z.optional(z.union([
         z.string(),
         z.null()
@@ -720,6 +744,17 @@ export const zPostApiAuthGoogleData = z.object({
  */
 export const zPostApiAuthGoogleResponse = zAuthResponseDtoApiResponse;
 
+export const zPostApiAuthResetPasswordData = z.object({
+    body: z.optional(zEmailDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPostApiAuthResetPasswordResponse = zBooleanApiResponse;
+
 export const zPostApiAuthLogoutData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -759,7 +794,8 @@ export const zGetApiEmojisData = z.object({
     query: z.optional(z.object({
         Page: z.optional(z.int().gte(1).lte(2147483647)),
         Limit: z.optional(z.int().gte(1).lte(50)),
-        Skip: z.optional(z.int())
+        Skip: z.optional(z.int()),
+        group: z.optional(z.string())
     }))
 });
 
@@ -807,7 +843,7 @@ export const zPostApiHistoryProjectsByProjectIdVersionsData = z.object({
 });
 
 /**
- * OK
+ * Created
  */
 export const zPostApiHistoryProjectsByProjectIdVersionsResponse = zVersionResponseDtoApiResponse;
 
@@ -822,7 +858,7 @@ export const zDeleteApiHistoryVersionsByVersionIdData = z.object({
 /**
  * OK
  */
-export const zDeleteApiHistoryVersionsByVersionIdResponse = zStringApiResponse;
+export const zDeleteApiHistoryVersionsByVersionIdResponse = zBooleanApiResponse;
 
 export const zGetApiHistoryVersionsByVersionIdData = z.object({
     body: z.optional(z.never()),
@@ -878,7 +914,7 @@ export const zPostApiHistoryVersionsByVersionIdHistoriesData = z.object({
 });
 
 /**
- * OK
+ * Created
  */
 export const zPostApiHistoryVersionsByVersionIdHistoriesResponse = zHistoryResponseDtoApiResponse;
 
@@ -893,7 +929,7 @@ export const zDeleteApiHistoryHistoriesByHistoryIdData = z.object({
 /**
  * OK
  */
-export const zDeleteApiHistoryHistoriesByHistoryIdResponse = zStringApiResponse;
+export const zDeleteApiHistoryHistoriesByHistoryIdResponse = zBooleanApiResponse;
 
 export const zGetApiHistoryHistoriesByHistoryIdData = z.object({
     body: z.optional(z.never()),
@@ -1097,9 +1133,9 @@ export const zDeleteApiUsersByIdData = z.object({
 });
 
 /**
- * No Content
+ * OK
  */
-export const zDeleteApiUsersByIdResponse = z.void();
+export const zDeleteApiUsersByIdResponse = zBooleanApiResponse;
 
 export const zGetApiUsersByIdData = z.object({
     body: z.optional(z.never()),
@@ -1139,3 +1175,14 @@ export const zGetApiUsersEmailByEmailData = z.object({
  * OK
  */
 export const zGetApiUsersEmailByEmailResponse = zUserResponseDtoApiResponse;
+
+export const zPostApiUsersSearchData = z.object({
+    body: z.optional(zUserSearchDto),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * OK
+ */
+export const zPostApiUsersSearchResponse = zUserSearchResponseDtoApiResponse;

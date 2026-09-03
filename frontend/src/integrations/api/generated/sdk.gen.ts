@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiEmojisData, DeleteApiEmojisResponses, DeleteApiHistoryHistoriesByHistoryIdData, DeleteApiHistoryHistoriesByHistoryIdErrors, DeleteApiHistoryHistoriesByHistoryIdResponses, DeleteApiHistoryVersionsByVersionIdData, DeleteApiHistoryVersionsByVersionIdErrors, DeleteApiHistoryVersionsByVersionIdResponses, DeleteApiProjectByIdData, DeleteApiProjectByIdErrors, DeleteApiProjectByIdResponses, DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiEmojisByHexcodeData, GetApiEmojisByHexcodeResponses, GetApiEmojisData, GetApiEmojisResponses, GetApiHistoryHistoriesByHistoryIdData, GetApiHistoryHistoriesByHistoryIdErrors, GetApiHistoryHistoriesByHistoryIdResponses, GetApiHistoryProjectsByProjectIdVersionsData, GetApiHistoryProjectsByProjectIdVersionsErrors, GetApiHistoryProjectsByProjectIdVersionsResponses, GetApiHistoryVersionsByVersionIdData, GetApiHistoryVersionsByVersionIdErrors, GetApiHistoryVersionsByVersionIdHistoriesData, GetApiHistoryVersionsByVersionIdHistoriesErrors, GetApiHistoryVersionsByVersionIdHistoriesResponses, GetApiHistoryVersionsByVersionIdResponses, GetApiProjectByEmailData, GetApiProjectByEmailErrors, GetApiProjectByEmailResponses, GetApiProjectByIdData, GetApiProjectByIdErrors, GetApiProjectByIdResponses, GetApiProjectData, GetApiProjectErrors, GetApiProjectResponses, GetApiSettingsData, GetApiSettingsErrors, GetApiSettingsResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PatchApiHistoryHistoriesByHistoryIdData, PatchApiHistoryHistoriesByHistoryIdErrors, PatchApiHistoryHistoriesByHistoryIdResponses, PatchApiHistoryVersionsByVersionIdData, PatchApiHistoryVersionsByVersionIdErrors, PatchApiHistoryVersionsByVersionIdResponses, PatchApiProjectData, PatchApiProjectDetailsData, PatchApiProjectDetailsErrors, PatchApiProjectDetailsResponses, PatchApiProjectErrors, PatchApiProjectResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiHistoryProjectsByProjectIdVersionsData, PostApiHistoryProjectsByProjectIdVersionsErrors, PostApiHistoryProjectsByProjectIdVersionsResponses, PostApiHistoryVersionsByVersionIdHistoriesData, PostApiHistoryVersionsByVersionIdHistoriesErrors, PostApiHistoryVersionsByVersionIdHistoriesResponses, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses, PostApiProjectData, PostApiProjectErrors, PostApiProjectResponses, PostApiSettingsData, PostApiSettingsErrors, PostApiSettingsResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PutApiSettingsData, PutApiSettingsErrors, PutApiSettingsResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
+import type { DeleteApiEmojisData, DeleteApiEmojisResponses, DeleteApiHistoryHistoriesByHistoryIdData, DeleteApiHistoryHistoriesByHistoryIdErrors, DeleteApiHistoryHistoriesByHistoryIdResponses, DeleteApiHistoryVersionsByVersionIdData, DeleteApiHistoryVersionsByVersionIdErrors, DeleteApiHistoryVersionsByVersionIdResponses, DeleteApiProjectByIdData, DeleteApiProjectByIdErrors, DeleteApiProjectByIdResponses, DeleteApiUsersByIdData, DeleteApiUsersByIdErrors, DeleteApiUsersByIdResponses, GetApiAuthMeData, GetApiAuthMeErrors, GetApiAuthMeResponses, GetApiEmojisByHexcodeData, GetApiEmojisByHexcodeResponses, GetApiEmojisData, GetApiEmojisResponses, GetApiHistoryHistoriesByHistoryIdData, GetApiHistoryHistoriesByHistoryIdResponses, GetApiHistoryProjectsByProjectIdVersionsData, GetApiHistoryProjectsByProjectIdVersionsResponses, GetApiHistoryVersionsByVersionIdData, GetApiHistoryVersionsByVersionIdHistoriesData, GetApiHistoryVersionsByVersionIdHistoriesResponses, GetApiHistoryVersionsByVersionIdResponses, GetApiProjectByEmailData, GetApiProjectByEmailErrors, GetApiProjectByEmailResponses, GetApiProjectByIdData, GetApiProjectByIdErrors, GetApiProjectByIdResponses, GetApiProjectData, GetApiProjectErrors, GetApiProjectResponses, GetApiSettingsData, GetApiSettingsErrors, GetApiSettingsResponses, GetApiUsersByIdData, GetApiUsersByIdErrors, GetApiUsersByIdResponses, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailErrors, GetApiUsersEmailByEmailResponses, GetApiUsersErrors, GetApiUsersResponses, PatchApiHistoryHistoriesByHistoryIdData, PatchApiHistoryHistoriesByHistoryIdResponses, PatchApiHistoryVersionsByVersionIdData, PatchApiHistoryVersionsByVersionIdResponses, PatchApiProjectData, PatchApiProjectDetailsData, PatchApiProjectDetailsErrors, PatchApiProjectDetailsResponses, PatchApiProjectErrors, PatchApiProjectResponses, PostApiAuthGoogleData, PostApiAuthGoogleErrors, PostApiAuthGoogleResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthLogoutData, PostApiAuthLogoutErrors, PostApiAuthLogoutResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiAuthResetPasswordData, PostApiAuthResetPasswordErrors, PostApiAuthResetPasswordResponses, PostApiHistoryProjectsByProjectIdVersionsData, PostApiHistoryProjectsByProjectIdVersionsErrors, PostApiHistoryProjectsByProjectIdVersionsResponses, PostApiHistoryVersionsByVersionIdHistoriesData, PostApiHistoryVersionsByVersionIdHistoriesErrors, PostApiHistoryVersionsByVersionIdHistoriesResponses, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses, PostApiProjectData, PostApiProjectErrors, PostApiProjectResponses, PostApiSettingsData, PostApiSettingsErrors, PostApiSettingsResponses, PostApiUsersData, PostApiUsersErrors, PostApiUsersResponses, PostApiUsersSearchData, PostApiUsersSearchErrors, PostApiUsersSearchResponses, PutApiSettingsData, PutApiSettingsErrors, PutApiSettingsResponses, PutApiUsersByIdData, PutApiUsersByIdErrors, PutApiUsersByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -45,6 +45,15 @@ export const postApiAuthGoogle = <ThrowOnError extends boolean = false>(options?
     }
 });
 
+export const postApiAuthResetPassword = <ThrowOnError extends boolean = false>(options?: Options<PostApiAuthResetPasswordData, ThrowOnError>) => (options?.client ?? client).post<PostApiAuthResetPasswordResponses, PostApiAuthResetPasswordErrors, ThrowOnError>({
+    url: '/api/Auth/reset-password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
 export const postApiAuthLogout = <ThrowOnError extends boolean = false>(options?: Options<PostApiAuthLogoutData, ThrowOnError>) => (options?.client ?? client).post<PostApiAuthLogoutResponses, PostApiAuthLogoutErrors, ThrowOnError>({ url: '/api/Auth/logout', ...options });
 
 export const getApiAuthMe = <ThrowOnError extends boolean = false>(options?: Options<GetApiAuthMeData, ThrowOnError>) => (options?.client ?? client).get<GetApiAuthMeResponses, GetApiAuthMeErrors, ThrowOnError>({ url: '/api/Auth/me', ...options });
@@ -55,10 +64,10 @@ export const getApiEmojis = <ThrowOnError extends boolean = false>(options?: Opt
 
 export const getApiEmojisByHexcode = <ThrowOnError extends boolean = false>(options: Options<GetApiEmojisByHexcodeData, ThrowOnError>) => (options.client ?? client).get<GetApiEmojisByHexcodeResponses, unknown, ThrowOnError>({ url: '/api/Emojis/{hexcode}', ...options });
 
-export const getApiHistoryProjectsByProjectIdVersions = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryProjectsByProjectIdVersionsData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryProjectsByProjectIdVersionsResponses, GetApiHistoryProjectsByProjectIdVersionsErrors, ThrowOnError>({ url: '/api/history/projects/{projectId}/versions', ...options });
+export const getApiHistoryProjectsByProjectIdVersions = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryProjectsByProjectIdVersionsData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryProjectsByProjectIdVersionsResponses, unknown, ThrowOnError>({ url: '/api/History/projects/{projectId}/versions', ...options });
 
 export const postApiHistoryProjectsByProjectIdVersions = <ThrowOnError extends boolean = false>(options: Options<PostApiHistoryProjectsByProjectIdVersionsData, ThrowOnError>) => (options.client ?? client).post<PostApiHistoryProjectsByProjectIdVersionsResponses, PostApiHistoryProjectsByProjectIdVersionsErrors, ThrowOnError>({
-    url: '/api/history/projects/{projectId}/versions',
+    url: '/api/History/projects/{projectId}/versions',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -66,12 +75,12 @@ export const postApiHistoryProjectsByProjectIdVersions = <ThrowOnError extends b
     }
 });
 
-export const deleteApiHistoryVersionsByVersionId = <ThrowOnError extends boolean = false>(options: Options<DeleteApiHistoryVersionsByVersionIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApiHistoryVersionsByVersionIdResponses, DeleteApiHistoryVersionsByVersionIdErrors, ThrowOnError>({ url: '/api/history/versions/{versionId}', ...options });
+export const deleteApiHistoryVersionsByVersionId = <ThrowOnError extends boolean = false>(options: Options<DeleteApiHistoryVersionsByVersionIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApiHistoryVersionsByVersionIdResponses, DeleteApiHistoryVersionsByVersionIdErrors, ThrowOnError>({ url: '/api/History/versions/{versionId}', ...options });
 
-export const getApiHistoryVersionsByVersionId = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryVersionsByVersionIdData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryVersionsByVersionIdResponses, GetApiHistoryVersionsByVersionIdErrors, ThrowOnError>({ url: '/api/history/versions/{versionId}', ...options });
+export const getApiHistoryVersionsByVersionId = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryVersionsByVersionIdData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryVersionsByVersionIdResponses, unknown, ThrowOnError>({ url: '/api/History/versions/{versionId}', ...options });
 
-export const patchApiHistoryVersionsByVersionId = <ThrowOnError extends boolean = false>(options: Options<PatchApiHistoryVersionsByVersionIdData, ThrowOnError>) => (options.client ?? client).patch<PatchApiHistoryVersionsByVersionIdResponses, PatchApiHistoryVersionsByVersionIdErrors, ThrowOnError>({
-    url: '/api/history/versions/{versionId}',
+export const patchApiHistoryVersionsByVersionId = <ThrowOnError extends boolean = false>(options: Options<PatchApiHistoryVersionsByVersionIdData, ThrowOnError>) => (options.client ?? client).patch<PatchApiHistoryVersionsByVersionIdResponses, unknown, ThrowOnError>({
+    url: '/api/History/versions/{versionId}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -79,10 +88,10 @@ export const patchApiHistoryVersionsByVersionId = <ThrowOnError extends boolean 
     }
 });
 
-export const getApiHistoryVersionsByVersionIdHistories = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryVersionsByVersionIdHistoriesData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryVersionsByVersionIdHistoriesResponses, GetApiHistoryVersionsByVersionIdHistoriesErrors, ThrowOnError>({ url: '/api/history/versions/{versionId}/histories', ...options });
+export const getApiHistoryVersionsByVersionIdHistories = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryVersionsByVersionIdHistoriesData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryVersionsByVersionIdHistoriesResponses, unknown, ThrowOnError>({ url: '/api/History/versions/{versionId}/histories', ...options });
 
 export const postApiHistoryVersionsByVersionIdHistories = <ThrowOnError extends boolean = false>(options: Options<PostApiHistoryVersionsByVersionIdHistoriesData, ThrowOnError>) => (options.client ?? client).post<PostApiHistoryVersionsByVersionIdHistoriesResponses, PostApiHistoryVersionsByVersionIdHistoriesErrors, ThrowOnError>({
-    url: '/api/history/versions/{versionId}/histories',
+    url: '/api/History/versions/{versionId}/histories',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -90,12 +99,12 @@ export const postApiHistoryVersionsByVersionIdHistories = <ThrowOnError extends 
     }
 });
 
-export const deleteApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean = false>(options: Options<DeleteApiHistoryHistoriesByHistoryIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApiHistoryHistoriesByHistoryIdResponses, DeleteApiHistoryHistoriesByHistoryIdErrors, ThrowOnError>({ url: '/api/history/histories/{historyId}', ...options });
+export const deleteApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean = false>(options: Options<DeleteApiHistoryHistoriesByHistoryIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApiHistoryHistoriesByHistoryIdResponses, DeleteApiHistoryHistoriesByHistoryIdErrors, ThrowOnError>({ url: '/api/History/histories/{historyId}', ...options });
 
-export const getApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryHistoriesByHistoryIdData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryHistoriesByHistoryIdResponses, GetApiHistoryHistoriesByHistoryIdErrors, ThrowOnError>({ url: '/api/history/histories/{historyId}', ...options });
+export const getApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean = false>(options: Options<GetApiHistoryHistoriesByHistoryIdData, ThrowOnError>) => (options.client ?? client).get<GetApiHistoryHistoriesByHistoryIdResponses, unknown, ThrowOnError>({ url: '/api/History/histories/{historyId}', ...options });
 
-export const patchApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean = false>(options: Options<PatchApiHistoryHistoriesByHistoryIdData, ThrowOnError>) => (options.client ?? client).patch<PatchApiHistoryHistoriesByHistoryIdResponses, PatchApiHistoryHistoriesByHistoryIdErrors, ThrowOnError>({
-    url: '/api/history/histories/{historyId}',
+export const patchApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean = false>(options: Options<PatchApiHistoryHistoriesByHistoryIdData, ThrowOnError>) => (options.client ?? client).patch<PatchApiHistoryHistoriesByHistoryIdResponses, unknown, ThrowOnError>({
+    url: '/api/History/histories/{historyId}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -103,7 +112,7 @@ export const patchApiHistoryHistoriesByHistoryId = <ThrowOnError extends boolean
     }
 });
 
-export const postApiHistoryVersionsByVersionIdRollbackByHistoryId = <ThrowOnError extends boolean = false>(options: Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData, ThrowOnError>) => (options.client ?? client).post<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors, ThrowOnError>({ url: '/api/history/versions/{versionId}/rollback/{historyId}', ...options });
+export const postApiHistoryVersionsByVersionIdRollbackByHistoryId = <ThrowOnError extends boolean = false>(options: Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData, ThrowOnError>) => (options.client ?? client).post<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses, unknown, ThrowOnError>({ url: '/api/History/versions/{versionId}/rollback/{historyId}', ...options });
 
 export const getApiProject = <ThrowOnError extends boolean = false>(options?: Options<GetApiProjectData, ThrowOnError>) => (options?.client ?? client).get<GetApiProjectResponses, GetApiProjectErrors, ThrowOnError>({ url: '/api/Project', ...options });
 
@@ -185,3 +194,12 @@ export const putApiUsersById = <ThrowOnError extends boolean = false>(options: O
 });
 
 export const getApiUsersEmailByEmail = <ThrowOnError extends boolean = false>(options: Options<GetApiUsersEmailByEmailData, ThrowOnError>) => (options.client ?? client).get<GetApiUsersEmailByEmailResponses, GetApiUsersEmailByEmailErrors, ThrowOnError>({ url: '/api/Users/email/{email}', ...options });
+
+export const postApiUsersSearch = <ThrowOnError extends boolean = false>(options?: Options<PostApiUsersSearchData, ThrowOnError>) => (options?.client ?? client).post<PostApiUsersSearchResponses, PostApiUsersSearchErrors, ThrowOnError>({
+    url: '/api/Users/search',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});

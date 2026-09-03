@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApiEmojis, deleteApiHistoryHistoriesByHistoryId, deleteApiHistoryVersionsByVersionId, deleteApiProjectById, deleteApiUsersById, getApiAuthMe, getApiEmojis, getApiEmojisByHexcode, getApiHistoryHistoriesByHistoryId, getApiHistoryProjectsByProjectIdVersions, getApiHistoryVersionsByVersionId, getApiHistoryVersionsByVersionIdHistories, getApiProject, getApiProjectByEmail, getApiProjectById, getApiSettings, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, patchApiHistoryHistoriesByHistoryId, patchApiHistoryVersionsByVersionId, patchApiProject, patchApiProjectDetails, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiHistoryProjectsByProjectIdVersions, postApiHistoryVersionsByVersionIdHistories, postApiHistoryVersionsByVersionIdRollbackByHistoryId, postApiProject, postApiSettings, postApiUsers, putApiSettings, putApiUsersById } from '../sdk.gen';
-import type { DeleteApiEmojisData, DeleteApiEmojisResponse, DeleteApiHistoryHistoriesByHistoryIdData, DeleteApiHistoryHistoriesByHistoryIdError, DeleteApiHistoryHistoriesByHistoryIdResponse, DeleteApiHistoryVersionsByVersionIdData, DeleteApiHistoryVersionsByVersionIdError, DeleteApiHistoryVersionsByVersionIdResponse, DeleteApiProjectByIdData, DeleteApiProjectByIdError, DeleteApiProjectByIdResponse, DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiEmojisByHexcodeData, GetApiEmojisByHexcodeResponse, GetApiEmojisData, GetApiEmojisResponse, GetApiHistoryHistoriesByHistoryIdData, GetApiHistoryHistoriesByHistoryIdError, GetApiHistoryHistoriesByHistoryIdResponse, GetApiHistoryProjectsByProjectIdVersionsData, GetApiHistoryProjectsByProjectIdVersionsError, GetApiHistoryProjectsByProjectIdVersionsResponse, GetApiHistoryVersionsByVersionIdData, GetApiHistoryVersionsByVersionIdError, GetApiHistoryVersionsByVersionIdHistoriesData, GetApiHistoryVersionsByVersionIdHistoriesError, GetApiHistoryVersionsByVersionIdHistoriesResponse, GetApiHistoryVersionsByVersionIdResponse, GetApiProjectByEmailData, GetApiProjectByEmailError, GetApiProjectByEmailResponse, GetApiProjectByIdData, GetApiProjectByIdError, GetApiProjectByIdResponse, GetApiProjectData, GetApiProjectError, GetApiProjectResponse, GetApiSettingsData, GetApiSettingsError, GetApiSettingsResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PatchApiHistoryHistoriesByHistoryIdData, PatchApiHistoryHistoriesByHistoryIdError, PatchApiHistoryHistoriesByHistoryIdResponse, PatchApiHistoryVersionsByVersionIdData, PatchApiHistoryVersionsByVersionIdError, PatchApiHistoryVersionsByVersionIdResponse, PatchApiProjectData, PatchApiProjectDetailsData, PatchApiProjectDetailsError, PatchApiProjectDetailsResponse, PatchApiProjectError, PatchApiProjectResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiHistoryProjectsByProjectIdVersionsData, PostApiHistoryProjectsByProjectIdVersionsError, PostApiHistoryProjectsByProjectIdVersionsResponse, PostApiHistoryVersionsByVersionIdHistoriesData, PostApiHistoryVersionsByVersionIdHistoriesError, PostApiHistoryVersionsByVersionIdHistoriesResponse, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdError, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse, PostApiProjectData, PostApiProjectError, PostApiProjectResponse, PostApiSettingsData, PostApiSettingsError, PostApiSettingsResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PutApiSettingsData, PutApiSettingsError, PutApiSettingsResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
+import { deleteApiEmojis, deleteApiHistoryHistoriesByHistoryId, deleteApiHistoryVersionsByVersionId, deleteApiProjectById, deleteApiUsersById, getApiAuthMe, getApiEmojis, getApiEmojisByHexcode, getApiHistoryHistoriesByHistoryId, getApiHistoryProjectsByProjectIdVersions, getApiHistoryVersionsByVersionId, getApiHistoryVersionsByVersionIdHistories, getApiProject, getApiProjectByEmail, getApiProjectById, getApiSettings, getApiUsers, getApiUsersById, getApiUsersEmailByEmail, type Options, patchApiHistoryHistoriesByHistoryId, patchApiHistoryVersionsByVersionId, patchApiProject, patchApiProjectDetails, postApiAuthGoogle, postApiAuthLogin, postApiAuthLogout, postApiAuthRegister, postApiAuthResetPassword, postApiHistoryProjectsByProjectIdVersions, postApiHistoryVersionsByVersionIdHistories, postApiHistoryVersionsByVersionIdRollbackByHistoryId, postApiProject, postApiSettings, postApiUsers, postApiUsersSearch, putApiSettings, putApiUsersById } from '../sdk.gen';
+import type { DeleteApiEmojisData, DeleteApiEmojisResponse, DeleteApiHistoryHistoriesByHistoryIdData, DeleteApiHistoryHistoriesByHistoryIdError, DeleteApiHistoryHistoriesByHistoryIdResponse, DeleteApiHistoryVersionsByVersionIdData, DeleteApiHistoryVersionsByVersionIdError, DeleteApiHistoryVersionsByVersionIdResponse, DeleteApiProjectByIdData, DeleteApiProjectByIdError, DeleteApiProjectByIdResponse, DeleteApiUsersByIdData, DeleteApiUsersByIdError, DeleteApiUsersByIdResponse, GetApiAuthMeData, GetApiAuthMeError, GetApiAuthMeResponse, GetApiEmojisByHexcodeData, GetApiEmojisByHexcodeResponse, GetApiEmojisData, GetApiEmojisResponse, GetApiHistoryHistoriesByHistoryIdData, GetApiHistoryHistoriesByHistoryIdResponse, GetApiHistoryProjectsByProjectIdVersionsData, GetApiHistoryProjectsByProjectIdVersionsResponse, GetApiHistoryVersionsByVersionIdData, GetApiHistoryVersionsByVersionIdHistoriesData, GetApiHistoryVersionsByVersionIdHistoriesResponse, GetApiHistoryVersionsByVersionIdResponse, GetApiProjectByEmailData, GetApiProjectByEmailError, GetApiProjectByEmailResponse, GetApiProjectByIdData, GetApiProjectByIdError, GetApiProjectByIdResponse, GetApiProjectData, GetApiProjectError, GetApiProjectResponse, GetApiSettingsData, GetApiSettingsError, GetApiSettingsResponse, GetApiUsersByIdData, GetApiUsersByIdError, GetApiUsersByIdResponse, GetApiUsersData, GetApiUsersEmailByEmailData, GetApiUsersEmailByEmailError, GetApiUsersEmailByEmailResponse, GetApiUsersError, GetApiUsersResponse, PatchApiHistoryHistoriesByHistoryIdData, PatchApiHistoryHistoriesByHistoryIdResponse, PatchApiHistoryVersionsByVersionIdData, PatchApiHistoryVersionsByVersionIdResponse, PatchApiProjectData, PatchApiProjectDetailsData, PatchApiProjectDetailsError, PatchApiProjectDetailsResponse, PatchApiProjectError, PatchApiProjectResponse, PostApiAuthGoogleData, PostApiAuthGoogleError, PostApiAuthGoogleResponse, PostApiAuthLoginData, PostApiAuthLoginError, PostApiAuthLoginResponse, PostApiAuthLogoutData, PostApiAuthLogoutError, PostApiAuthLogoutResponse, PostApiAuthRegisterData, PostApiAuthRegisterError, PostApiAuthRegisterResponse, PostApiAuthResetPasswordData, PostApiAuthResetPasswordError, PostApiAuthResetPasswordResponse, PostApiHistoryProjectsByProjectIdVersionsData, PostApiHistoryProjectsByProjectIdVersionsError, PostApiHistoryProjectsByProjectIdVersionsResponse, PostApiHistoryVersionsByVersionIdHistoriesData, PostApiHistoryVersionsByVersionIdHistoriesError, PostApiHistoryVersionsByVersionIdHistoriesResponse, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse, PostApiProjectData, PostApiProjectError, PostApiProjectResponse, PostApiSettingsData, PostApiSettingsError, PostApiSettingsResponse, PostApiUsersData, PostApiUsersError, PostApiUsersResponse, PostApiUsersSearchData, PostApiUsersSearchError, PostApiUsersSearchResponse, PutApiSettingsData, PutApiSettingsError, PutApiSettingsResponse, PutApiUsersByIdData, PutApiUsersByIdError, PutApiUsersByIdResponse } from '../types.gen';
 
 export const postApiAuthRegisterMutation = (options?: Partial<Options<PostApiAuthRegisterData>>): UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> => {
     const mutationOptions: UseMutationOptions<PostApiAuthRegisterResponse, PostApiAuthRegisterError, Options<PostApiAuthRegisterData>> = {
@@ -38,6 +38,20 @@ export const postApiAuthGoogleMutation = (options?: Partial<Options<PostApiAuthG
     const mutationOptions: UseMutationOptions<PostApiAuthGoogleResponse, PostApiAuthGoogleError, Options<PostApiAuthGoogleData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await postApiAuthGoogle({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const postApiAuthResetPasswordMutation = (options?: Partial<Options<PostApiAuthResetPasswordData>>): UseMutationOptions<PostApiAuthResetPasswordResponse, PostApiAuthResetPasswordError, Options<PostApiAuthResetPasswordData>> => {
+    const mutationOptions: UseMutationOptions<PostApiAuthResetPasswordResponse, PostApiAuthResetPasswordError, Options<PostApiAuthResetPasswordData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postApiAuthResetPassword({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -156,7 +170,7 @@ export const getApiEmojisByHexcodeOptions = (options: Options<GetApiEmojisByHexc
 
 export const getApiHistoryProjectsByProjectIdVersionsQueryKey = (options: Options<GetApiHistoryProjectsByProjectIdVersionsData>) => createQueryKey('getApiHistoryProjectsByProjectIdVersions', options);
 
-export const getApiHistoryProjectsByProjectIdVersionsOptions = (options: Options<GetApiHistoryProjectsByProjectIdVersionsData>) => queryOptions<GetApiHistoryProjectsByProjectIdVersionsResponse, GetApiHistoryProjectsByProjectIdVersionsError, GetApiHistoryProjectsByProjectIdVersionsResponse, ReturnType<typeof getApiHistoryProjectsByProjectIdVersionsQueryKey>>({
+export const getApiHistoryProjectsByProjectIdVersionsOptions = (options: Options<GetApiHistoryProjectsByProjectIdVersionsData>) => queryOptions<GetApiHistoryProjectsByProjectIdVersionsResponse, DefaultError, GetApiHistoryProjectsByProjectIdVersionsResponse, ReturnType<typeof getApiHistoryProjectsByProjectIdVersionsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await getApiHistoryProjectsByProjectIdVersions({
             ...options,
@@ -199,7 +213,7 @@ export const deleteApiHistoryVersionsByVersionIdMutation = (options?: Partial<Op
 
 export const getApiHistoryVersionsByVersionIdQueryKey = (options: Options<GetApiHistoryVersionsByVersionIdData>) => createQueryKey('getApiHistoryVersionsByVersionId', options);
 
-export const getApiHistoryVersionsByVersionIdOptions = (options: Options<GetApiHistoryVersionsByVersionIdData>) => queryOptions<GetApiHistoryVersionsByVersionIdResponse, GetApiHistoryVersionsByVersionIdError, GetApiHistoryVersionsByVersionIdResponse, ReturnType<typeof getApiHistoryVersionsByVersionIdQueryKey>>({
+export const getApiHistoryVersionsByVersionIdOptions = (options: Options<GetApiHistoryVersionsByVersionIdData>) => queryOptions<GetApiHistoryVersionsByVersionIdResponse, DefaultError, GetApiHistoryVersionsByVersionIdResponse, ReturnType<typeof getApiHistoryVersionsByVersionIdQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await getApiHistoryVersionsByVersionId({
             ...options,
@@ -212,8 +226,8 @@ export const getApiHistoryVersionsByVersionIdOptions = (options: Options<GetApiH
     queryKey: getApiHistoryVersionsByVersionIdQueryKey(options)
 });
 
-export const patchApiHistoryVersionsByVersionIdMutation = (options?: Partial<Options<PatchApiHistoryVersionsByVersionIdData>>): UseMutationOptions<PatchApiHistoryVersionsByVersionIdResponse, PatchApiHistoryVersionsByVersionIdError, Options<PatchApiHistoryVersionsByVersionIdData>> => {
-    const mutationOptions: UseMutationOptions<PatchApiHistoryVersionsByVersionIdResponse, PatchApiHistoryVersionsByVersionIdError, Options<PatchApiHistoryVersionsByVersionIdData>> = {
+export const patchApiHistoryVersionsByVersionIdMutation = (options?: Partial<Options<PatchApiHistoryVersionsByVersionIdData>>): UseMutationOptions<PatchApiHistoryVersionsByVersionIdResponse, DefaultError, Options<PatchApiHistoryVersionsByVersionIdData>> => {
+    const mutationOptions: UseMutationOptions<PatchApiHistoryVersionsByVersionIdResponse, DefaultError, Options<PatchApiHistoryVersionsByVersionIdData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await patchApiHistoryVersionsByVersionId({
                 ...options,
@@ -228,7 +242,7 @@ export const patchApiHistoryVersionsByVersionIdMutation = (options?: Partial<Opt
 
 export const getApiHistoryVersionsByVersionIdHistoriesQueryKey = (options: Options<GetApiHistoryVersionsByVersionIdHistoriesData>) => createQueryKey('getApiHistoryVersionsByVersionIdHistories', options);
 
-export const getApiHistoryVersionsByVersionIdHistoriesOptions = (options: Options<GetApiHistoryVersionsByVersionIdHistoriesData>) => queryOptions<GetApiHistoryVersionsByVersionIdHistoriesResponse, GetApiHistoryVersionsByVersionIdHistoriesError, GetApiHistoryVersionsByVersionIdHistoriesResponse, ReturnType<typeof getApiHistoryVersionsByVersionIdHistoriesQueryKey>>({
+export const getApiHistoryVersionsByVersionIdHistoriesOptions = (options: Options<GetApiHistoryVersionsByVersionIdHistoriesData>) => queryOptions<GetApiHistoryVersionsByVersionIdHistoriesResponse, DefaultError, GetApiHistoryVersionsByVersionIdHistoriesResponse, ReturnType<typeof getApiHistoryVersionsByVersionIdHistoriesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await getApiHistoryVersionsByVersionIdHistories({
             ...options,
@@ -271,7 +285,7 @@ export const deleteApiHistoryHistoriesByHistoryIdMutation = (options?: Partial<O
 
 export const getApiHistoryHistoriesByHistoryIdQueryKey = (options: Options<GetApiHistoryHistoriesByHistoryIdData>) => createQueryKey('getApiHistoryHistoriesByHistoryId', options);
 
-export const getApiHistoryHistoriesByHistoryIdOptions = (options: Options<GetApiHistoryHistoriesByHistoryIdData>) => queryOptions<GetApiHistoryHistoriesByHistoryIdResponse, GetApiHistoryHistoriesByHistoryIdError, GetApiHistoryHistoriesByHistoryIdResponse, ReturnType<typeof getApiHistoryHistoriesByHistoryIdQueryKey>>({
+export const getApiHistoryHistoriesByHistoryIdOptions = (options: Options<GetApiHistoryHistoriesByHistoryIdData>) => queryOptions<GetApiHistoryHistoriesByHistoryIdResponse, DefaultError, GetApiHistoryHistoriesByHistoryIdResponse, ReturnType<typeof getApiHistoryHistoriesByHistoryIdQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await getApiHistoryHistoriesByHistoryId({
             ...options,
@@ -284,8 +298,8 @@ export const getApiHistoryHistoriesByHistoryIdOptions = (options: Options<GetApi
     queryKey: getApiHistoryHistoriesByHistoryIdQueryKey(options)
 });
 
-export const patchApiHistoryHistoriesByHistoryIdMutation = (options?: Partial<Options<PatchApiHistoryHistoriesByHistoryIdData>>): UseMutationOptions<PatchApiHistoryHistoriesByHistoryIdResponse, PatchApiHistoryHistoriesByHistoryIdError, Options<PatchApiHistoryHistoriesByHistoryIdData>> => {
-    const mutationOptions: UseMutationOptions<PatchApiHistoryHistoriesByHistoryIdResponse, PatchApiHistoryHistoriesByHistoryIdError, Options<PatchApiHistoryHistoriesByHistoryIdData>> = {
+export const patchApiHistoryHistoriesByHistoryIdMutation = (options?: Partial<Options<PatchApiHistoryHistoriesByHistoryIdData>>): UseMutationOptions<PatchApiHistoryHistoriesByHistoryIdResponse, DefaultError, Options<PatchApiHistoryHistoriesByHistoryIdData>> => {
+    const mutationOptions: UseMutationOptions<PatchApiHistoryHistoriesByHistoryIdResponse, DefaultError, Options<PatchApiHistoryHistoriesByHistoryIdData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await patchApiHistoryHistoriesByHistoryId({
                 ...options,
@@ -298,8 +312,8 @@ export const patchApiHistoryHistoriesByHistoryIdMutation = (options?: Partial<Op
     return mutationOptions;
 };
 
-export const postApiHistoryVersionsByVersionIdRollbackByHistoryIdMutation = (options?: Partial<Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData>>): UseMutationOptions<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdError, Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData>> => {
-    const mutationOptions: UseMutationOptions<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse, PostApiHistoryVersionsByVersionIdRollbackByHistoryIdError, Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData>> = {
+export const postApiHistoryVersionsByVersionIdRollbackByHistoryIdMutation = (options?: Partial<Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData>>): UseMutationOptions<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse, DefaultError, Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData>> => {
+    const mutationOptions: UseMutationOptions<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponse, DefaultError, Options<PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await postApiHistoryVersionsByVersionIdRollbackByHistoryId({
                 ...options,
@@ -542,3 +556,17 @@ export const getApiUsersEmailByEmailOptions = (options: Options<GetApiUsersEmail
     },
     queryKey: getApiUsersEmailByEmailQueryKey(options)
 });
+
+export const postApiUsersSearchMutation = (options?: Partial<Options<PostApiUsersSearchData>>): UseMutationOptions<PostApiUsersSearchResponse, PostApiUsersSearchError, Options<PostApiUsersSearchData>> => {
+    const mutationOptions: UseMutationOptions<PostApiUsersSearchResponse, PostApiUsersSearchError, Options<PostApiUsersSearchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postApiUsersSearch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};

@@ -55,6 +55,10 @@ export type CreateVersionDto = {
     description?: string | null;
 };
 
+export type EmailDto = {
+    email: string;
+};
+
 export type EmojiResponseDto = {
     _id?: string | null;
     emoji: string | null;
@@ -111,8 +115,8 @@ export type GoogleAuthDto = {
 
 export type HistoryResponseDto = {
     id?: string | null;
-    versionId?: string | null;
-    data?: string | null;
+    versionId: string;
+    data: string;
     members?: Array<Member> | null;
     isRollback?: boolean;
     createdAt?: string;
@@ -240,14 +244,6 @@ export type SettingsResponseDtoApiResponse = {
     errors?: unknown;
 };
 
-export type StringApiResponse = {
-    data?: string | null;
-    message?: string | null;
-    status?: number;
-    isSuccess?: boolean;
-    errors?: unknown;
-};
-
 export type ThemeOptions = 'Light' | 'Dark';
 
 export type UpdateHistoryDto = {
@@ -318,11 +314,36 @@ export type UserResponseDtoPaginatedResponseDtoApiResponse = {
     errors?: unknown;
 };
 
+export type UserSearchDto = {
+    username: string;
+    excludedUsers?: Array<string> | null;
+    limit?: number;
+};
+
+export type UserSearchResponseDto = {
+    users?: Array<UserSearchResultDto> | null;
+};
+
+export type UserSearchResponseDtoApiResponse = {
+    data?: UserSearchResponseDto;
+    message?: string | null;
+    status?: number;
+    isSuccess?: boolean;
+    errors?: unknown;
+};
+
+export type UserSearchResultDto = {
+    id?: string | null;
+    username?: string | null;
+    displayName?: string | null;
+    profilePicture?: string | null;
+};
+
 export type VersionResponseDto = {
     id?: string | null;
-    name?: string | null;
+    name: string;
     description?: string | null;
-    projectId?: string | null;
+    projectId: string;
     currentHistoryId?: string | null;
     createdAt?: string;
     updatedAt?: string;
@@ -516,6 +537,35 @@ export type PostApiAuthGoogleResponses = {
 
 export type PostApiAuthGoogleResponse = PostApiAuthGoogleResponses[keyof PostApiAuthGoogleResponses];
 
+export type PostApiAuthResetPasswordData = {
+    body?: EmailDto;
+    path?: never;
+    query?: never;
+    url: '/api/Auth/reset-password';
+};
+
+export type PostApiAuthResetPasswordErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Service Unavailable
+     */
+    503: BooleanApiResponse;
+};
+
+export type PostApiAuthResetPasswordError = PostApiAuthResetPasswordErrors[keyof PostApiAuthResetPasswordErrors];
+
+export type PostApiAuthResetPasswordResponses = {
+    /**
+     * OK
+     */
+    200: BooleanApiResponse;
+};
+
+export type PostApiAuthResetPasswordResponse = PostApiAuthResetPasswordResponses[keyof PostApiAuthResetPasswordResponses];
+
 export type PostApiAuthLogoutData = {
     body?: never;
     path?: never;
@@ -589,6 +639,7 @@ export type GetApiEmojisData = {
         Page?: number;
         Limit?: number;
         Skip?: number;
+        group?: string;
     };
     url: '/api/Emojis';
 };
@@ -630,17 +681,8 @@ export type GetApiHistoryProjectsByProjectIdVersionsData = {
         Limit?: number;
         Skip?: number;
     };
-    url: '/api/history/projects/{projectId}/versions';
+    url: '/api/History/projects/{projectId}/versions';
 };
-
-export type GetApiHistoryProjectsByProjectIdVersionsErrors = {
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type GetApiHistoryProjectsByProjectIdVersionsError = GetApiHistoryProjectsByProjectIdVersionsErrors[keyof GetApiHistoryProjectsByProjectIdVersionsErrors];
 
 export type GetApiHistoryProjectsByProjectIdVersionsResponses = {
     /**
@@ -657,23 +699,23 @@ export type PostApiHistoryProjectsByProjectIdVersionsData = {
         projectId: string;
     };
     query?: never;
-    url: '/api/history/projects/{projectId}/versions';
+    url: '/api/History/projects/{projectId}/versions';
 };
 
 export type PostApiHistoryProjectsByProjectIdVersionsErrors = {
     /**
-     * Bad Request
+     * Not Found
      */
-    400: ProblemDetails;
+    404: ProblemDetails;
 };
 
 export type PostApiHistoryProjectsByProjectIdVersionsError = PostApiHistoryProjectsByProjectIdVersionsErrors[keyof PostApiHistoryProjectsByProjectIdVersionsErrors];
 
 export type PostApiHistoryProjectsByProjectIdVersionsResponses = {
     /**
-     * OK
+     * Created
      */
-    200: VersionResponseDtoApiResponse;
+    201: VersionResponseDtoApiResponse;
 };
 
 export type PostApiHistoryProjectsByProjectIdVersionsResponse = PostApiHistoryProjectsByProjectIdVersionsResponses[keyof PostApiHistoryProjectsByProjectIdVersionsResponses];
@@ -684,7 +726,7 @@ export type DeleteApiHistoryVersionsByVersionIdData = {
         versionId: string;
     };
     query?: never;
-    url: '/api/history/versions/{versionId}';
+    url: '/api/History/versions/{versionId}';
 };
 
 export type DeleteApiHistoryVersionsByVersionIdErrors = {
@@ -700,7 +742,7 @@ export type DeleteApiHistoryVersionsByVersionIdResponses = {
     /**
      * OK
      */
-    200: StringApiResponse;
+    200: BooleanApiResponse;
 };
 
 export type DeleteApiHistoryVersionsByVersionIdResponse = DeleteApiHistoryVersionsByVersionIdResponses[keyof DeleteApiHistoryVersionsByVersionIdResponses];
@@ -713,17 +755,8 @@ export type GetApiHistoryVersionsByVersionIdData = {
     query?: {
         projectId?: string;
     };
-    url: '/api/history/versions/{versionId}';
+    url: '/api/History/versions/{versionId}';
 };
-
-export type GetApiHistoryVersionsByVersionIdErrors = {
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type GetApiHistoryVersionsByVersionIdError = GetApiHistoryVersionsByVersionIdErrors[keyof GetApiHistoryVersionsByVersionIdErrors];
 
 export type GetApiHistoryVersionsByVersionIdResponses = {
     /**
@@ -740,21 +773,8 @@ export type PatchApiHistoryVersionsByVersionIdData = {
         versionId: string;
     };
     query?: never;
-    url: '/api/history/versions/{versionId}';
+    url: '/api/History/versions/{versionId}';
 };
-
-export type PatchApiHistoryVersionsByVersionIdErrors = {
-    /**
-     * Bad Request
-     */
-    400: ProblemDetails;
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type PatchApiHistoryVersionsByVersionIdError = PatchApiHistoryVersionsByVersionIdErrors[keyof PatchApiHistoryVersionsByVersionIdErrors];
 
 export type PatchApiHistoryVersionsByVersionIdResponses = {
     /**
@@ -775,17 +795,8 @@ export type GetApiHistoryVersionsByVersionIdHistoriesData = {
         Limit?: number;
         Skip?: number;
     };
-    url: '/api/history/versions/{versionId}/histories';
+    url: '/api/History/versions/{versionId}/histories';
 };
-
-export type GetApiHistoryVersionsByVersionIdHistoriesErrors = {
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type GetApiHistoryVersionsByVersionIdHistoriesError = GetApiHistoryVersionsByVersionIdHistoriesErrors[keyof GetApiHistoryVersionsByVersionIdHistoriesErrors];
 
 export type GetApiHistoryVersionsByVersionIdHistoriesResponses = {
     /**
@@ -802,23 +813,23 @@ export type PostApiHistoryVersionsByVersionIdHistoriesData = {
         versionId: string;
     };
     query?: never;
-    url: '/api/history/versions/{versionId}/histories';
+    url: '/api/History/versions/{versionId}/histories';
 };
 
 export type PostApiHistoryVersionsByVersionIdHistoriesErrors = {
     /**
-     * Bad Request
+     * Not Found
      */
-    400: ProblemDetails;
+    404: ProblemDetails;
 };
 
 export type PostApiHistoryVersionsByVersionIdHistoriesError = PostApiHistoryVersionsByVersionIdHistoriesErrors[keyof PostApiHistoryVersionsByVersionIdHistoriesErrors];
 
 export type PostApiHistoryVersionsByVersionIdHistoriesResponses = {
     /**
-     * OK
+     * Created
      */
-    200: HistoryResponseDtoApiResponse;
+    201: HistoryResponseDtoApiResponse;
 };
 
 export type PostApiHistoryVersionsByVersionIdHistoriesResponse = PostApiHistoryVersionsByVersionIdHistoriesResponses[keyof PostApiHistoryVersionsByVersionIdHistoriesResponses];
@@ -829,7 +840,7 @@ export type DeleteApiHistoryHistoriesByHistoryIdData = {
         historyId: string;
     };
     query?: never;
-    url: '/api/history/histories/{historyId}';
+    url: '/api/History/histories/{historyId}';
 };
 
 export type DeleteApiHistoryHistoriesByHistoryIdErrors = {
@@ -845,7 +856,7 @@ export type DeleteApiHistoryHistoriesByHistoryIdResponses = {
     /**
      * OK
      */
-    200: StringApiResponse;
+    200: BooleanApiResponse;
 };
 
 export type DeleteApiHistoryHistoriesByHistoryIdResponse = DeleteApiHistoryHistoriesByHistoryIdResponses[keyof DeleteApiHistoryHistoriesByHistoryIdResponses];
@@ -858,17 +869,8 @@ export type GetApiHistoryHistoriesByHistoryIdData = {
     query?: {
         versionId?: string;
     };
-    url: '/api/history/histories/{historyId}';
+    url: '/api/History/histories/{historyId}';
 };
-
-export type GetApiHistoryHistoriesByHistoryIdErrors = {
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type GetApiHistoryHistoriesByHistoryIdError = GetApiHistoryHistoriesByHistoryIdErrors[keyof GetApiHistoryHistoriesByHistoryIdErrors];
 
 export type GetApiHistoryHistoriesByHistoryIdResponses = {
     /**
@@ -885,21 +887,8 @@ export type PatchApiHistoryHistoriesByHistoryIdData = {
         historyId: string;
     };
     query?: never;
-    url: '/api/history/histories/{historyId}';
+    url: '/api/History/histories/{historyId}';
 };
-
-export type PatchApiHistoryHistoriesByHistoryIdErrors = {
-    /**
-     * Bad Request
-     */
-    400: ProblemDetails;
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type PatchApiHistoryHistoriesByHistoryIdError = PatchApiHistoryHistoriesByHistoryIdErrors[keyof PatchApiHistoryHistoriesByHistoryIdErrors];
 
 export type PatchApiHistoryHistoriesByHistoryIdResponses = {
     /**
@@ -917,17 +906,8 @@ export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdData = {
         historyId: string;
     };
     query?: never;
-    url: '/api/history/versions/{versionId}/rollback/{historyId}';
+    url: '/api/History/versions/{versionId}/rollback/{historyId}';
 };
-
-export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors = {
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdError = PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors[keyof PostApiHistoryVersionsByVersionIdRollbackByHistoryIdErrors];
 
 export type PostApiHistoryVersionsByVersionIdRollbackByHistoryIdResponses = {
     /**
@@ -979,6 +959,10 @@ export type PatchApiProjectErrors = {
      * Bad Request
      */
     400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
 };
 
 export type PatchApiProjectError = PatchApiProjectErrors[keyof PatchApiProjectErrors];
@@ -1004,6 +988,10 @@ export type PostApiProjectErrors = {
      * Bad Request
      */
     400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
 };
 
 export type PostApiProjectError = PostApiProjectErrors[keyof PostApiProjectErrors];
@@ -1031,6 +1019,10 @@ export type DeleteApiProjectByIdErrors = {
      * Bad Request
      */
     400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
 };
 
 export type DeleteApiProjectByIdError = DeleteApiProjectByIdErrors[keyof DeleteApiProjectByIdErrors];
@@ -1113,6 +1105,10 @@ export type PatchApiProjectDetailsErrors = {
      * Bad Request
      */
     400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
 };
 
 export type PatchApiProjectDetailsError = PatchApiProjectDetailsErrors[keyof PatchApiProjectDetailsErrors];
@@ -1162,6 +1158,10 @@ export type PostApiSettingsData = {
 
 export type PostApiSettingsErrors = {
     /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
      * Internal Server Error
      */
     500: ProblemDetails;
@@ -1186,6 +1186,10 @@ export type PutApiSettingsData = {
 };
 
 export type PutApiSettingsErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
     /**
      * Internal Server Error
      */
@@ -1281,9 +1285,9 @@ export type DeleteApiUsersByIdError = DeleteApiUsersByIdErrors[keyof DeleteApiUs
 
 export type DeleteApiUsersByIdResponses = {
     /**
-     * No Content
+     * OK
      */
-    204: void;
+    200: BooleanApiResponse;
 };
 
 export type DeleteApiUsersByIdResponse = DeleteApiUsersByIdResponses[keyof DeleteApiUsersByIdResponses];
@@ -1368,3 +1372,28 @@ export type GetApiUsersEmailByEmailResponses = {
 };
 
 export type GetApiUsersEmailByEmailResponse = GetApiUsersEmailByEmailResponses[keyof GetApiUsersEmailByEmailResponses];
+
+export type PostApiUsersSearchData = {
+    body?: UserSearchDto;
+    path?: never;
+    query?: never;
+    url: '/api/Users/search';
+};
+
+export type PostApiUsersSearchErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiUsersSearchError = PostApiUsersSearchErrors[keyof PostApiUsersSearchErrors];
+
+export type PostApiUsersSearchResponses = {
+    /**
+     * OK
+     */
+    200: UserSearchResponseDtoApiResponse;
+};
+
+export type PostApiUsersSearchResponse = PostApiUsersSearchResponses[keyof PostApiUsersSearchResponses];
