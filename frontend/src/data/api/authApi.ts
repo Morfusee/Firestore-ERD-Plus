@@ -70,13 +70,15 @@ export const logoutUserApi = async () => {
 
 export const resetPasswordApi = async (email: string) => {
   const response = await axiosInstance
-    .post(`/auth/reset-password`, { email })
+    .post(`/api/Auth/reset-password`, { email })
     .then((res) => {
-      if (!res.data.success) {
-        throw new Error("Failed to send password reset email");
+      // ponytail: backend envelope uses isSuccess; accept legacy success during migration
+      const success = res.data.isSuccess ?? res.data.success;
+      if (!success) {
+        throw new Error(res.data.message || "Failed to send password reset email");
       }
 
-      return res.data;
+      return { ...res.data, success };
     });
 
   return response;
