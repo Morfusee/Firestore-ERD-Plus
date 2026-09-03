@@ -73,7 +73,7 @@ export const resetPasswordApi = async (email: string) => {
   const response = await axiosInstance
     .post(`/api/Auth/reset-password`, { email })
     .then((res) => {
-      // ponytail: backend envelope uses isSuccess; accept legacy success during migration
+      // backend envelope uses isSuccess; accept legacy success during migration
       const success = res.data.isSuccess ?? res.data.success;
       if (!success) {
         throw new Error(res.data.message || "Failed to send password reset email");

@@ -102,7 +102,7 @@ public class AuthService(
                     .WithErrors(identity.Errors);
             }
 
-            // ponytail: email-match, no FirebaseUid column; add uid tracking when email-change/linking matters.
+            // email-match, no FirebaseUid column; add uid tracking when email-change/linking matters.
             if (
                 !identity.Value.Email.Equals(
                     registerDto.Email,
