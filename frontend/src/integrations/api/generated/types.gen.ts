@@ -218,6 +218,7 @@ export type RegisterDto = {
     username: string;
     email: string;
     displayName?: string | null;
+    idToken: string;
 };
 
 export type SaveProjectDto = {

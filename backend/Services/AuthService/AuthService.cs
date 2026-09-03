@@ -1,20 +1,17 @@
-using System.Text.Json;
 using backend.Common.Attributes;
+using backend.Common.Extensions;
 using backend.Common.Providers;
-using backend.Config;
 using backend.DTOs.Auth;
 using backend.DTOs.Common;
 using backend.DTOs.User;
 using backend.Mappers;
 using backend.Models;
 using backend.Services.UserService;
-using FirebaseAdmin;
-using FirebaseAdmin.Auth;
 using FluentResults;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Util;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Text.Json;
 
 namespace backend.Services.AuthService;
 
@@ -24,6 +21,7 @@ public class AuthService(
     UserMapper userMapper,
     IFirebaseAuthProvider firebaseAuthProvider,
     IFirebasePasswordResetProvider passwordResetProvider,
+    IUserService userService,
     IConfiguration configuration,
     ILogger<AuthService> logger
 ) : IAuthService
@@ -31,8 +29,9 @@ public class AuthService(
     private readonly MongoDbContext _context = context;
     private readonly UserMapper _userMapper = userMapper;
     private readonly ILogger<AuthService> _logger = logger;
-    private readonly FirebaseAuth _firebaseAuth = firebaseAuthProvider.Auth;
+    private readonly IFirebaseAuthProvider _firebaseAuthProvider = firebaseAuthProvider;
     private readonly IFirebasePasswordResetProvider _passwordResetProvider = passwordResetProvider;
+    private readonly IUserService _userService = userService;
     private readonly string _frontendOrigin =
         configuration.GetValue<string>("Frontend:Origin") ?? "http://localhost:5173";
 
@@ -40,26 +39,29 @@ public class AuthService(
     {
         try
         {
-            var token = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(loginDto.IdToken);
-
-            var uid = token.Uid;
-            var firebaseUser = await _firebaseAuth.GetUserAsync(uid);
-            if (firebaseUser == null)
+            var identity = await _firebaseAuthProvider.VerifyIdentityAsync(loginDto.IdToken);
+            if (identity.IsFailed)
             {
-                return Result.Fail<AuthResponseDto>("Invalid authentication token.");
+                return Result
+                    .Fail<AuthResponseDto>(
+                        new Error("Invalid authentication token.").WithMetadata(
+                            "Unauthorized",
+                            true
+                        )
+                    )
+                    .WithErrors(identity.Errors);
             }
 
             // Note: Password verification happens on the client side with Firebase SDK
-            // For server-side, we generate a custom token that the client can use
             var user = await _context
                 .Users.Find(u =>
-                    u.Email.Equals(firebaseUser.Email, StringComparison.CurrentCultureIgnoreCase)
+                    u.Email.Equals(identity.Value.Email, StringComparison.CurrentCultureIgnoreCase)
                 )
                 .FirstOrDefaultAsync();
 
             if (user == null)
             {
-                return Result.Fail<AuthResponseDto>("User not found.");
+                return ResultExtensions.NotFound<AuthResponseDto>("User not found.");
             }
 
             var response = new AuthResponseDto { User = _userMapper.ToDto(user) };
@@ -77,6 +79,44 @@ public class AuthService(
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(registerDto.IdToken))
+            {
+                return Result.Fail<AuthResponseDto>(
+                    new Error("Authentication token is required.").WithMetadata(
+                        "ValidationError",
+                        true
+                    )
+                );
+            }
+
+            var identity = await _firebaseAuthProvider.VerifyIdentityAsync(registerDto.IdToken);
+            if (identity.IsFailed)
+            {
+                return Result
+                    .Fail<AuthResponseDto>(
+                        new Error("Invalid authentication token.").WithMetadata(
+                            "Unauthorized",
+                            true
+                        )
+                    )
+                    .WithErrors(identity.Errors);
+            }
+
+            // ponytail: email-match, no FirebaseUid column; add uid tracking when email-change/linking matters.
+            if (
+                !identity.Value.Email.Equals(
+                    registerDto.Email,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            {
+                return Result.Fail<AuthResponseDto>(
+                    new Error(
+                        "Identity mismatch: email does not match the verified token."
+                    ).WithMetadata("ValidationError", true)
+                );
+            }
+
             // Check if user already exists in MongoDB
             var existingUser = await _context
                 .Users.Find(u =>
@@ -91,28 +131,31 @@ public class AuthService(
             if (existingUser != null)
             {
                 return Result.Fail<AuthResponseDto>(
-                    existingUser.Email == registerDto.Email
-                        ? "Email is already in use."
-                        : "Username is already in use."
+                    new Error(
+                        existingUser.Email == registerDto.Email
+                            ? "Email is already in use."
+                            : "Username is already in use."
+                    ).WithMetadata("Conflict", true)
                 );
             }
 
-            // Create user in MongoDB
-            var newUser = new CreateUserDto
+            // Provision through the same invariant as normal user creation:
+            // default settings are created and the user is rolled back when settings fail.
+            var created = await _userService.CreateUserAsync(
+                new CreateUserDto
+                {
+                    Username = registerDto.Username,
+                    Email = identity.Value.Email,
+                    DisplayName = registerDto.DisplayName ?? registerDto.Username,
+                }
+            );
+
+            if (created.IsFailed)
             {
-                Username = registerDto.Username,
-                Email = registerDto.Email,
-                DisplayName = registerDto.DisplayName ?? registerDto.Username,
-            };
+                return Result.Fail<AuthResponseDto>(created.Errors);
+            }
 
-            await _context.Users.InsertOneAsync(_userMapper.ToUser(newUser));
-
-            var response = new AuthResponseDto
-            {
-                User = _userMapper.ToDto(_userMapper.ToUser(newUser)),
-            };
-
-            return Result.Ok(response);
+            return Result.Ok(new AuthResponseDto { User = created.Value });
         }
         catch (Exception ex)
         {
@@ -125,15 +168,17 @@ public class AuthService(
     {
         try
         {
-            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(token);
-            var uid = decodedToken.Uid;
-
-            // Get Firebase user
-            var firebaseUser = await _firebaseAuth.GetUserAsync(uid).ThrowIfNull("Invalid token.");
+            var identity = await _firebaseAuthProvider.VerifyIdentityAsync(token);
+            if (identity.IsFailed)
+            {
+                return Result
+                    .Fail<string>("Token verification failed.")
+                    .WithErrors(identity.Errors);
+            }
 
             // Find corresponding user in MongoDB
             var user = await _context
-                .Users.Find(u => u.Email == firebaseUser.Email)
+                .Users.Find(u => u.Email == identity.Value.Email)
                 .FirstOrDefaultAsync();
 
             if (user == null)
@@ -154,26 +199,23 @@ public class AuthService(
     {
         try
         {
-            // Verify the Google ID token with Firebase
-            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(googleAuthDto.IdToken);
-
-            // Get or create Firebase user
-            UserRecord firebaseUser = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
-
-            if (firebaseUser == null)
+            var identity = await _firebaseAuthProvider.VerifyIdentityAsync(googleAuthDto.IdToken);
+            if (identity.IsFailed)
             {
-                return Result.Fail<AuthResponseDto>("Invalid Google authentication token.");
-            }
-
-            if (string.IsNullOrEmpty(firebaseUser.Email))
-            {
-                return Result.Fail<AuthResponseDto>("Email not provided by Google account.");
+                return Result
+                    .Fail<AuthResponseDto>(
+                        new Error("Invalid Google authentication token.").WithMetadata(
+                            "Unauthorized",
+                            true
+                        )
+                    )
+                    .WithErrors(identity.Errors);
             }
 
             // Check if user exists in MongoDB
             var existingUser = await _context
                 .Users.Find(u =>
-                    u.Email.Equals(firebaseUser.Email, StringComparison.CurrentCultureIgnoreCase)
+                    u.Email.Equals(identity.Value.Email, StringComparison.CurrentCultureIgnoreCase)
                 )
                 .FirstOrDefaultAsync();
 
@@ -182,8 +224,8 @@ public class AuthService(
             if (existingUser == null)
             {
                 // Create new user in MongoDB
-                var username = firebaseUser.Email.Split('@')[0]; // Generate username from email
-                var displayName = firebaseUser.DisplayName ?? username;
+                var username = identity.Value.Email.Split('@')[0]; // Generate username from email
+                var displayName = identity.Value.DisplayName ?? username;
 
                 // Check if username already exists and make it unique if needed
                 var usernameExists = await _context
@@ -197,19 +239,24 @@ public class AuthService(
                     username = $"{username}_{Guid.NewGuid().ToString().Substring(0, 8)}";
                 }
 
-                user = _userMapper.ToUser(
+                var created = await _userService.CreateUserAsync(
                     new CreateUserDto
                     {
                         Username = username,
-                        Email = firebaseUser.Email,
+                        Email = identity.Value.Email,
                         DisplayName = displayName,
                     }
                 );
 
-                await _context.Users.InsertOneAsync(user);
+                if (created.IsFailed)
+                {
+                    return Result.Fail<AuthResponseDto>(created.Errors);
+                }
+
+                user = _userMapper.ToUser(created.Value);
                 _logger.LogInformation(
                     "Created new user via Google OAuth: {Email}",
-                    firebaseUser.Email
+                    identity.Value.Email
                 );
             }
             else
@@ -217,7 +264,7 @@ public class AuthService(
                 user = existingUser;
                 _logger.LogInformation(
                     "Existing user logged in via Google OAuth: {Email}",
-                    firebaseUser.Email
+                    identity.Value.Email
                 );
             }
 

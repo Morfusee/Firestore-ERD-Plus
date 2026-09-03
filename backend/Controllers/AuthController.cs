@@ -82,7 +82,22 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<object>>> GetCurrentUser()
     {
-        if (!Request.Cookies.TryGetValue("access_token", out var token))
+        // ponytail: header primary, cookie fallback retained for compat; drop cookie when no consumer sets it.
+        string? token = null;
+        if (Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        {
+            token = authorizationHeader.ToString().Replace("Bearer ", string.Empty).Trim();
+        }
+
+        if (
+            string.IsNullOrEmpty(token)
+            && Request.Cookies.TryGetValue("access_token", out var cookieToken)
+        )
+        {
+            token = cookieToken;
+        }
+
+        if (string.IsNullOrEmpty(token))
         {
             return Unauthorized(
                 new ApiResponse<object>(

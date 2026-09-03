@@ -318,7 +318,8 @@ export const zRegisterDto = z.object({
     displayName: z.optional(z.union([
         z.string(),
         z.null()
-    ]))
+    ])),
+    idToken: z.string().min(1)
 });
 
 export const zSaveProjectDto = z.object({

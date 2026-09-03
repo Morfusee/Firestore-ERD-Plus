@@ -74,6 +74,15 @@ public static class ResultExtensions
             return StatusCodes.Status503ServiceUnavailable;
         }
 
+        if (
+            result.Errors.Any(e =>
+                e.Metadata != null && e.Metadata.ContainsKey("Unauthorized")
+            )
+        )
+        {
+            return StatusCodes.Status401Unauthorized;
+        }
+
         return StatusCodes.Status500InternalServerError;
     }
 }
